@@ -20,7 +20,7 @@
   },
   "scripts": {
     "clean": "rm -rf ./typings/; rm -rf ./node_modules/;",
-	"configure": "typings install --global; npm install;",
+	"configure": "npm install; typings install --global;",
     "build": "tsc",
     "test": "mocha -c",
     "cover": "istanbul cover _mocha",
