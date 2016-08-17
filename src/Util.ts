@@ -3,7 +3,7 @@
  */
 
 /**
- * Grab bag of methods that probably shouldn't be in the default namespace.
+ * Collection of logging methods. Useful for making the output easier to read and understand.
  *
  * @param msg
  */

@@ -5,8 +5,10 @@
 import restify = require('restify');
 
 import EchoController from '../controller/EchoController';
+import QueryController from '../controller/QueryController';
 
 import Log from '../Util';
+import {QueryRequest} from "../controller/QueryController";
 
 export default class RouteHandler {
 
@@ -15,7 +17,8 @@ export default class RouteHandler {
 
         if (typeof req.params.message !== 'undefined') {
             let val = req.params.message;
-            let ret = EchoController.echo(val);
+            let controller = new EchoController();
+            let ret = controller.echo(val);
             res.json(200, {msg: ret});
         } else {
             res.json(400, {error: 'No message provided'});
@@ -25,27 +28,25 @@ export default class RouteHandler {
     }
 
 
-    static putSay(req:restify.Request, res:restify.Response, next:restify.Next) {
-        Log.trace('RouteHandler::putSay(..) - params: ' + JSON.stringify(req.params));
+    static postQuery(req:restify.Request, res:restify.Response, next:restify.Next) {
+        Log.trace('RouteHandler::postQuery(..) - params: ' + JSON.stringify(req.params));
         try {
-            // validate params
-            if (typeof req.params.val !== 'undefined') {
-                // let routeCtrl = new SayController();
+            let query:QueryRequest = req.params;
 
-                let id = req.params.val;
-                let val = JSON.parse(req.body);
+            let controller = new QueryController();
+            let isValid = controller.isValid(query);
 
-                // let retVal = routeCtrl.say(id, val);
-                let retVal = 'foo';
-                res.json(200, retVal);
+            if (isValid === true) {
+                let result = controller.query(query);
+                res.json(200, result);
             } else {
-                res.send(403);
+                res.json(403, {status: 'invalid query'});
             }
-        } catch (err) {
-            console.log('RouteHandler::putSay(..) - ERROR: ' + err.message);
-            res.send(404);
-        }
 
+        } catch (err) {
+            console.log('RouteHandler::postQuery(..) - ERROR: ' + err.message);
+            res.send(403);
+        }
         return next();
     }
 }

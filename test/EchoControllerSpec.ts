@@ -18,7 +18,7 @@ describe("EchoController", function () {
 
     it("Should be able to echo", function () {
         let txt = 'hello?';
-        let ret = EchoController.echo(txt);
+        let ret = new EchoController().echo(txt);
         Log.test('In: ' + txt + ', out: ' + ret);
         expect(ret).not.to.be.equal(null);
         expect(ret).to.equal(txt + '...' + txt);
@@ -26,7 +26,7 @@ describe("EchoController", function () {
 
     it("Should be able to handle null", function () {
         let txt:string = null;
-        let ret = EchoController.echo(txt);
+        let ret = new EchoController().echo(txt);
         Log.test('In: ' + txt + ', out: ' + ret);
         expect(ret).not.to.be.equal(null);
         expect(ret).to.equal('');
@@ -34,7 +34,7 @@ describe("EchoController", function () {
 
     it("Should be able to handle silence", function () {
         let txt = '';
-        let ret = EchoController.echo(txt);
+        let ret = new EchoController().echo(txt);
         Log.test('In: ' + txt + ', out: ' + ret);
         expect(ret).not.to.be.equal(null);
         expect(ret).to.equal('');

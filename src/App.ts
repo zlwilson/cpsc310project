@@ -5,17 +5,18 @@
 import Log from './Util';
 import Server from './rest/Server';
 
-namespace portal {
-    export class App {
-
-        initServer(port:number) {
-            Log.info('App::initServer( ' + port + ' ) - start');
-            let s = new Server(port);
-            s.start();
-        }
+/**
+ * Starts the server; doesn't listen to whether the start was successful.
+ */
+export class App {
+    initServer(port:number) {
+        Log.info('App::initServer( ' + port + ' ) - start');
+        let s = new Server(port);
+        s.start();
     }
 }
 
+// This ends up starting the whole system and listens on a hardcoded port (4321)
 Log.info('App - starting');
-let app = new portal.App();
+let app = new App();
 app.initServer(4321);

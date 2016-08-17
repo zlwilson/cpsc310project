@@ -7,7 +7,7 @@ import Message from "../model/Message";
 
 export default class EchoController {
 
-    public static echo(value:string):string {
+    public echo(value:string):string {
         Log.trace('EchoController::echo( ' + value + ' )');
         let msg = new Message(value);
         return msg.echo();
