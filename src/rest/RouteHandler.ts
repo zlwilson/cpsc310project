@@ -40,7 +40,7 @@ export default class RouteHandler {
                 let result = controller.query(query);
                 res.json(200, result);
             } else {
-                res.json(403, {status: 'invalid query'});
+                res.json(400, {status: 'invalid query'});
             }
 
         } catch (err) {

@@ -27,7 +27,7 @@ export default class QueryController {
 
     public query(query:QueryRequest):QueryResponse {
         Log.trace('QueryController::query( ' + query + ' )');
-
+        
         return {status: 'received', ts: query.ts, result: {}};
     }
 }
