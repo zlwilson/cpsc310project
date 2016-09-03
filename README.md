@@ -1,16 +1,16 @@
 # CPSC 310 Project
 
-This is the base project for CPSC310. Using it will help you get started with many of the tools we will use this term. You do not need to use this if you do not want to, but it may make your life easier.
+This is the base project for CPSC310. Using it will help you get started with many of the tools we will use this term.
 
 ### Configure Environment
 
-To start using this project you need to get the code and basic toolchain setup: 
+To start using this project you need to get your computer configured so you can build and execute the code. To do this, follow these steps; the specifics of each step (especially the first two) will vary based on which operating system your computer has:
 
-1. Install git on your machine (you should be able to execute ```git -v``` on the command line).
+1. Install git (you should be able to execute ```git -v``` on the command line).
 
-1. Install Node on your machine (will also install NPM) (you should be able to execute ```node -v``` and ```npm -v``` the command line).
+1. Install Node, which will also install NPM (you should be able to execute ```node -v``` and ```npm -v``` the command line).
 
-1. It is important that your project be called ```cpsc310project``` on disk if you want to work with the public test suite we are providing. The easiest way to do this is to:
+1. It is important that your project directory be called ```cpsc310project``` if you want to work with the public test suite we are providing. The easiest way to do this is to:
   
  * Clone the project: ```git clone git@github.com:CS310-2016Fall/cpsc310project_teamXXX.git``` (where ```XXX``` is your team number)
  
@@ -40,6 +40,14 @@ You can also run the tests as a Mocha target inside your favourite IDE (Webstorm
 
 See the [cpsc310d1-pub](https://github.com/CS310-2016Fall/cpsc310d1-pub) repo for instructions.
 
-### Start server
+### Start the server (for use with UI)
 
 * ```npm run start``` (or ```npm start```)
+
+See the [cpsc310-ui](https://github.com/CS310-2016Fall/cpsc310ui) repo for instructions.
+
+### Developing the system
+
+If you are developing in Typescript you will have to re-compile the Typescript code. This can be done with ```npm run build``` to build the system and get it ready to execute. New unit tests can be written and added to ```/test```; as long as the tests end in ```Spec.ts``` they will be executed automatically when you run ```npm run test```.
+
+
