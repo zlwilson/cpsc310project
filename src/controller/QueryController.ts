@@ -4,30 +4,28 @@
 
 import Log from "../Util";
 
-// TODO: actually define this in a meaningful way
 export interface QueryRequest {
-    ts:number;
-    query:string;
+    GET: string|string[];
+    WHERE: {};
+    AS: string;
 }
 
 export interface QueryResponse {
-    ts:number;
-    status:string;
-    result:{};
 }
 
 export default class QueryController {
 
-    public isValid(query:QueryRequest):boolean {
-        if (typeof query.ts !== 'undefined' && typeof query.query !== 'undefined') {
+    public isValid(query: QueryRequest): boolean {
+        if (typeof query !== 'undefined' && query !== null) {
             return true;
         }
         return false;
     }
 
-    public query(query:QueryRequest):QueryResponse {
+    public query(query: QueryRequest): QueryResponse {
         Log.trace('QueryController::query( ' + query + ' )');
-        
-        return {status: 'received', ts: query.ts, result: {}};
+
+        // TODO: implement this
+        return {status: 'received', ts: new Date().getTime()};
     }
 }

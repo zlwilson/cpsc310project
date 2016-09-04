@@ -1,5 +1,5 @@
 /**
- * Created by rtholmes on 15-10-31.
+ * Created by rtholmes on 2016-10-31.
  */
 
 import EchoController from "../src/controller/EchoController";
@@ -25,7 +25,7 @@ describe("EchoController", function () {
     });
 
     it("Should be able to handle null", function () {
-        let txt:string = null;
+        let txt: string = null;
         let ret = new EchoController().echo(txt);
         Log.test('In: ' + txt + ', out: ' + ret);
         expect(ret).not.to.be.equal(null);

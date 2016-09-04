@@ -56,6 +56,8 @@ export default class Server {
                 // clear; curl -is  http://localhost:4321/echo/foo
                 that.rest.get('/echo/:message', RouteHandler.getEcho);
 
+                that.rest.post('/dataset/:id', RouteHandler.postDataset);
+
                 that.rest.post('/query', RouteHandler.postQuery);
 
                 that.rest.listen(that.port, function () {
