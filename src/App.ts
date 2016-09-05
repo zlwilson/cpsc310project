@@ -2,14 +2,14 @@
  * Created by rtholmes on 2016-06-19.
  */
 
-import Log from './Util';
 import Server from './rest/Server';
+import Log from './Util';
 
 /**
  * Starts the server; doesn't listen to whether the start was successful.
  */
 export class App {
-    initServer(port: number) {
+    public initServer(port: number) {
         Log.info('App::initServer( ' + port + ' ) - start');
         let s = new Server(port);
         s.start().then(function (val: boolean) {

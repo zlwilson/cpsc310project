@@ -1,19 +1,18 @@
 /**
  * Created by rtholmes on 2016-06-14.
  */
-
 import restify = require('restify');
 
+import DatasetController from '../controller/DatasetController';
 import EchoController from '../controller/EchoController';
 import QueryController from '../controller/QueryController';
-import DatasetController from '../controller/DatasetController';
 
-import Log from '../Util';
 import {QueryRequest} from "../controller/QueryController";
+import Log from '../Util';
 
 export default class RouteHandler {
 
-    static getEcho(req: restify.Request, res: restify.Response, next: restify.Next) {
+    public static getEcho(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::getEcho(..) - params: ' + JSON.stringify(req.params));
 
         if (typeof req.params.message !== 'undefined') {
@@ -28,31 +27,30 @@ export default class RouteHandler {
         return next();
     }
 
-    static putDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
+    public static putDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::postDataset(..) - params: ' + JSON.stringify(req.params));
         try {
             let id: string = req.params.id;
 
             // stream bytes from request into buffer and convert to base64
             // adapted from: https://github.com/restify/node-restify/issues/880#issuecomment-133485821
-            var buffer: any = [];
+            let buffer: any = [];
             req.on('data', function onRequestData(chunk: any) {
                 Log.trace('RouteHandler::postDataset(..) on data; chunk length: ' + chunk.length);
-                buffer.push(chunk)
+                buffer.push(chunk);
             });
 
             req.once('end', function () {
-                Log.trace('on end ');
-                var concated = Buffer.concat(buffer);
+                let concated = Buffer.concat(buffer);
                 req.body = concated.toString('base64');
-                Log.trace('RouteHandler::postDataset(..) on end; body length: ' + req.body.length);
+                Log.trace('RouteHandler::postDataset(..) on end; total length: ' + req.body.length);
 
-                let dataset: any = req.body;
-                Log.trace('RouteHandler::postDataset(..) - body: ' + dataset);
-                Log.trace('RouteHandler::postDataset(..) - zip length: ' + dataset.length);
+                // let dataset: any = req.body;
+                // Log.trace('RouteHandler::postDataset(..) - body: ' + dataset);
+                // Log.trace('RouteHandler::postDataset(..) - zip length: ' + dataset.length);
 
                 let controller = new DatasetController();
-                controller.process(id, dataset).then(function (result) {
+                controller.process(id, req.body).then(function (result) {
                     Log.trace('RouteHandler::postDataset(..) - processed');
                     res.json(200, result);
                 }).catch(function (err: Error) {
@@ -62,13 +60,13 @@ export default class RouteHandler {
             });
 
         } catch (err) {
-            console.log('RouteHandler::postDataset(..) - ERROR: ' + err.message);
+            Log.error('RouteHandler::postDataset(..) - ERROR: ' + err.message);
             res.send(400, {err: err.message});
         }
         return next();
     }
 
-    static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
+    public static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::postQuery(..) - params: ' + JSON.stringify(req.params));
         try {
             let query: QueryRequest = req.params;
@@ -82,12 +80,10 @@ export default class RouteHandler {
             } else {
                 res.json(400, {status: 'invalid query'});
             }
-
         } catch (err) {
-            console.log('RouteHandler::postQuery(..) - ERROR: ' + err.message);
+            Log.error('RouteHandler::postQuery(..) - ERROR: ' + err.message);
             res.send(403);
         }
         return next();
     }
 }
-

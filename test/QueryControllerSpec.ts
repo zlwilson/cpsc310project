@@ -6,15 +6,13 @@ import Log from "../src/Util";
 import QueryController from "../src/controller/QueryController";
 import {QueryRequest} from "../src/controller/QueryController";
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
 describe("QueryController", function () {
 
     beforeEach(function () {
-
     });
 
     afterEach(function () {
-
     });
 
     it("Should be able to validate a valid query", function () {
@@ -22,7 +20,7 @@ describe("QueryController", function () {
         let controller = new QueryController();
         let isValid = controller.isValid(query);
 
-        expect(isValid).to.be.true;
+        expect(isValid).to.equal(true);
     });
 
     it("Should be able to invalidate an invalid query", function () {
@@ -30,11 +28,10 @@ describe("QueryController", function () {
         let controller = new QueryController();
         let isValid = controller.isValid(query);
 
-        expect(isValid).to.be.false;
+        expect(isValid).to.equal(false);
     });
 
     it("Should be able to query", function () {
-        let d = new Date();
         let query: QueryRequest = {GET: 'food', WHERE: {IS: 'apple'}, AS: 'table'};
         let controller = new QueryController();
         let ret = controller.query(query);
@@ -42,5 +39,4 @@ describe("QueryController", function () {
         expect(ret).not.to.be.equal(null);
         // should check that the value is meaningful
     });
-
 });

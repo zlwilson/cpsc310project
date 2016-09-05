@@ -5,15 +5,14 @@
 import EchoController from "../src/controller/EchoController";
 import Log from "../src/Util";
 
-var expect = require('chai').expect;
+import {expect} from 'chai';
+
 describe("EchoController", function () {
 
     beforeEach(function () {
-
     });
 
     afterEach(function () {
-
     });
 
     it("Should be able to echo", function () {

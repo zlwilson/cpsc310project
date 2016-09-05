@@ -15,7 +15,11 @@ export default class DatasetController {
                 let zip = new JSZip();
                 zip.loadAsync(data, {base64: true}).then(function (done) {
                     Log.trace('DatasetController::process(..) - unzipped');
-                    // TODO: process zip (zip.file)
+
+                    // TODO: iterate through files in zip  (zip.files)
+                    // The contents of the file will depend on the id provided. e.g.,
+                    // some zips will contain .html files, some will contain .json files.
+
                     fulfill(true);
                 }).catch(function (err) {
                     Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);
