@@ -34,7 +34,7 @@ The sample project ships with some automated unit tests. These commands will exe
 * Test: ```npm run test``` (or ```npm test```)
 * Test coverage: ```npm run cover``` HTML reports: ```./coverage/lcov-report/index.html```
 
-You can also run the tests as a Mocha target inside your favourite IDE (Webstorm and VSCode both work well and are free for academic use).
+You can also run the tests as a Mocha target inside your favourite IDE (WebStorm and VSCode both work well and are free for academic use).
 
 ### Run integration tests
 
@@ -49,5 +49,11 @@ See the [cpsc310-ui](https://github.com/CS310-2016Fall/cpsc310ui) repo for instr
 ### Developing the system
 
 If you are developing in Typescript you will have to re-compile the Typescript code. This can be done with ```npm run build``` to build the system and get it ready to execute. New unit tests can be written and added to ```/test```; as long as the tests end in ```Spec.ts``` they will be executed automatically when you run ```npm run test```.
+
+### Running and Testing in the IDE
+
+While these instructions are for WebStorm, other IDEs (e.g., VSCode, Atom, etc.) and editors (e.g., Sublime) should be similar, or will at least be compatible with the command line options described above.
+
+To run or test the system in WebStorm you will need to configure run targets. To run the system go to the ```Run->Edit Configurations``` and tap on the ```+``` and then ```Node.js```. Point the 'JavaScript file' argument to ```src/App.js```. To run the system tests, go to the ```Run->Edit Configurations``` and tap on the ```+``` and then ```Mocha```. Point the 'Test Directory' file argument to ```test/```.
 
 
