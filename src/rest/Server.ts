@@ -12,10 +12,10 @@ import RouteHandler from './RouteHandler';
  */
 export default class Server {
 
-    private port:number;
-    private rest:restify.Server;
+    private port: number;
+    private rest: restify.Server;
 
-    constructor(port:number) {
+    constructor(port: number) {
         Log.info("Server::<init>( " + port + " )");
         this.port = port;
     }
@@ -26,7 +26,7 @@ export default class Server {
      *
      * @returns {Promise<T>}
      */
-    public stop():Promise<boolean> {
+    public stop(): Promise<boolean> {
         Log.info('Server::close()');
         let that = this;
         return new Promise(function (fulfill, reject) {
@@ -43,7 +43,7 @@ export default class Server {
      *
      * @returns {Promise<T>}
      */
-    public start():Promise<boolean> {
+    public start(): Promise<boolean> {
         let that = this;
         return new Promise(function (fulfill, reject) {
             try {
@@ -51,20 +51,25 @@ export default class Server {
                     name: 'classPortal'
                 });
 
-                that.rest.use(restify.bodyParser());
+                // that.rest.use(restify.bodyParser());
 
                 // clear; curl -is  http://localhost:4321/echo/foo
+                // Sends an echo message (for testing). No body.
                 that.rest.get('/echo/:message', RouteHandler.getEcho);
 
-                that.rest.post('/dataset/:id', RouteHandler.postDataset);
+                // Sends a dataset. Is idempotent and can create or update a dataset id.
+                that.rest.put('/dataset/:id', RouteHandler.putDataset);
 
-                that.rest.post('/query', RouteHandler.postQuery);
+                // Receives queries. Although these queries never change the server (and thus could be GETs)
+                // they are formed by sending JSON bodies, which is not standard for normal GET requests.
+                that.rest.post('/query', restify.bodyParser(), RouteHandler.postQuery);
 
                 that.rest.listen(that.port, function () {
                     Log.info('Server::start() - restify listening: ' + that.rest.url);
                     fulfill(true);
                 });
             } catch (err) {
+                Log.error('Server::start() - ERROR: ' + err);
                 reject(err);
             }
         });

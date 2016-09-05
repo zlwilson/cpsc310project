@@ -9,10 +9,14 @@ import Server from './rest/Server';
  * Starts the server; doesn't listen to whether the start was successful.
  */
 export class App {
-    initServer(port:number) {
+    initServer(port: number) {
         Log.info('App::initServer( ' + port + ' ) - start');
         let s = new Server(port);
-        s.start();
+        s.start().then(function (val: boolean) {
+            Log.info("App::initServer() - started: " + val);
+        }).catch(function (err: Error) {
+            Log.error("App::initServer() - ERROR: " + err.message);
+        });
     }
 }
 

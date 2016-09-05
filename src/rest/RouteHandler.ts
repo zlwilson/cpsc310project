@@ -28,22 +28,39 @@ export default class RouteHandler {
         return next();
     }
 
-    static postDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
+    static putDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::postDataset(..) - params: ' + JSON.stringify(req.params));
         try {
             let id: string = req.params.id;
-            let dataset: any = req.body;
-            Log.trace('RouteHandler::postDataset(..) - body: ' + dataset);
 
-            let controller = new DatasetController();
-            controller.process(id, dataset.zip).then(function (result) {
-
-                Log.trace('RouteHandler::postDataset(..) - processed');
-                res.json(200, result);
-            }).catch(function (err: Error) {
-                Log.trace('RouteHandler::postDataset(..) - ERROR: ' + err.message);
-                res.json(400, {err: err.message});
+            // stream bytes from request into buffer and convert to base64
+            // adapted from: https://github.com/restify/node-restify/issues/880#issuecomment-133485821
+            var buffer: any = [];
+            req.on('data', function onRequestData(chunk: any) {
+                Log.trace('RouteHandler::postDataset(..) on data; chunk length: ' + chunk.length);
+                buffer.push(chunk)
             });
+
+            req.once('end', function () {
+                Log.trace('on end ');
+                var concated = Buffer.concat(buffer);
+                req.body = concated.toString('base64');
+                Log.trace('RouteHandler::postDataset(..) on end; body length: ' + req.body.length);
+
+                let dataset: any = req.body;
+                Log.trace('RouteHandler::postDataset(..) - body: ' + dataset);
+                Log.trace('RouteHandler::postDataset(..) - zip length: ' + dataset.length);
+
+                let controller = new DatasetController();
+                controller.process(id, dataset).then(function (result) {
+                    Log.trace('RouteHandler::postDataset(..) - processed');
+                    res.json(200, result);
+                }).catch(function (err: Error) {
+                    Log.trace('RouteHandler::postDataset(..) - ERROR: ' + err.message);
+                    res.json(400, {err: err.message});
+                });
+            });
+
         } catch (err) {
             console.log('RouteHandler::postDataset(..) - ERROR: ' + err.message);
             res.send(400, {err: err.message});

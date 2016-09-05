@@ -16,14 +16,14 @@ export interface QueryResponse {
 export default class QueryController {
 
     public isValid(query: QueryRequest): boolean {
-        if (typeof query !== 'undefined' && query !== null) {
+        if (typeof query !== 'undefined' && query !== null && Object.keys(query).length > 0) {
             return true;
         }
         return false;
     }
 
     public query(query: QueryRequest): QueryResponse {
-        Log.trace('QueryController::query( ' + query + ' )');
+        Log.trace('QueryController::query( ' + JSON.stringify(query) + ' )');
 
         // TODO: implement this
         return {status: 'received', ts: new Date().getTime()};
