@@ -28,6 +28,8 @@
   },
   "dependencies": {
     "jszip": "^3.1.2",
-    "restify": "^4.0.3"
+    "restify": "^4.0.3",
+    "tslint": "^3.15.1",
+    "typescript": "^1.8.10"
   }
 }
