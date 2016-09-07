@@ -14,7 +14,7 @@ import Log from '../Util';
 export default class RouteHandler {
 
     private static datasetController = new DatasetController();
-
+    
     public static getEcho(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::getEcho(..) - params: ' + JSON.stringify(req.params));
 
@@ -30,10 +30,11 @@ export default class RouteHandler {
         return next();
     }
 
-    public static putDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
+    public static  putDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::postDataset(..) - params: ' + JSON.stringify(req.params));
         try {
             let id: string = req.params.id;
+            var that = this;
 
             // stream bytes from request into buffer and convert to base64
             // adapted from: https://github.com/restify/node-restify/issues/880#issuecomment-133485821
@@ -52,7 +53,7 @@ export default class RouteHandler {
                 // Log.trace('RouteHandler::postDataset(..) - body: ' + dataset);
                 // Log.trace('RouteHandler::postDataset(..) - zip length: ' + dataset.length);
 
-                let controller = RouteHandler.datasetController;
+                let controller = that.datasetController;
                 controller.process(id, req.body).then(function (result) {
                     Log.trace('RouteHandler::postDataset(..) - processed');
                     res.json(200, result);
@@ -85,7 +86,7 @@ export default class RouteHandler {
                 res.json(400, {status: 'invalid query'});
             }
         } catch (err) {
-            Log.error('RouteHandler::postQuery(..) - ERROR: ' + err.message);
+            Log.error('RouteHandler::postQuery(..) - ERROR: ' + err);
             res.send(403);
         }
         return next();

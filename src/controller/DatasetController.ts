@@ -16,6 +16,9 @@ export default class DatasetController {
 
     private datasets: Datasets = {};
 
+    constructor() {
+        Log.trace('DatasetController::init()');
+    }
     /**
      * Returns the referenced dataset. If the dataset is not in memory, it should be
      * loaded from disk and put in memory. If it is not in disk, then it should return
