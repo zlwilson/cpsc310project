@@ -2,6 +2,7 @@
  * Created by rtholmes on 2016-06-19.
  */
 
+import {Datasets} from "../controller/DatasetController";
 import Log from "../Util";
 
 export interface QueryRequest {
@@ -14,6 +15,11 @@ export interface QueryResponse {
 }
 
 export default class QueryController {
+    private datasets: Datasets = null;
+
+    constructor(datasets: Datasets) {
+        this.datasets = datasets;
+    }
 
     public isValid(query: QueryRequest): boolean {
         if (typeof query !== 'undefined' && query !== null && Object.keys(query).length > 0) {

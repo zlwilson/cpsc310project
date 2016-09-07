@@ -4,6 +4,7 @@
 import restify = require('restify');
 
 import DatasetController from '../controller/DatasetController';
+import {Datasets} from '../controller/DatasetController';
 import EchoController from '../controller/EchoController';
 import QueryController from '../controller/QueryController';
 
@@ -11,6 +12,8 @@ import {QueryRequest} from "../controller/QueryController";
 import Log from '../Util';
 
 export default class RouteHandler {
+
+    private static datasetController = new DatasetController();
 
     public static getEcho(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::getEcho(..) - params: ' + JSON.stringify(req.params));
@@ -49,7 +52,7 @@ export default class RouteHandler {
                 // Log.trace('RouteHandler::postDataset(..) - body: ' + dataset);
                 // Log.trace('RouteHandler::postDataset(..) - zip length: ' + dataset.length);
 
-                let controller = new DatasetController();
+                let controller = RouteHandler.datasetController;
                 controller.process(id, req.body).then(function (result) {
                     Log.trace('RouteHandler::postDataset(..) - processed');
                     res.json(200, result);
@@ -71,7 +74,8 @@ export default class RouteHandler {
         try {
             let query: QueryRequest = req.params;
 
-            let controller = new QueryController();
+            let datasets = RouteHandler.datasetController.getDatasets();
+            let controller = new QueryController(datasets);
             let isValid = controller.isValid(query);
 
             if (isValid === true) {
