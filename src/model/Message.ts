@@ -11,7 +11,7 @@ export default class Message {
 
     public echo(): string {
         if (this.msg !== null && this.msg.length > 0) {
-            return this.msg + '...' + this.msg;
+            return this.msg + '...' + this.msg + '...' + this.msg;
         }
         return '';
     }

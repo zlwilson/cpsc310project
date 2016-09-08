@@ -14,7 +14,7 @@ import Log from '../Util';
 export default class RouteHandler {
 
     private static datasetController = new DatasetController();
-    
+
     public static getEcho(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::getEcho(..) - params: ' + JSON.stringify(req.params));
 
@@ -34,7 +34,7 @@ export default class RouteHandler {
         Log.trace('RouteHandler::postDataset(..) - params: ' + JSON.stringify(req.params));
         try {
             let id: string = req.params.id;
-            var that = this;
+            let that = this;
 
             // stream bytes from request into buffer and convert to base64
             // adapted from: https://github.com/restify/node-restify/issues/880#issuecomment-133485821
@@ -48,10 +48,6 @@ export default class RouteHandler {
                 let concated = Buffer.concat(buffer);
                 req.body = concated.toString('base64');
                 Log.trace('RouteHandler::postDataset(..) on end; total length: ' + req.body.length);
-
-                // let dataset: any = req.body;
-                // Log.trace('RouteHandler::postDataset(..) - body: ' + dataset);
-                // Log.trace('RouteHandler::postDataset(..) - zip length: ' + dataset.length);
 
                 let controller = that.datasetController;
                 controller.process(id, req.body).then(function (result) {
@@ -75,7 +71,7 @@ export default class RouteHandler {
         try {
             let query: QueryRequest = req.params;
 
-            let datasets = RouteHandler.datasetController.getDatasets();
+            let datasets: Datasets = RouteHandler.datasetController.getDatasets();
             let controller = new QueryController(datasets);
             let isValid = controller.isValid(query);
 
