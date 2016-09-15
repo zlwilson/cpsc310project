@@ -2,6 +2,7 @@
  * Created by rtholmes on 2016-06-14.
  */
 import restify = require('restify');
+import fs = require('fs');
 
 import DatasetController from '../controller/DatasetController';
 import {Datasets} from '../controller/DatasetController';
@@ -15,19 +16,18 @@ export default class RouteHandler {
 
     private static datasetController = new DatasetController();
 
-    public static getEcho(req: restify.Request, res: restify.Response, next: restify.Next) {
-        Log.trace('RouteHandler::getEcho(..) - params: ' + JSON.stringify(req.params));
-
-        if (typeof req.params.message !== 'undefined') {
-            let val = req.params.message;
-            let controller = new EchoController();
-            let ret = controller.echo(val);
-            res.json(200, {msg: ret});
-        } else {
-            res.json(400, {error: 'No message provided'});
-        }
-
-        return next();
+    public static getHomepage(req:restify.Request, res:restify.Response, next:restify.Next) {
+	Log.trace('RoutHandler::getHomepage(..)');
+	fs.readFile('./src/rest/views/index.html', 'utf8', function(err: Error, file: Buffer) {
+	    if (err) {
+		res.send(500);
+		Log.error(JSON.stringify(err));
+		return next();
+	    }
+	    res.write(file);
+	    res.end();
+	    return next();
+	});
     }
 
     public static  putDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
@@ -69,7 +69,6 @@ export default class RouteHandler {
         Log.trace('RouteHandler::postQuery(..) - params: ' + JSON.stringify(req.params));
         try {
             let query: QueryRequest = req.params;
-
             let datasets: Datasets = RouteHandler.datasetController.getDatasets();
             let controller = new QueryController(datasets);
             let isValid = controller.isValid(query);
