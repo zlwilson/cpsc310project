@@ -20,14 +20,15 @@
   },
   "scripts": {
     "clean": "rm -rf ./typings/; rm -rf ./node_modules/;",
-    "configure": "npm install; typings install --global;",
+    "configure": "npm install && typings install --global",
     "build": "tsc",
-    "test": "mocha -c",
+    "test": "mocha -c -R mochawesome",
     "cover": "istanbul cover _mocha",
     "start": "node src/App.js"
   },
   "dependencies": {
     "jszip": "^3.1.2",
+    "mochawesome": "^1.5.2",
     "restify": "^4.0.3",
     "tslint": "^3.15.1",
     "typescript": "^1.8.10"
