@@ -1,8 +1,8 @@
 {
-  "name": "cpsc310bootstrap",
-  "description": "Stub project",
+  "name": "cpsc310project",
+  "description": "CPSC 310 project",
   "homepage": "https://github.com/ubccpsc/310",
-  "author": "Reid Holmes",
+  "author": "",
   "contributors": "N/A",
   "license": "GPL-3.0",
   "repository": "N/A",
@@ -19,11 +19,14 @@
     "typings": "^1.3.0"
   },
   "scripts": {
-    "clean": "rm -rf ./typings/; rm -rf ./node_modules/;",
-    "configure": "npm install && typings install --global",
+    "clean": "rm -rf ./typings/; rm -rf ./node_modules/;"
+	"cleanwin": "rmdir ./typings /s /q & rmdir ./node_modules /s /q"
+    "configure": "npm install; typings install --global;",
+    "configurewin": "npm install & typings install --global",
     "build": "tsc",
     "test": "mocha -c -R mochawesome",
     "cover": "istanbul cover _mocha",
+    "coverwin": "istanbul cover node_modules/mocha/bin/_mocha",
     "start": "node src/App.js"
   },
   "dependencies": {
