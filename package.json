@@ -19,8 +19,8 @@
     "typings": "^1.3.0"
   },
   "scripts": {
-    "clean": "rm -rf ./typings/; rm -rf ./node_modules/;"
-	"cleanwin": "rmdir ./typings /s /q & rmdir ./node_modules /s /q"
+    "clean": "rm -rf ./typings/; rm -rf ./node_modules/;",
+	"cleanwin": "rmdir ./typings /s /q & rmdir ./node_modules /s /q",
     "configure": "npm install; typings install --global;",
     "configurewin": "npm install & typings install --global",
     "build": "tsc",
