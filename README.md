@@ -27,12 +27,20 @@ Once your project is configured you need to further prepare the project's toolin
 
 1. ```npm run build```
 
+If you use Windows; instead try:
+
+1. ```npm run cleanwin```
+
+1. ```npm run configurewin```
+
+1. ```npm run build```
+
 ### Run unit tests
 
 The sample project ships with some automated unit tests. These commands will execute the suites:
  
 * Test: ```npm run test``` (or ```npm test```)
-* Test coverage: ```npm run cover``` HTML reports: ```./coverage/lcov-report/index.html```
+* Test coverage: ```npm run cover``` (or ```npm run coverwin``` if you use Windows). HTML reports: ```./coverage/lcov-report/index.html```
 
 You can also run the tests as a Mocha target inside your favourite IDE (WebStorm and VSCode both work well and are free for academic use).
 
