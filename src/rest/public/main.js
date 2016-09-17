@@ -10,7 +10,7 @@ $(function () {
                 data: data,
                 processData: false
             }).fail(function (e) {
-            spawnErrorModal(e)
+            spawnHttpErrorModal(e)
         });
 
     });
@@ -18,7 +18,7 @@ $(function () {
     $("#datasetRm").click(function () {
         var id = $("#datasetId").val();
         $.ajax("/dataset/" + id, {type: "DELETE"}).fail(function (e) {
-            spawnErrorModal(e)
+            spawnHttpErrorModal(e)
         });
 
 
@@ -35,11 +35,10 @@ $(function () {
                     generateTable(data["result"]);
                 }
             }).fail(function (e) {
-                spawnErrorModal(e)
+                spawnHttpErrorModal(e)
             });
         } catch (err) {
-            // TODO: modal not working quite right
-            spawnErrorModal(err);
+            spawnErrorModal("Query Error", err);
         }
     });
 
@@ -94,14 +93,20 @@ $(function () {
             });
     }
 
-    function spawnErrorModal(e) {
-        console.log(e)
+    function spawnHttpErrorModal(e) {
         $("#errorModal .modal-title").html(e.status);
         $("#errorModal .modal-body p").html(e.statusText + "</br>" + e.responseText);
         if ($('#errorModal').is(':hidden')) {
             $("#errorModal").modal('show')
         }
+    }
 
+    function spawnErrorModal(errorTitle, errorText) {
+        $("#errorModal .modal-title").html(errorTitle);
+        $("#errorModal .modal-body p").html(errorText);
+        if ($('#errorModal').is(':hidden')) {
+            $("#errorModal").modal('show')
+        }
     }
 });
 
