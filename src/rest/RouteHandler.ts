@@ -6,7 +6,6 @@ import fs = require('fs');
 
 import DatasetController from '../controller/DatasetController';
 import {Datasets} from '../controller/DatasetController';
-import EchoController from '../controller/EchoController';
 import QueryController from '../controller/QueryController';
 
 import {QueryRequest} from "../controller/QueryController";
@@ -16,18 +15,18 @@ export default class RouteHandler {
 
     private static datasetController = new DatasetController();
 
-    public static getHomepage(req:restify.Request, res:restify.Response, next:restify.Next) {
-	Log.trace('RoutHandler::getHomepage(..)');
-	fs.readFile('./src/rest/views/index.html', 'utf8', function(err: Error, file: Buffer) {
-	    if (err) {
-		res.send(500);
-		Log.error(JSON.stringify(err));
-		return next();
-	    }
-	    res.write(file);
-	    res.end();
-	    return next();
-	});
+    public static getHomepage(req: restify.Request, res: restify.Response, next: restify.Next) {
+        Log.trace('RoutHandler::getHomepage(..)');
+        fs.readFile('./src/rest/views/index.html', 'utf8', function (err: Error, file: Buffer) {
+            if (err) {
+                res.send(500);
+                Log.error(JSON.stringify(err));
+                return next();
+            }
+            res.write(file);
+            res.end();
+            return next();
+        });
     }
 
     public static  putDataset(req: restify.Request, res: restify.Response, next: restify.Next) {

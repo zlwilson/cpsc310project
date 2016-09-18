@@ -3,7 +3,7 @@ $(function () {
         var id = $("#datasetId").val();
         var zip = $("#datasetZip").prop('files')[0];
         var data = new FormData();
-        data.append("zip", zip)
+        data.append("zip", zip);
         $.ajax("/dataset/" + id,
             {
                 type: "PUT",
@@ -12,7 +12,6 @@ $(function () {
             }).fail(function (e) {
             spawnHttpErrorModal(e)
         });
-
     });
 
     $("#datasetRm").click(function () {
@@ -20,8 +19,6 @@ $(function () {
         $.ajax("/dataset/" + id, {type: "DELETE"}).fail(function (e) {
             spawnHttpErrorModal(e)
         });
-
-
     });
 
     $("#queryForm").submit(function (e) {
