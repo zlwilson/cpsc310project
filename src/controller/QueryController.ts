@@ -8,6 +8,7 @@ import Log from "../Util";
 export interface QueryRequest {
     GET: string|string[];
     WHERE: {};
+    ORDER: string;
     AS: string;
 }
 
