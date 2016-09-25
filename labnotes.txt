@@ -1,0 +1,32 @@
+localhost:4321/
+
+GET - receive data
+POST - receive data and also send
+PUT - send data
+
+localhost:4321/dataset/:id
+
+:id = courses, etc.
+
+localhost:4321/query
+
+
+
+curl to query localhost
+
+eg: curl localhost:4321/dataset/test --upload-file XXX.zip
+
+
+
+
+======== Milestone 1 ========
+- Complete PUT /dataset	Zack
+	- parse .zip
+	- write to disk
+- Complete POST /query				
+  - Query Engine 	
+	- ‘GET’			Lotus
+	- LOGIC			Zack	
+	- MCOMPARATOR		Lotus
+	- MCOMPARISON		Lotus
+	- SCOMPARISON		Zack
