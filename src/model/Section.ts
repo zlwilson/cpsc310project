@@ -1,7 +1,7 @@
 /**
  * Created by pablo on 9/24/16.
  */
-interface Section {
+export default class Section {
     Title: string;
     Section: string;
     id: number;
@@ -19,4 +19,6 @@ interface Section {
     Avg: number;
     Campus: string;
     Subject: string;
+    
+    
 }
