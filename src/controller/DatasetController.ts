@@ -4,6 +4,9 @@
 
 import Log from "../Util";
 import JSZip = require('jszip');
+import Course from "../model/Course";
+import Section from "../model/Section";
+
 
 /**
  * In memory representation of all datasets.
@@ -35,7 +38,6 @@ export default class DatasetController {
 
     public getDatasets(): Datasets {
         // TODO: if datasets is empty, load all dataset files in ./data from disk
-
         return this.datasets;
     }
 
@@ -62,6 +64,25 @@ export default class DatasetController {
                     // some zips will contain .html files, some will contain .json files.
                     // You can depend on 'id' to differentiate how the zip should be handled,
                     // although you should still be tolerant to errors.
+                    let courses: Course[];
+
+                    for (var file in myZip.files) {
+                        let file_name = myZip.file(file).name;
+                        let course = new Course;
+                        course = course.createCourse(file_name);
+
+                        let dataJSON = myZip.file(file).async("string");
+                        let dataParsed = JSON.parse(dataJSON);
+                        let section_list = data.result;
+
+                        course.rank = data.rank;
+
+                        let sections: Section[] = JSON.parse(section_list);
+
+                        
+                        courses.concat(course);
+
+                    }
 
                     that.save(id, processedDataset);
 
