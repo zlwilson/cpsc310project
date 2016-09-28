@@ -65,24 +65,39 @@ export default class DatasetController {
                     // You can depend on 'id' to differentiate how the zip should be handled,
                     // although you should still be tolerant to errors.
                     let courses: Course[];
+                    var promisedArray: Promise<any>[];
+
+                    console.log("reading ZIP...");
 
                     for (var file in myZip.files) {
+                        console.log("In ZIP-reading for loop...");
                         let file_name = myZip.file(file).name;
                         let course = new Course;
                         course = course.createCourse(file_name);
+                        var dataParsed: any;
 
-                        let dataJSON = myZip.file(file).async("string");
-                        let dataParsed = JSON.parse(dataJSON);
-                        let section_list = data.result;
+                        var promisedContent = myZip.file(file).async("string");
+                        promisedArray.concat(promisedContent);
+                        console.log("added promise to array");
 
-                        course.rank = data.rank;
-
-                        let sections: Section[] = JSON.parse(section_list);
-
-                        
-                        courses.concat(course);
-
+                        //     .then(function (filetext) {
+                        //     dataParsed = JSON.parse(filetext);
+                        //     promisedArray.concat(promisedContent);
+                        //     console.log("added promise to promisedArray");
+                        //     let sections: Section[] = JSON.parse(dataParsed.result);
+                        //     // processedDataset.add(sections);
+                        // }).catch(function () {
+                        //     console.log("JSON parsing failed");
+                        // });
                     }
+
+                    Promise.all(promisedArray).then(function (result) {
+                        for (var content in result) {
+                            console.log(content);
+                        }
+                    }).catch(function () {
+                        console.log("Error in Promise.all()");
+                    });
 
                     that.save(id, processedDataset);
 
@@ -110,5 +125,6 @@ export default class DatasetController {
         this.datasets[id] = processedDataset;
 
         // TODO: actually write to disk in the ./data directory
+        // use fs to write JSON string to  disk dir
     }
 }
