@@ -2,10 +2,10 @@
  * Created by rtholmes on 2016-09-03.
  */
 
-import Log from "../Util";
+import Log from '../Util';
 import JSZip = require('jszip');
-import Course from "../model/Course";
-import Section from "../model/Section";
+import Section from '../model/Section';
+import fs = require('fs');
 
 /**
  * In memory representation of all datasets.
@@ -31,12 +31,37 @@ export default class DatasetController {
      */
     public getDataset(id: string): any {
         // TODO: this should check if the dataset is on disk in ./data if it is not already in memory.
-
+        fs.readFile('../../data/id', 'string', (err, data) => {
+            if (err) {
+                console.log('Z - Error in getDatasets(id): ')
+                throw err;
+            }
+            console.log('Z - Read data in getDatasets(id)! ' + data);
+            return data;
+        });
         return this.datasets[id];
     }
 
     public getDatasets(): Datasets {
         // TODO: if datasets is empty, load all dataset files in ./data from disk
+        var allFiles: string[] = [];
+        fs.readdir('../../data', (err, files) => {
+            if (err) {
+                console.log('Z - Error in getDatasets() readdir: ')
+                throw err;
+            }
+            allFiles = files;
+        });
+
+        for (var file in allFiles) {
+            fs.readFile('../../data/' + allFiles[file], 'string', (err, data) => {
+               if (err) {
+                   console.log('Z - Error in getDatasets() for loop: ')
+                   throw err;
+               }
+            });
+        }
+
         return this.datasets;
     }
 
@@ -67,28 +92,28 @@ export default class DatasetController {
                     // let courses: Course[];
                     var promisesArray: Promise<any>[] = [];
 
-                    console.log("Z - reading ZIP...");
+                    console.log('Z - reading ZIP...');
 
                     for (var file in myZip.files) {
-                        console.log("Z - In ZIP-reading for loop...");
-                        var promisedContent = myZip.file(file).async("string");
+                        console.log('Z - In ZIP-reading for loop...');
+                        var promisedContent = myZip.file(file).async('string');
                         promisesArray.push(promisedContent);
-                        console.log("Z - added promise to array");
+                        console.log('Z - added promise to array');
                     }
 
-                    console.log("Z - " + promisesArray);
+                    console.log('Z - ' + promisesArray);
 
                     Promise.all(promisesArray).then(function (result) {
-                        console.log("Z - iterating through all Promises...");
+                        console.log('Z - iterating through all Promises...');
                         for (var section in result) {
-                            var instanceSection: Section = JSON.parse(section);
+                            var instanceSection: Section = JSON.parse(result[section]);
                             processedDataset.push(instanceSection);
-                            console.log("Z - this should be a section object: " + instanceSection);
+                            console.log('Z - this should be a section object: ' + result[section]);
                         }
-                        console.log("Z - about to save sections[]");
+                        console.log('Z - about to save sections[]');
                         that.save(id, processedDataset);
                     }).catch(function (err) {
-                        console.log("Z - Error in Promise.all()" + err);
+                        console.log('Z - Error in Promise.all()' + err);
                     });
 
                     fulfill(true);
@@ -113,10 +138,17 @@ export default class DatasetController {
     private save(id: string, processedDataset: any) {
         // add it to the memory model
         this.datasets[id] = processedDataset;
-        console.log("Z - in save()...");
+        console.log('Z - in save()...');
 
         // TODO: actually write to disk in the ./data directory
         // use fs to write JSON string to  disk dir
-        console.log("Z - fs.write() now!");
+        console.log('Z - fs.write() now!');
+        fs.writeFile('../../data/' + id + '.txt', processedDataset, (err) => {
+            if (err) {
+                console.log('Error saving data: ' + err);
+                throw err;
+            }
+            console.log('Saved!');
+        })
     }
 }

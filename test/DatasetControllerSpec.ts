@@ -239,7 +239,7 @@ describe("DatasetController", function () {
         return zip.generateAsync(opts).then(function (data) {
             Log.test('Dataset created');
             let controller = new DatasetController();
-            return controller.process('setA', data);
+            return controller.process('sections', data);
         }).then(function (result) {
             Log.test('Dataset processed; result: ' + result);
             expect(result).to.equal(true);
