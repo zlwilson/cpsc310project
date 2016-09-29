@@ -19,6 +19,4 @@ export default class Section {
     Avg: number;
     Campus: string;
     Subject: string;
-    
-    
 }

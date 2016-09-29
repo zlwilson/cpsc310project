@@ -7,7 +7,6 @@ import JSZip = require('jszip');
 import Course from "../model/Course";
 import Section from "../model/Section";
 
-
 /**
  * In memory representation of all datasets.
  */
@@ -58,48 +57,39 @@ export default class DatasetController {
                 myZip.loadAsync(data, {base64: true}).then(function (zip: JSZip) {
                     Log.trace('DatasetController::process(..) - unzipped');
 
-                    let processedDataset = {};
+                    let processedDataset: Section[] = [];
                     // TODO: iterate through files in zip (zip.files)
                     // The contents of the file will depend on the id provided. e.g.,
                     // some zips will contain .html files, some will contain .json files.
                     // You can depend on 'id' to differentiate how the zip should be handled,
                     // although you should still be tolerant to errors.
-                    let courses: Course[];
-                    var promisedArray: Promise<any>[];
 
-                    console.log("reading ZIP...");
+                    // let courses: Course[];
+                    var promisesArray: Promise<any>[] = [];
+
+                    console.log("Z - reading ZIP...");
 
                     for (var file in myZip.files) {
-                        console.log("In ZIP-reading for loop...");
-                        let file_name = myZip.file(file).name;
-                        let course = new Course;
-                        course = course.createCourse(file_name);
-                        var dataParsed: any;
-
+                        console.log("Z - In ZIP-reading for loop...");
                         var promisedContent = myZip.file(file).async("string");
-                        promisedArray.concat(promisedContent);
-                        console.log("added promise to array");
-
-                        //     .then(function (filetext) {
-                        //     dataParsed = JSON.parse(filetext);
-                        //     promisedArray.concat(promisedContent);
-                        //     console.log("added promise to promisedArray");
-                        //     let sections: Section[] = JSON.parse(dataParsed.result);
-                        //     // processedDataset.add(sections);
-                        // }).catch(function () {
-                        //     console.log("JSON parsing failed");
-                        // });
+                        promisesArray.push(promisedContent);
+                        console.log("Z - added promise to array");
                     }
 
-                    Promise.all(promisedArray).then(function (result) {
-                        for (var content in result) {
-                            console.log(content);
-                        }
-                    }).catch(function () {
-                        console.log("Error in Promise.all()");
-                    });
+                    console.log("Z - " + promisesArray);
 
-                    that.save(id, processedDataset);
+                    Promise.all(promisesArray).then(function (result) {
+                        console.log("Z - iterating through all Promises...");
+                        for (var section in result) {
+                            var instanceSection: Section = JSON.parse(section);
+                            processedDataset.push(instanceSection);
+                            console.log("Z - this should be a section object: " + instanceSection);
+                        }
+                        console.log("Z - about to save sections[]");
+                        that.save(id, processedDataset);
+                    }).catch(function (err) {
+                        console.log("Z - Error in Promise.all()" + err);
+                    });
 
                     fulfill(true);
                 }).catch(function (err) {
@@ -123,8 +113,10 @@ export default class DatasetController {
     private save(id: string, processedDataset: any) {
         // add it to the memory model
         this.datasets[id] = processedDataset;
+        console.log("Z - in save()...");
 
         // TODO: actually write to disk in the ./data directory
         // use fs to write JSON string to  disk dir
+        console.log("Z - fs.write() now!");
     }
 }
