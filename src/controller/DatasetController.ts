@@ -89,7 +89,6 @@ export default class DatasetController {
                     // You can depend on 'id' to differentiate how the zip should be handled,
                     // although you should still be tolerant to errors.
 
-                    // let courses: Course[];
                     var promisesArray: Promise<any>[] = [];
 
                     console.log('Z - reading ZIP...');
@@ -110,13 +109,15 @@ export default class DatasetController {
                             processedDataset.push(instanceSection);
                             console.log('Z - this should be a section object: ' + result[section]);
                         }
-                        console.log('Z - about to save sections[]');
+                        console.log('Z - heading to save sections[]');
                         that.save(id, processedDataset);
+                    }).then(function() {
+                        fulfill(true);
+                        console.log('Z - fulfilling true');
                     }).catch(function (err) {
                         console.log('Z - Error in Promise.all()' + err);
                     });
 
-                    fulfill(true);
                 }).catch(function (err) {
                     Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);
                     reject(err);
@@ -143,7 +144,7 @@ export default class DatasetController {
         // TODO: actually write to disk in the ./data directory
         // use fs to write JSON string to  disk dir
         console.log('Z - fs.write() now!');
-        fs.writeFile('../../data/' + id + '.txt', processedDataset, (err) => {
+        fs.writeFile('../../data/' + id + '.json', processedDataset, (err) => {
             if (err) {
                 console.log('Error saving data: ' + err);
                 throw err;
