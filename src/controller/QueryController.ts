@@ -11,12 +11,17 @@ import Section from "../model/Section";
 
 export interface QueryRequest {
     GET: string|string[];
-    WHERE: {
-        IS?:any;
-    };
+    WHERE: QueryBody;
     ORDER: string;
     AS: string;
 
+}
+
+export interface QueryBody
+{
+    IS?:any;
+    OR?:Array<QueryRequest>;
+    GT?:{};
 }
 
 export interface QueryResponse {
@@ -72,10 +77,11 @@ export default class QueryController {
         //Todo: Valid key translation using string.replace at the beginning or switch everywhere
 
         //WHERE
-        this.filter(query);
+        var jsonwhere = query.WHERE;
+        var filteredDs = this.filter(jsonwhere, sections);
 
         //GET
-        this.getColumn(preamble, sections);
+        filteredDs = this.getColumn(preamble, filteredDs);
 
         //ORDER
         //AS
@@ -85,26 +91,36 @@ export default class QueryController {
         //Get wanted information in Section
 
 
-        return sections;
+        return ;
         //return {status: 'received', ts: new Date().getTime()};
     }
 
-    public filter(query: QueryRequest)
+    //return the filtered dataset , section should be Section[]
+    public filter(query: QueryBody, sections: string[]): any
     {
-        var jsonwhere = query.WHERE;
+        var filteredDs: string[]=[];
         var index = 0;
-        for (let q in jsonwhere)
+        for (let q in query)
         {
             if(index === 0)
             {
                 Log.trace(q);
                 switch (q)
                 {
-                    case'OR':
-                        this.logicOr();
+                    case 'OR':
+                        //filteredDs = this.logicOr(query.WHERE.OR, section);
                         break;
-                    case'AND':
+                    case 'AND':
                         this.logicAnd();
+                        break;
+                    case 'GT':
+                        filteredDs = this.greaterThan(query.GT, sections);
+                        break;
+                    case 'LT':
+                        this.lessThan();
+                        break;
+                    case 'EQ':
+                        this.equalTo();
                         break;
                     default:
                         Log.trace("Undefined EBNF in WHERE");
@@ -112,9 +128,10 @@ export default class QueryController {
             }
             index++;
         }
+        return filteredDs;
     }
 
-    public getColumn(preamble: string[], sections: string[])
+    public getColumn(preamble: string[], sections: string[]): any
     {
         for (let p in preamble)
         {
@@ -150,11 +167,12 @@ export default class QueryController {
 
             }
         }
+        return sections;
     }
 
-    public logicOr ()
+    public logicOr (subQuery:Array<QueryRequest>, sections: string[]): any
     {
-
+            //return this.filter(subQuery[0], sections).append(this.filter(subQuery[1], sections));
     }
 
     public logicAnd ()
@@ -162,4 +180,29 @@ export default class QueryController {
 
     }
 
+    public greaterThan (compare:{}, sections:string[]):any
+    {
+        //get the object inseide GT, use key to iterate through sections to find targeted value and compare
+        //if value is greater, add it to filteredData.
+        //return filteredData
+        var comparedKey = Object.keys(compare);
+        Log.trace(comparedKey[0]);
+
+        var filteredDs:string[] = [];
+        for (let section in sections)
+        {
+
+        }
+        return filteredDs;
+    }
+
+    public lessThan ()
+    {
+
+    }
+
+    public equalTo ()
+    {
+
+    }
 }
