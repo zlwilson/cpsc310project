@@ -45,4 +45,5 @@ describe("QueryController", function () {
         expect(ret).not.to.be.equal(null);
         // should check that the value is meaningful
     });
+
 });
