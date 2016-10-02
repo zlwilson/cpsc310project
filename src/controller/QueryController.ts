@@ -20,8 +20,20 @@ export interface QueryRequest {
 export interface QueryBody
 {
     IS?:any;
-    OR?:Array<QueryRequest>;
-    GT?:{};
+    OR?:[QueryBody, QueryBody];
+    GT?: {
+        courses_avg?: number;
+        courses_pass?: number;
+        courses_fail?: number;
+        courses_audit?: number;
+
+    };
+    LT?: {
+        courses_avg?: number;
+        courses_pass?: number;
+        courses_fail?: number;
+        courses_audit?: number;
+    };
 }
 
 export interface QueryResponse {
@@ -68,8 +80,16 @@ export default class QueryController {
         Log.trace(id);
         //if (datasets[id].pushed)
         let controller = QueryController.datasetController;
+
         var file = controller.getDataset(id);
-        var sections:string[] = file.result;
+        var result = file.result;
+        var sections:Section[] = [];
+
+        for (var r in result)
+        {
+            var instanceSection: Section = result[r];
+            sections.push(instanceSection);
+        }
 
         //If datasets[id] is null, then use DatasetController.process to find if it's in disk,
         //If still null, return error
@@ -96,9 +116,9 @@ export default class QueryController {
     }
 
     //return the filtered dataset , section should be Section[]
-    public filter(query: QueryBody, sections: string[]): any
+    public filter(query: QueryBody, sections: Section[]): any
     {
-        var filteredDs: string[]=[];
+        var filteredDs: Section[]=[];
         var index = 0;
         for (let q in query)
         {
@@ -108,16 +128,16 @@ export default class QueryController {
                 switch (q)
                 {
                     case 'OR':
-                        //filteredDs = this.logicOr(query.WHERE.OR, section);
+                        filteredDs = this.logicOr(query, sections);
                         break;
                     case 'AND':
                         this.logicAnd();
                         break;
                     case 'GT':
-                        filteredDs = this.greaterThan(query.GT, sections);
+                        filteredDs = this.greaterThan(query, sections);
                         break;
                     case 'LT':
-                        this.lessThan();
+                        filteredDs = this.lessThan(query, sections);
                         break;
                     case 'EQ':
                         this.equalTo();
@@ -131,12 +151,11 @@ export default class QueryController {
         return filteredDs;
     }
 
-    public getColumn(preamble: string[], sections: string[]): any
+    public getColumn(preamble: string[], sections: Section[]): any
     {
         for (let p in preamble)
         {
             Log.trace(preamble[p]);
-            var getStat: string[] = [];
 
             for (let section of sections)
             {
@@ -170,9 +189,11 @@ export default class QueryController {
         return sections;
     }
 
-    public logicOr (subQuery:Array<QueryRequest>, sections: string[]): any
+    public logicOr (query: QueryBody, sections: Section[]): any
     {
-            //return this.filter(subQuery[0], sections).append(this.filter(subQuery[1], sections));
+        var or = this.filter(query.OR[0], sections).concat(this.filter(query.OR[1], sections));
+        or = this.removeDuplicate(or);
+        return or;
     }
 
     public logicAnd ()
@@ -180,29 +201,171 @@ export default class QueryController {
 
     }
 
-    public greaterThan (compare:{}, sections:string[]):any
+    //Todo: deal with wrong input 
+    public greaterThan (query: QueryBody, sections:Section[]):any
     {
         //get the object inseide GT, use key to iterate through sections to find targeted value and compare
         //if value is greater, add it to filteredData.
         //return filteredData
-        var comparedKey = Object.keys(compare);
-        Log.trace(comparedKey[0]);
 
-        var filteredDs:string[] = [];
-        for (let section in sections)
+        var comparedKey = Object.keys(query.GT);
+        var comparedVal: string|number;
+        var compareField: string;
+
+        var filteredDs:Section[] = [];
+        switch (comparedKey[0])
         {
-
+            case 'courses_avg':
+                comparedVal = query.GT.courses_avg;
+                compareField = "Avg";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.Avg > comparedVal)
+                    {
+                        filteredDs.push(s);
+                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Avg + ", greater than " + comparedVal);
+                    }
+                }
+                break;
+            case 'courses_pass':
+                comparedVal = query.GT.courses_pass;
+                compareField = "Pass";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.Pass > comparedVal)
+                    {
+                        filteredDs.push(s);
+                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Pass + ", greater than " + comparedVal);
+                    }
+                }
+                break;
+            case 'courses_fail':
+                comparedVal = query.GT.courses_fail;
+                compareField = "Fail";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.Fail > comparedVal)
+                    {
+                        filteredDs.push(s);
+                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Fail + ", greater than " + comparedVal);
+                    }
+                }
+                break;
+            case  'courses_audit':
+                comparedVal = query.GT.courses_audit;
+                compareField = "Audit";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.Audit > comparedVal)
+                    {
+                        filteredDs.push(s);
+                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", greater than " + comparedVal);
+                    }
+                }
+                break;
+            default:
+                Log.error("Unexpected compare value");
         }
+        // Log.trace("Comparing " + comparedKey[0] + " with " + comparedVal);
+
+
         return filteredDs;
     }
 
-    public lessThan ()
-    {
 
+
+    public lessThan (query: QueryBody, sections:Section[]):any
+    {
+        var comparedKey = Object.keys(query.LT);
+        var comparedVal: string|number;
+        var compareField: string;
+
+        var filteredDs:Section[] = [];
+        switch (comparedKey[0])
+        {
+            case 'courses_avg':
+                comparedVal = query.LT.courses_avg;
+                compareField = "Avg";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.Avg < comparedVal)
+                    {
+                        filteredDs.push(s);
+                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Avg + ", less than " + comparedVal);
+                    }
+                }
+                break;
+            case 'courses_pass':
+                comparedVal = query.LT.courses_pass;
+                compareField = "Pass";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.Pass < comparedVal)
+                    {
+                        filteredDs.push(s);
+                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Pass + ", less than " + comparedVal);
+                    }
+                }
+                break;
+            case 'courses_fail':
+                comparedVal = query.LT.courses_fail;
+                compareField = "Fail";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.Fail < comparedVal)
+                    {
+                        filteredDs.push(s);
+                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Fail + ", less than " + comparedVal);
+                    }
+                }
+                break;
+            case  'courses_audit':
+                comparedVal = query.LT.courses_audit;
+                compareField = "Audit";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.Audit < comparedVal)
+                    {
+                        filteredDs.push(s);
+                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", less than " + comparedVal);
+                    }
+                }
+                break;
+            default:
+                Log.error("Unexpected compare value");
+        }
+        // Log.trace("Comparing " + comparedKey[0] + " with " + comparedVal);
+
+
+        return filteredDs;
     }
 
     public equalTo ()
     {
 
+    }
+
+    public removeDuplicate (dupArray: Section[]):Section[]
+    {
+        for (var i = 0; i<dupArray.length; ++i)
+        {
+            for (var j = i + 1; j< dupArray.length; ++j)
+            {
+                if (dupArray[i].id === dupArray[j].id)
+                {
+                    dupArray.splice(j--, 1);
+                }
+
+            }
+        }
+        return dupArray;
     }
 }
