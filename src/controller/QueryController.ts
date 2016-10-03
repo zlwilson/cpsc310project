@@ -35,6 +35,12 @@ export interface QueryBody
         courses_fail?: number;
         courses_audit?: number;
     };
+    EQ?:{
+        courses_avg?: number;
+        courses_pass?: number;
+        courses_fail?: number;
+        courses_audit?: number;
+    }
 }
 
 export interface QueryResponse {
@@ -141,7 +147,7 @@ export default class QueryController {
                         filteredDs = this.lessThan(query, sections);
                         break;
                     case 'EQ':
-                        this.equalTo();
+                        filteredDs = this.equalTo(query, sections);
                         break;
                     default:
                         Log.trace("Undefined EBNF in WHERE");
@@ -212,7 +218,7 @@ export default class QueryController {
         //return filteredData
 
         var comparedKey = Object.keys(query.GT);
-        var comparedVal: string|number;
+        var comparedVal: number;
         var compareField: string;
 
         var filteredDs:Section[] = [];
@@ -282,7 +288,7 @@ export default class QueryController {
     public lessThan (query: QueryBody, sections:Section[]):any
     {
         var comparedKey = Object.keys(query.LT);
-        var comparedVal: string|number;
+        var comparedVal: number;
         var compareField: string;
 
         var filteredDs:Section[] = [];
@@ -349,9 +355,74 @@ export default class QueryController {
         return filteredDs;
     }
 
-    public equalTo ()
+    public equalTo (query: QueryBody, sections:Section[]):any
     {
+        var comparedKey = Object.keys(query.EQ);
+        var comparedVal: number;
+        var compareField: string;
 
+        var filteredDs:Section[] = [];
+        switch (comparedKey[0])
+        {
+            case 'courses_avg':
+                comparedVal = query.EQ.courses_avg;
+                compareField = "Avg";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.Avg == comparedVal)
+                    {
+                        filteredDs.push(s);
+                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Avg + ", equal to " + comparedVal);
+                    }
+                }
+                break;
+            case 'courses_pass':
+                comparedVal = query.EQ.courses_pass;
+                compareField = "Pass";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.Pass == comparedVal)
+                    {
+                        filteredDs.push(s);
+                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Pass + ", equal to " + comparedVal);
+                    }
+                }
+                break;
+            case 'courses_fail':
+                comparedVal = query.EQ.courses_fail;
+                compareField = "Fail";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.Fail == comparedVal)
+                    {
+                        filteredDs.push(s);
+                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Fail + ", equal to " + comparedVal);
+                    }
+                }
+                break;
+            case  'courses_audit':
+                comparedVal = query.EQ.courses_audit;
+                compareField = "Audit";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.Audit == comparedVal)
+                    {
+                        filteredDs.push(s);
+                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", equal to " + comparedVal);
+                    }
+                }
+                break;
+            default:
+                Log.error("Unexpected compare value");
+        }
+        // Log.trace("Comparing " + comparedKey[0] + " with " + comparedVal);
+
+
+        return filteredDs;
     }
 
     public removeDuplicate (dupArray: Section[]):Section[]
