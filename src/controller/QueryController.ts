@@ -43,7 +43,23 @@ export interface QueryBody
     }
 }
 
-export interface QueryResponse {
+export interface QueryResponse
+{
+
+    result: Array<Result>;
+}
+
+export interface Result
+{
+    courses_dept?: string;
+    courses_id?: string;
+    courses_instructor?: string;
+    courses_title?: string;
+
+    courses_avg?: number;
+    courses_pass?: number;
+    courses_fail?: number;
+    courses_audit?: number;
 }
 
 export default class QueryController {
@@ -105,10 +121,11 @@ export default class QueryController {
 
         //WHERE
         var jsonwhere = query.WHERE;
-        var filteredDs = this.filter(jsonwhere, sections);
+        var filteredDs: Section[]  = this.filter(jsonwhere, sections);
 
         //GET
-        filteredDs = this.getColumn(preamble, filteredDs);
+        var selectedDs: QueryResponse = this.getColumn(preamble, filteredDs);
+        // selectedDs.render = query.AS;
 
         //ORDER
         //AS
@@ -118,12 +135,12 @@ export default class QueryController {
         //Get wanted information in Section
 
 
-        return ;
+        return selectedDs;
         //return {status: 'received', ts: new Date().getTime()};
     }
 
     //return the filtered dataset , section should be Section[]
-    public filter(query: QueryBody, sections: Section[]): any
+    public filter(query: QueryBody, sections: Section[]): Section[]
     {
         var filteredDs: Section[]=[];
         var index = 0;
@@ -158,42 +175,51 @@ export default class QueryController {
         return filteredDs;
     }
 
-    public getColumn(preamble: string[], sections: Section[]): any
+    public getColumn(preamble: string[], sections: Section[]): QueryResponse
     {
-        for (let p in preamble)
-        {
-            Log.trace(preamble[p]);
+        var selectedDs: QueryResponse = { result:[]};
 
-            for (let section of sections)
+        for (let section in sections)
+        {
+            var result: Result = {};
+
+            for (let p in preamble)
             {
-                //valid key translation
+                Log.trace(preamble[p]);
+
                 switch (preamble[p])
                 {
                     case 'courses_dept':
-                        // getStat.push(section.Subject);
-                        // Log.trace(course.Subject);
+                        result["courses_dept"] = sections[section].Subject;
                         break;
                     case 'courses_id':
+                        result["courses_id"] = sections[section].id;
                         break;
                     case 'courses_avg':
+                        result["courses_avg"] = sections[section].Avg;
                         break;
                     case 'courses_instructor':
+                        result["courses_instructor"] = sections[section].Professor;
                         break;
                     case 'courses_title':
+                        result["courses_title"] = sections[section].Title;
                         break;
                     case 'courses_pass':
+                        result["courses_pass"] = sections[section].Pass;
                         break;
                     case 'courses_fail':
+                        result["courses_fail"] = sections[section].Pass;
                         break;
                     case 'courses_audit':
+                        result["courses_audit"] = sections[section].Audit;
                         break;
                     default:
-
+                        Log.error("Unexpected GET input");
                 }
-
             }
+            selectedDs.result.push(result);
         }
-        return sections;
+        return selectedDs;
     }
 
     public logicOr (query: QueryBody, sections: Section[]): Section[]
