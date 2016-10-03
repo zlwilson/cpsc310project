@@ -4,7 +4,7 @@
 export default class Section {
     Title: string;
     Section: string;
-    id: number;
+    id: string;
     Professor: string;
     Audit: number;
     Withdrew: number
