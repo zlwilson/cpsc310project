@@ -21,6 +21,7 @@ export interface QueryBody
 {
     IS?:any;
     OR?:[QueryBody, QueryBody];
+    AND?:[QueryBody, QueryBody];
     GT?: {
         courses_avg?: number;
         courses_pass?: number;
@@ -131,7 +132,7 @@ export default class QueryController {
                         filteredDs = this.logicOr(query, sections);
                         break;
                     case 'AND':
-                        this.logicAnd();
+                        filteredDs = this.logicAnd(query, sections);
                         break;
                     case 'GT':
                         filteredDs = this.greaterThan(query, sections);
@@ -189,19 +190,21 @@ export default class QueryController {
         return sections;
     }
 
-    public logicOr (query: QueryBody, sections: Section[]): any
+    public logicOr (query: QueryBody, sections: Section[]): Section[]
     {
-        var or = this.filter(query.OR[0], sections).concat(this.filter(query.OR[1], sections));
+        var or: Section[] = this.filter(query.OR[0], sections).concat(this.filter(query.OR[1], sections));
         or = this.removeDuplicate(or);
         return or;
     }
 
-    public logicAnd ()
+    public logicAnd (query: QueryBody, sections: Section[]): any
     {
-
+        var applyFirst: Section[] = this.filter(query.AND[0], sections);
+        var applySecond: Section[] = this.filter(query.AND[1], applyFirst);
+        return applySecond;
     }
 
-    //Todo: deal with wrong input 
+    //Todo: deal with wrong input
     public greaterThan (query: QueryBody, sections:Section[]):any
     {
         //get the object inseide GT, use key to iterate through sections to find targeted value and compare
@@ -275,8 +278,6 @@ export default class QueryController {
 
         return filteredDs;
     }
-
-
 
     public lessThan (query: QueryBody, sections:Section[]):any
     {
