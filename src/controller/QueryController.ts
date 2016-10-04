@@ -53,8 +53,8 @@ export interface QueryBody
 
 export interface QueryResponse
 {
-
     result: Array<Result>;
+    render: string;
 }
 
 export interface Result
@@ -135,6 +135,7 @@ export default class QueryController {
 
         //GET
         var selectedDs: QueryResponse = this.getColumn(preamble, filteredDs);
+        selectedDs.render = query.AS.toLowerCase();
         // selectedDs.render = query.AS;
 
         //ORDER
@@ -144,9 +145,7 @@ export default class QueryController {
 
         //Create a Course of datasets[id] and translate keys
         //Get wanted information in Section
-
-
-        return selectedDs;
+        return orderedDs;
         //return {status: 'received', ts: new Date().getTime()};
     }
 
@@ -194,7 +193,7 @@ export default class QueryController {
 
     public getColumn(preamble: string[], sections: Section[]): QueryResponse
     {
-        var selectedDs: QueryResponse = { result:[]};
+        var selectedDs: QueryResponse = { result:[], render:""};
 
         for (let section in sections)
         {
