@@ -138,6 +138,7 @@ export default class QueryController {
         // selectedDs.render = query.AS;
 
         //ORDER
+        var orderedDs: QueryResponse = this.orderResult(query, selectedDs);
         //AS
 
 
@@ -234,6 +235,86 @@ export default class QueryController {
                 }
             }
             selectedDs.result.push(result);
+        }
+        return selectedDs;
+    }
+
+    public orderResult (query: QueryRequest, selectedDs: QueryResponse): QueryResponse
+    {
+        switch (query.ORDER)
+        {
+            case 'courses_dept':
+                selectedDs.result.sort(function (a,b) {
+                    if (a.courses_dept < b.courses_dept)
+                    {
+                        return -1;
+                    }
+                    if (a.courses_dept > b.courses_dept)
+                    {
+                        return 1;
+                    }
+                    return 0;
+                });
+                break;
+            case 'courses_id':
+                selectedDs.result.sort(function (a,b) {
+                    if (a.courses_id < b.courses_id)
+                    {
+                        return -1;
+                    }
+                    if (a.courses_id > b.courses_id)
+                    {
+                        return 1;
+                    }
+                    return 0;
+                });
+                break;
+            case 'courses_instructor':
+                selectedDs.result.sort(function (a,b) {
+                    if (a.courses_instructor < b.courses_instructor)
+                    {
+                        return -1;
+                    }
+                    if (a.courses_instructor > b.courses_instructor)
+                    {
+                        return 1;
+                    }
+                    return 0;
+                });
+                break;
+            case 'courses_title':
+                selectedDs.result.sort(function (a,b) {
+                    if (a.courses_title < b.courses_title)
+                    {
+                        return -1;
+                    }
+                    if (a.courses_title > b.courses_title)
+                    {
+                        return 1;
+                    }
+                    return 0;
+                });
+                break;
+            case 'courses_avg':
+                selectedDs.result.sort(function (a,b) {
+                    return a.courses_avg-b.courses_avg;
+                })
+                break;
+            case 'courses_pass':
+                selectedDs.result.sort(function (a,b) {
+                    return a.courses_pass-b.courses_pass;
+                })
+                break;
+            case 'courses_fail':
+                selectedDs.result.sort(function (a,b) {
+                    return a.courses_fail-b.courses_fail;
+                })
+                break;
+            case 'courses_audit':
+                selectedDs.result.sort(function (a,b) {
+                    return a.courses_audit-b.courses_audit;
+                })
+                break;
         }
         return selectedDs;
     }
