@@ -19,7 +19,13 @@ export interface QueryRequest {
 
 export interface QueryBody
 {
-    IS?:any;
+    IS?:{
+        courses_dept?: string;
+        courses_id?: string;
+        courses_instructor?: string;
+        courses_title?: string;
+    }
+
     OR?:[QueryBody, QueryBody];
     AND?:[QueryBody, QueryBody];
     GT?: {
@@ -41,6 +47,8 @@ export interface QueryBody
         courses_fail?: number;
         courses_audit?: number;
     }
+
+    NOT?: QueryBody;
 }
 
 export interface QueryResponse
@@ -65,6 +73,7 @@ export interface Result
 export default class QueryController {
     private datasets: Datasets = null;
     private  static datasetController = new DatasetController();
+    private sections: Section[] = [];
 
     constructor(datasets: Datasets) {
         this.datasets = datasets;
@@ -113,6 +122,7 @@ export default class QueryController {
             var instanceSection: Section = result[r];
             sections.push(instanceSection);
         }
+        this.sections = sections;
 
         //If datasets[id] is null, then use DatasetController.process to find if it's in disk,
         //If still null, return error
@@ -151,6 +161,9 @@ export default class QueryController {
                 Log.trace(q);
                 switch (q)
                 {
+                    case 'IS':
+                        filteredDs = this.compareString(query, sections);
+                        break;
                     case 'OR':
                         filteredDs = this.logicOr(query, sections);
                         break;
@@ -165,6 +178,9 @@ export default class QueryController {
                         break;
                     case 'EQ':
                         filteredDs = this.equalTo(query, sections);
+                        break;
+                    case 'NOT':
+                        filteredDs = this.negation(query, sections);
                         break;
                     default:
                         Log.trace("Undefined EBNF in WHERE");
@@ -185,7 +201,7 @@ export default class QueryController {
 
             for (let p in preamble)
             {
-                Log.trace(preamble[p]);
+                // Log.trace(preamble[p]);
 
                 switch (preamble[p])
                 {
@@ -449,6 +465,98 @@ export default class QueryController {
 
 
         return filteredDs;
+    }
+
+    public compareString(query: QueryBody, sections:Section[]): Section[]
+    {
+        var comparedKey = Object.keys(query.IS);
+        var comparedVal: string;
+        var compareField: string;
+
+        var filteredDs:Section[] = [];
+        switch (comparedKey[0])
+        {
+            case 'courses_dept':
+                comparedVal = query.IS.courses_dept;
+                compareField = "Subject";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.Subject === comparedVal)
+                    {
+                        filteredDs.push(s);
+                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Subject + ", equal to " + comparedVal);
+                    }
+                }
+                break;
+            case 'courses_title':
+                comparedVal = query.IS.courses_title;
+                compareField = "Title";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.Title === comparedVal)
+                    {
+                        filteredDs.push(s);
+                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Title + ", equal to " + comparedVal);
+                    }
+                }
+                break;
+            case 'courses_instructor':
+                comparedVal = query.IS.courses_instructor;
+                compareField = "Professor";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.Professor === comparedVal)
+                    {
+                        filteredDs.push(s);
+                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Professor + ", equal to " + comparedVal);
+                    }
+                }
+                break;
+            case  'courses_id':
+                comparedVal = query.IS.courses_id;
+                compareField = "id";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    // "==" is used here instead of "===" for comparing numbers with string type
+                    if (s.id == comparedVal)
+                    {
+                        filteredDs.push(s);
+                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.id + ", equal to " + comparedVal);
+                        break;
+                    }
+                }
+                break;
+            default:
+                Log.error("Unexpected compare value");
+        }
+        // Log.trace("Comparing " + comparedKey[0] + " with " + comparedVal);
+
+
+        return filteredDs;
+    }
+
+    public negation (query: QueryBody, sections:Section[]): Section[]
+    {
+        var filteredDs: Section[] = this.filter(query.NOT, sections);
+
+        var negatedDs: Section[] =  this.sections.filter(function (el) {
+            return !filteredDs.includes(el);
+        })
+
+        for (let n in negatedDs)
+        {
+            Log.trace(negatedDs[n].id);
+        }
+        Log.trace("Filtered:");
+        for (let f in filteredDs)
+        {
+            Log.trace(filteredDs[f].id);
+        }
+        return negatedDs;
     }
 
     public removeDuplicate (dupArray: Section[]):Section[]
