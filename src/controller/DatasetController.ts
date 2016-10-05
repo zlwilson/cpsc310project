@@ -105,7 +105,8 @@ export default class DatasetController {
                     Promise.all(promisesArray).then(function (result) {
                         console.log('Z - iterating through all Promises...');
                         for (var section in result) {
-                            var instanceSection: Section = JSON.parse(result[section]);
+                            let jsonString = JSON.stringify(result[section]);
+                            var instanceSection: Section = JSON.parse(jsonString);
                             processedDataset.push(instanceSection);
                             console.log('Z - this should be a section object: ' + result[section]);
                         }
