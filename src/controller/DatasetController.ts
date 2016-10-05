@@ -107,7 +107,7 @@ export default class DatasetController {
                         for (var section in result) {
                             var instanceSection: Section = JSON.parse(result[section]);
                             processedDataset.push(instanceSection);
-                            // console.log('Z - this should be a section object: ' + result[section]);
+                            console.log('Z - this should be a section object: ' + result[section]);
                         }
                         console.log('Z - heading to save sections[]');
                         that.save(id, processedDataset);
