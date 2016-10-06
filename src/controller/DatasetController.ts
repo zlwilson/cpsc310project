@@ -48,23 +48,22 @@ export default class DatasetController {
         var allFiles:any = [];
         console.log('Z - in getDatasets()...');
 
-        fs.readdir('data/', (err, files) => {
-            console.log('Z - in getDatasets().readdir()...');
+        fs.readdir('data/', function (err, files) {
+            console.log('Z - reading ./data...');
             if (err) {
-                console.log('Z - Error in getDatasets() readdir: ' + err);
+                console.log('Z - Error reading ./data: ' + err);
                 throw err;
             }
+
             allFiles = files;
-            console.log('Z - list of datasets: ' + files);
+            console.log('Z - list of existing datasets in ./data: ' + files);
         });
 
         for (var file in allFiles) {
             var dataset = allFiles[file];
-            this.datasets = {datasets, dataset};
+            this.datasets = (dataset);
         }
 
-        this.datasets = allFiles;
-        console.log('Z - this.datasets = ' + this.datasets);
         return this.datasets;
     }
 
