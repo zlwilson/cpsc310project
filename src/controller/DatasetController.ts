@@ -45,23 +45,13 @@ export default class DatasetController {
 
     public getDatasets(): Datasets {
         // TODO: if datasets is empty, load all dataset files in ./data from disk
-        var allFiles: string[] = [];
-        fs.readdir('../../data', (err, files) => {
+        fs.readdir('data', function (err, files) {
             if (err) {
-                console.log('Z - Error in getDatasets() readdir: ')
+                console.log('Z - Error in getDatasets() readdir: ' + err);
                 throw err;
             }
-            allFiles = files;
+            this.datasets = files;
         });
-
-        for (var file in allFiles) {
-            fs.readFile('../../data/' + allFiles[file], 'string', (err, data) => {
-               if (err) {
-                   console.log('Z - Error in getDatasets() for loop: ')
-                   throw err;
-               }
-            });
-        }
 
         return this.datasets;
     }
@@ -113,7 +103,10 @@ export default class DatasetController {
                         }
                         console.log('Z - heading to save sections[]');
                         var saveNumber = that.save(id, processedDataset);
+                        console.log('Z - Saved with code: ' + saveNumber);
                         fulfill(saveNumber);
+                    }).then(function () {
+                        console.log('Z - fulfilled true');
                     }).catch(function (err) {
                         console.log('Z - Error in Promise.all()' + err);
                     });
@@ -145,6 +138,10 @@ export default class DatasetController {
         // use fs to write JSON string to  disk dir
         console.log('Z - fs.write() now!');
         // return new Promise<Number> {};
+
+        // var fd = fs.openSync('data/' + id, 'wx');
+        // fs.writeSync(fd, processedDataset);
+
         fs.open('data/' + id, 'wx', (err, fileDestination) => {
             if (err) {
                 if (err.code === "EEXIST") {
@@ -169,5 +166,9 @@ export default class DatasetController {
         });
 
         return 400;
+    }
+
+    private removeDataset(id: string, processedDataset: any) {
+        // delete dataset
     }
 }
