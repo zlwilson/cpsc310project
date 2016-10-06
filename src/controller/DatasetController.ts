@@ -32,12 +32,12 @@ export default class DatasetController {
 
     public getDataset(id: string): any { 
         // TODO: this should check if the dataset is on disk in ./data if it is not already in memory. 
-        fs.readFile('../../data/' + id, 'string', function (err, data) { 
+        fs.readFile('data/' + id, 'string', function (err, data) { 
             if (err) {
-                console.log('Z - Error in getDatasets(id): ')
+                console.log('Z - Error in getDatasets(id): ' + err);
                 throw err;
             } 
-            console.log('Z - Read data in getDatasets(id)! ' + data); 
+            console.log('Z - Read data in getDatasets(id): ' + data); 
             return data;
         }); 
         return this.datasets[id];
@@ -45,15 +45,26 @@ export default class DatasetController {
 
     public getDatasets(): Datasets {
         // TODO: if datasets is empty, load all dataset files in ./data from disk
-        var allFiles: string[] = [];
-        fs.readdir('../../data/', (err, files) => {
+        var allFiles:any = [];
+        console.log('Z - in getDatasets()...');
+
+        fs.readdir('data/', (err, files) => {
+            console.log('Z - in getDatasets().readdir()...');
             if (err) {
-                console.log('Z - Error in getDatasets() readdir: ')
+                console.log('Z - Error in getDatasets() readdir: ' + err);
                 throw err;
             }
             allFiles = files;
+            console.log('Z - list of datasets: ' + files);
         });
+
+        for (var file in allFiles) {
+            var dataset = allFiles[file];
+            this.datasets = {datasets, dataset};
+        }
+
         this.datasets = allFiles;
+        console.log('Z - this.datasets = ' + this.datasets);
         return this.datasets;
     }
 
