@@ -244,7 +244,6 @@ describe("DatasetController", function () {
             Log.test('Dataset processed; result: ' + result);
             expect(result).to.equal(true);
         });
-
     });
 
 });

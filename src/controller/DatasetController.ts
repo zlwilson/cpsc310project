@@ -63,7 +63,7 @@ export default class DatasetController {
      * @param data base64 representation of a zip file
      * @returns {Promise<boolean>} returns true if successful; false if the dataset was invalid (for whatever reason)
      */
-    public process(id: string, data: any): Promise<boolean> {
+    public process(id: string, data: any): Promise<Number> {
         Log.trace('DatasetController::process( ' + id + '... )');
 
         let that = this;
@@ -101,9 +101,12 @@ export default class DatasetController {
                             processedDataset.push(instanceSection);
                             // console.log('Z - this should be a section object: ' + result[sectionIndex]);
                         }
+
                         console.log('Z - heading to save sections[]');
                         var saveNumber = that.save(id, processedDataset);
                         console.log('Z - Saved with code: ' + saveNumber);
+
+
                         fulfill(saveNumber);
                     }).then(function () {
                         console.log('Z - fulfilled true');
