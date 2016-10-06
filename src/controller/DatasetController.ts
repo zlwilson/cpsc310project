@@ -29,22 +29,22 @@ export default class DatasetController {
      * @param id
      * @returns {{}}
      */
-    public getDataset(id: string): any {
-        // TODO: this should check if the dataset is on disk in ./data if it is not already in memory.
-        fs.readFile('../../data/id', 'string', (err, data) => {
-            if (err) {
+    public getDataset(id: string): any { 
+        // TODO: this should check if the dataset is on disk in ./data if it is not already in memory. 
+        fs.readFile('../../data/' + id, 'string', function (err, data) { 
+            if (err) { 
                 console.log('Z - Error in getDatasets(id): ')
                 throw err;
-            }
-            console.log('Z - Read data in getDatasets(id)! ' + data);
+            } 
+            console.log('Z - Read data in getDatasets(id)! ' + data); 
             return data;
-        });
+        }); 
         return this.datasets[id];
-    }
+     }
 
     public getDatasets(): Datasets {
         // TODO: if datasets is empty, load all dataset files in ./data from disk
-        var allFiles: string[] = [];
+        let allFiles: String[] = [];
         fs.readdir('../../data', (err, files) => {
             if (err) {
                 console.log('Z - Error in getDatasets() readdir: ')
@@ -52,16 +52,7 @@ export default class DatasetController {
             }
             allFiles = files;
         });
-
-        for (var file in allFiles) {
-            fs.readFile('../../data/' + allFiles[file], 'string', (err, data) => {
-               if (err) {
-                   console.log('Z - Error in getDatasets() for loop: ')
-                   throw err;
-               }
-            });
-        }
-
+        this.datasets = allFiles;
         return this.datasets;
     }
 
@@ -72,7 +63,7 @@ export default class DatasetController {
      * @param data base64 representation of a zip file
      * @returns {Promise<boolean>} returns true if successful; false if the dataset was invalid (for whatever reason)
      */
-    public process(id: string, data: any): Promise<boolean> {
+    public process(id: string, data: any): Promise<number> {
         Log.trace('DatasetController::process( ' + id + '... )');
 
         let that = this;
@@ -94,10 +85,10 @@ export default class DatasetController {
                     console.log('Z - reading ZIP...');
 
                     for (var file in myZip.files) {
-                        console.log('Z - In ZIP-reading for loop...');
+                        // console.log('Z - In ZIP-reading for loop...');
                         var promisedContent = myZip.file(file).async('string');
                         promisesArray.push(promisedContent);
-                        console.log('Z - added promise to array');
+                        // console.log('Z - added promise to array');
                     }
 
                     console.log('Z - ' + promisesArray);
@@ -111,9 +102,10 @@ export default class DatasetController {
                             console.log('Z - this should be a section object: ' + result[section]);
                         }
                         console.log('Z - heading to save sections[]');
-                        that.save(id, processedDataset);
+                        var saveID = that.save(id, processedDataset);
+
+                        fulfill(saveID);
                     }).then(function() {
-                        fulfill(true);
                         console.log('Z - fulfilling true');
                     }).catch(function (err) {
                         console.log('Z - Error in Promise.all()' + err);
@@ -137,20 +129,37 @@ export default class DatasetController {
      * @param id
      * @param processedDataset
      */
-    private save(id: string, processedDataset: any) {
+    private save(id: string, processedDataset: any): number {
         // add it to the memory model
         this.datasets[id] = processedDataset;
         console.log('Z - in save()...');
 
         // TODO: actually write to disk in the ./data directory
         // use fs to write JSON string to  disk dir
-        console.log('Z - fs.write() now!');
-        fs.writeFile('../../data/' + id + '.json', processedDataset, (err) => {
+        console.log('Z - fs.write() now!'); 
+        // return new Promise<Number> {};  
+        // var fd = fs.openSync('data/' + id, 'wx'); 
+        // fs.writeSync(fd, processedDataset);  
+        fs.open('data/' + id, 'wx', (err, fileDestination) => { 
             if (err) {
-                console.log('Error saving data: ' + err);
-                throw err;
-            }
-            console.log('Saved!');
-        })
+                if (err.code === "EEXIST") { 
+                    console.error(id + ' already exists'); 
+                    return 201; 
+                } else {
+                    throw err; 
+                }
+            }   
+
+            // writeMyData(fd); 
+            fs.write(fileDestination, processedDataset, function (err) { 
+                if (err) { 
+                    console.log('Z - error in open().write()'); 
+                    throw err;
+                } 
+                console.log('Z - file saved!!!!');
+                return 204;
+            });
+        });
+        return 400;
     }
 }
