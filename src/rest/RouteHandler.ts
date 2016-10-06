@@ -84,4 +84,19 @@ export default class RouteHandler {
         }
         return next();
     }
+
+    public static deleteDataset(req: restify.Request, res: restify.Response, next: restify.Next)
+    {
+        Log.trace('RouteHandler::deleteDataset(..) - params: ' + JSON.stringify(req.params));
+        try {
+            var id: string = req.params.id;
+
+           //Todo: DeletDataset
+
+        } catch (err) {
+            Log.error('RouteHandler::deleteDataset(..) - ERROR: ' + err.message);
+            res.send(400, {err: err.message});
+        }
+        return next();
+    }
 }

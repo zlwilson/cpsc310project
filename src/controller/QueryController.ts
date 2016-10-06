@@ -5,6 +5,7 @@
 import {Datasets, default as DatasetController} from "./DatasetController";
 import Log from "../Util";
 import Section from "../model/Section";
+import {error} from "util";
 
 export interface QueryRequest {
     GET: string|string[];
@@ -69,7 +70,6 @@ export interface Result
 
 export default class QueryController {
     private datasets: Datasets = null;
-    private  static datasetController = new DatasetController();
     private sections: Section[] = [];
 
     constructor(datasets: Datasets) {
@@ -78,7 +78,10 @@ export default class QueryController {
 
     public isValid(query: QueryRequest): boolean {
         //Added an invalid condition - when GET is not included, query is not valid
-        if (typeof query !== 'undefined' && query !== null && Object.keys(query).length > 0 && query.hasOwnProperty("GET")) {
+        if (typeof query !== 'undefined'
+            && query !== null
+            && Object.keys(query).length > 0
+            && query.hasOwnProperty("GET")) {
             return true;
         }
         return false;
@@ -104,27 +107,25 @@ export default class QueryController {
             preamble = temp;
         }
 
-        //use id to find file
         var id: string = preamble[0].split("_", 2)[0];
         Log.trace(id);
-        //if (datasets[id].pushed)
-        let controller = QueryController.datasetController;
 
-        var file = controller.getDataset(id);
-        var result = file.result;
-        var sections:Section[] = [];
+        // var sections:Section[] = [];
+        //
+        // for (var r in result)
+        // {
+        //     var instanceSection: Section = result[r];
+        //     sections.push(instanceSection);
+        // }
 
-        for (var r in result)
+        var sections:Section[]  = this.datasets[id];
+
+        if (typeof sections === 'undefined')
         {
-            var instanceSection: Section = result[r];
-            sections.push(instanceSection);
+            //throw new error("Dataset with given id hasn't been pushed yet");
         }
+
         this.sections = sections;
-
-        //If datasets[id] is null, then use DatasetController.process to find if it's in disk,
-        //If still null, return error
-
-        //Todo: Valid key translation using string.replace at the beginning or switch everywhere
 
         //WHERE
         var jsonwhere = query.WHERE;
@@ -132,18 +133,15 @@ export default class QueryController {
 
         //GET
         var selectedDs: QueryResponse = this.getColumn(preamble, filteredDs);
-        selectedDs.render = query.AS.toLowerCase();
-        // selectedDs.render = query.AS;
 
         //ORDER
         var orderedDs: QueryResponse = this.orderResult(query, selectedDs);
+
         //AS
+        orderedDs.render = query.AS.toLowerCase();
 
-
-        //Create a Course of datasets[id] and translate keys
-        //Get wanted information in Section
         return orderedDs;
-        //return {status: 'received', ts: new Date().getTime()};
+
     }
 
     //return the filtered dataset , section should be Section[]
@@ -180,6 +178,7 @@ export default class QueryController {
                         filteredDs = this.negation(query, sections);
                         break;
                     default:
+                        // throw error
                         Log.trace("Undefined EBNF in WHERE");
                 }
             }
@@ -624,15 +623,15 @@ export default class QueryController {
             return !filteredDs.includes(el);
         })
 
-        for (let n in negatedDs)
-        {
-            Log.trace(negatedDs[n].id);
-        }
-        Log.trace("Filtered:");
-        for (let f in filteredDs)
-        {
-            Log.trace(filteredDs[f].id);
-        }
+        // for (let n in negatedDs)
+        // {
+        //     Log.trace(negatedDs[n].id);
+        // }
+        // Log.trace("Filtered:");
+        // for (let f in filteredDs)
+        // {
+        //     Log.trace(filteredDs[f].id);
+        // }
         return negatedDs;
     }
 

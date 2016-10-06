@@ -11,7 +11,7 @@ import fs = require('fs');
  * In memory representation of all datasets.
  */
 export interface Datasets {
-    [id: string]: {};
+    [id: string]: Section[];
 }
 
 export default class DatasetController {
@@ -31,7 +31,7 @@ export default class DatasetController {
      */
     public getDataset(id: string): any {
         // TODO: this should check if the dataset is on disk in ./data if it is not already in memory.
-        fs.readFile('../../data/id', 'string', (err, data) => {
+        fs.readFile('../../data/' + id, 'string', (err, data) => {
             if (err) {
                 console.log('Z - Error in getDatasets(id): ')
                 throw err;
@@ -45,7 +45,7 @@ export default class DatasetController {
     public getDatasets(): Datasets {
         // TODO: if datasets is empty, load all dataset files in ./data from disk
         var allFiles: string[] = [];
-        fs.readdir('../../data', (err, files) => {
+        fs.readdir('../../data/', (err, files) => {
             if (err) {
                 console.log('Z - Error in getDatasets() readdir: ')
                 throw err;
@@ -95,7 +95,7 @@ export default class DatasetController {
 
                     for (var file in myZip.files) {
                         console.log('Z - In ZIP-reading for loop...');
-                        var promisedContent = myZip.file(file).async('string');
+                        var promisedContent = myZip.files[file].async('string');
                         promisesArray.push(promisedContent);
                         console.log('Z - added promise to array');
                     }
@@ -111,9 +111,10 @@ export default class DatasetController {
                             console.log('Z - this should be a section object: ' + result[section]);
                         }
                         console.log('Z - heading to save sections[]');
-                        that.save(id, processedDataset);
+                        var saveNumber = that.save(id, processedDataset);
+                        fulfill(saveNumber);
                     }).then(function() {
-                        fulfill(true);
+                        // fulfill(true);
                         console.log('Z - fulfilling true');
                     }).catch(function (err) {
                         console.log('Z - Error in Promise.all()' + err);
@@ -137,7 +138,7 @@ export default class DatasetController {
      * @param id
      * @param processedDataset
      */
-    private save(id: string, processedDataset: any) {
+    private save(id: string, processedDataset: any): Number {
         // add it to the memory model
         this.datasets[id] = processedDataset;
         console.log('Z - in save()...');
@@ -145,12 +146,29 @@ export default class DatasetController {
         // TODO: actually write to disk in the ./data directory
         // use fs to write JSON string to  disk dir
         console.log('Z - fs.write() now!');
-        fs.writeFile('../../data/' + id + '.json', processedDataset, (err) => {
+        // return new Promise<Number> {};
+
+        fs.open('data/' + id,'wx',function (err, fileDestination) {
             if (err) {
-                console.log('Error saving data: ' + err);
-                throw err;
+                if (err.code === "EEXIST") {
+                    console.error(id + ' already exists');
+                    return 201;
+                } else {
+                    throw err;
+                }
             }
-            console.log('Saved!');
-        })
+
+            // writeMyData(fd);
+            fs.write(fileDestination,processedDataset, function (err) {
+                if (err) {
+                    console.log('Z - error in open().write()');
+                    throw err;
+                }
+                console.log('Z - file saved!!!!');
+                return 204;
+            })
+        });
+
+        return 400;
     }
 }
