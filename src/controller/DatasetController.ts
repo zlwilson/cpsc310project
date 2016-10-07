@@ -35,12 +35,11 @@ export default class DatasetController {
         fs.readFile('data/' + id, 'string', function (err, data) { 
             if (err) {
                 console.log('Z - Error in getDatasets(id): ' + err);
-                throw err;
+                // throw err;
             } 
             console.log('Z - Read data in getDatasets(id): ' + data); 
             return data;
         }); 
-        return this.datasets[id];
      }
 
     public getDatasets(): Datasets {
@@ -60,7 +59,7 @@ export default class DatasetController {
 
             for (var file in files) {
                 console.log('Z - inside for @ ' + files[file]);
-                this.datasets.files[file] = files[file];
+                this.datasets[files[file]] = files[file];
                 console.log('Z - ' + this.datasets.files[file]);
             }
         });
@@ -79,6 +78,8 @@ export default class DatasetController {
      */
     public process(id: string, data: any): Promise<number> {
         Log.trace('DatasetController::process( ' + id + '... )');
+
+        var saveID: Number;
 
         let that = this;
         return new Promise(function (fulfill, reject) {
@@ -118,22 +119,25 @@ export default class DatasetController {
                         }
                         console.log('Z - heading to save sections[]');
 
-                        var saveID = that.save(id, processedDataset);
+                        that.save(id, processedDataset).then(function (result) {
+                            saveID = result;
+                        });
+                        console.log('Z - save ID = ' + saveID);
 
-                        fulfill(saveID);
                     }).then(function() {
                         console.log('Z - fulfilling true');
+                        fulfill(saveID);
                     }).catch(function (err) {
-                        console.log('Z - Error in Promise.all()' + err);
+                        console.log('Z - Error in Promise.all() ' + err);
                     });
 
                 }).catch(function (err) {
                     Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);
-                    reject(err);
+                    reject(saveID);
                 });
             } catch (err) {
                 Log.trace('DatasetController::process(..) - ERROR: ' + err);
-                reject(err);
+                reject(saveID);
             }
         });
     }
@@ -145,7 +149,7 @@ export default class DatasetController {
      * @param id
      * @param processedDataset
      */
-     private save(id: string, processedDataset: any): number {
+     private save(id: string, processedDataset: any): Promise<number> {
         // add it to the memory model
         this.datasets[id] = processedDataset;
         console.log('Z - in save()...');
@@ -154,29 +158,32 @@ export default class DatasetController {
         // use fs to write JSON string to  disk dir
 
         console.log('Z - fs.write() now!'); 
-        // return new Promise<Number> {};  
-        // var fd = fs.openSync('data/' + id, 'wx'); 
-        // fs.writeSync(fd, processedDataset);  
-        fs.open('data/' + id, 'wx', (err, fileDestination) => { 
-            if (err) {
-                if (err.code === "EEXIST") { 
-                    console.error(id + ' already exists'); 
-                    return 201; 
-                } else {
-                    throw err; 
-                }
-            }   
+        return new Promise(function (fulfill, reject) {
+            try {
+                fs.open('data/' + id, 'wx', (err, fileDestination) => {
+                    if (err) {
+                        if (err.code === "EEXIST") {
+                            console.error(id + ' already exists');
+                            fulfill(201);
+                        } else {
+                            console.error('Z - error in save(): ' + err);
+                        }
+                    }
 
-            // writeMyData(fd); 
-            fs.write(fileDestination, processedDataset, function (err) { 
-                if (err) { 
-                    console.log('Z - error in open().write()'); 
-                    throw err;
-                } 
-                console.log('Z - file saved!!!!');
-                return 204;
-            });
+                    // writeMyData(fd); 
+                    fs.write(fileDestination, processedDataset, function (err) {
+                        if (err) {
+                            console.log('Z - error in open().write()');
+                            throw err;
+                        }
+                        console.log('Z - file saved!!!!');
+                        fulfill(204);
+                    });
+                });
+            } catch (err) {
+                console.log('Z - error saving');
+                reject(400);
+            }
         });
-        return 400;
     }
 }
