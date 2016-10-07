@@ -18,6 +18,8 @@ export default class DatasetController {
 
     private datasets: any = {};
 
+    private returnCode: Number;
+
     constructor() {
         Log.trace('DatasetController::init()');
     }
@@ -59,7 +61,11 @@ export default class DatasetController {
 
             for (var file in files) {
                 console.log('Z - inside for @ ' + files[file]);
-                this.datasets[files[file]] = files[file];
+
+                let fileName: string = files[file];
+
+                this.datasets[fileName] = files[file];
+
                 console.log('Z - ' + this.datasets.files[file]);
             }
         });
@@ -78,8 +84,6 @@ export default class DatasetController {
      */
     public process(id: string, data: any): Promise<number> {
         Log.trace('DatasetController::process( ' + id + '... )');
-
-        var saveID: Number;
 
         let that = this;
         return new Promise(function (fulfill, reject) {
@@ -115,29 +119,31 @@ export default class DatasetController {
                             let jsonString = JSON.stringify(result[section]);
                             var instanceSection: Section = JSON.parse(jsonString);
                             processedDataset.push(instanceSection);
-                            console.log('Z - this should be a section object: ' + result[section]);
+                            // console.log('Z - this should be a section object: ' + result[section]);
                         }
                         console.log('Z - heading to save sections[]');
 
-                        that.save(id, processedDataset).then(function (result) {
-                            saveID = result;
+                        var p = that.save(id, processedDataset);
+
+                        p.catch(function (result) {
+                            // returnCode = result;
                         });
-                        console.log('Z - save ID = ' + saveID);
+
+                        console.log('Z - save ID = ' + p);
 
                     }).then(function() {
                         console.log('Z - fulfilling true');
-                        fulfill(saveID);
+                        fulfill(true);
                     }).catch(function (err) {
                         console.log('Z - Error in Promise.all() ' + err);
                     });
-
                 }).catch(function (err) {
                     Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);
-                    reject(saveID);
+                    reject(400);
                 });
             } catch (err) {
                 Log.trace('DatasetController::process(..) - ERROR: ' + err);
-                reject(saveID);
+                reject(400);
             }
         });
     }
@@ -149,7 +155,7 @@ export default class DatasetController {
      * @param id
      * @param processedDataset
      */
-     private save(id: string, processedDataset: any): Promise<number> {
+     private save(id: string, processedDataset: any) {
         // add it to the memory model
         this.datasets[id] = processedDataset;
         console.log('Z - in save()...');
@@ -159,10 +165,10 @@ export default class DatasetController {
 
         console.log('Z - fs.write() now!');
 
-        // fs.open('data/' + id, 'wx', function (err, fileDestination) {
+        // fs.open('data/' + id + '.json', 'wx', function (err, fileDestination) {
         //     if (err) {
         //         if (err.code === "EEXIST") {
-        //             console.error(id + ' already exists');
+        //             console.error(id + '.json already exists');
         //             return 201;
         //         } else {
         //             console.error('Z - error in save(): ' + err);
@@ -179,19 +185,27 @@ export default class DatasetController {
         //         });
         //     }
         // });
-        
+
         return new Promise(function (fulfill, reject) {
             try {
-                fs.open('data/' + id, 'wx', (err, fileDestination) => {
+                fs.mkdir('data', function (err){
+                    if (err) {
+                        console.log('Z - ./data already exists');
+                    } else {
+                        console.log('Z - made the directory');
+                    }
+                });
+
+                fs.open('data/' + id + '.json', 'wx', function (err, fileDestination) {
                     if (err) {
                         if (err.code === "EEXIST") {
-                            console.error(id + ' already exists');
-                            fulfill(201);
+                            console.error(id + '.json already exists');
+                            // returnCode = 201;
+                            fulfill(true);
                         } else {
                             console.error('Z - error in save(): ' + err);
                         }
                     }
-
                     // writeMyData(fd); 
                     fs.write(fileDestination, processedDataset, function (err) {
                         if (err) {
@@ -199,12 +213,14 @@ export default class DatasetController {
                             throw err;
                         }
                         console.log('Z - file saved!!!!');
-                        fulfill(204);
+                        // returnCode = 204;
+                        fulfill(true);
                     });
                 });
             } catch (err) {
                 console.log('Z - error saving');
-                reject(400);
+                // returnCode = 400;
+                reject(false);
             }
         });
     }
