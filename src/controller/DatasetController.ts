@@ -16,7 +16,7 @@ export interface Datasets {
 
 export default class DatasetController {
 
-    private datasets: Datasets = {};
+    private datasets: any = {};
 
     constructor() {
         Log.trace('DatasetController::init()');
@@ -57,12 +57,15 @@ export default class DatasetController {
 
             allFiles = files;
             console.log('Z - list of existing datasets in ./data: ' + files);
+
+            for (var file in files) {
+                console.log('Z - inside for @ ' + files[file]);
+                this.datasets.files[file] = files[file];
+                console.log('Z - ' + this.datasets.files[file]);
+            }
         });
 
-        for (var file in allFiles) {
-            var dataset = allFiles[file];
-            this.datasets = (dataset);
-        }
+        console.log('Z - this.dataset: ' + this.datasets);
 
         return this.datasets;
     }
