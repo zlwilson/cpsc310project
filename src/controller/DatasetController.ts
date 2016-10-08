@@ -62,7 +62,10 @@ export default class DatasetController {
 
             if (Object.keys(this.datasets).length == 0) {
                 dir.forEach(function (data, err) {
-                    that.datasets[data] = JSON.parse(JSON.stringify(fs.readFileSync('data/' + data, 'utf8')));
+                    var name = data.substring(0, data.length-5);
+
+                    that.datasets[name] = JSON.parse(JSON.stringify(fs.readFileSync('data/' + data, 'utf8')));
+
                 })
             }
             console.log('Z - just finished reading dir: ' + Object.keys(this.datasets).length);
@@ -70,6 +73,7 @@ export default class DatasetController {
             console.log(err)
         }
 
+        console.log('Z - this.datasets = ' + that.datasets);
         return that.datasets;
     }
 
