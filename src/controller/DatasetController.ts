@@ -16,7 +16,7 @@ export interface Datasets {
 
 export default class DatasetController {
 
-    private datasets: any = {};
+    private datasets: Datasets = {};
 
     private returnCode: Number;
 
@@ -47,6 +47,7 @@ export default class DatasetController {
     public getDatasets(): Datasets {
         // TODO: if datasets is empty, load all dataset files in ./data from disk
         var allFiles:any = [];
+
         console.log('Z - in getDatasets()...');
 
         fs.readdir('data/', function (err, files) {
@@ -62,7 +63,13 @@ export default class DatasetController {
             for (var file in files) {
                 console.log('Z - inside for @ ' + files[file]);
 
-                let fileName: string = files[file];
+                var fileName: string = files[file];
+
+                fs.readFile('data/' + fileName + '.json', function (err, data) {
+                    console.log('Z - readFile: ' + data);
+                    let jsonString = JSON.stringify(data);
+                    var instanceSection: Section = JSON.parse(jsonString);
+                });
 
                 this.datasets[fileName] = files[file];
 
@@ -105,7 +112,6 @@ export default class DatasetController {
 
                     for (var file in myZip.files) {
                         // console.log('Z - In ZIP-reading for loop...');
-                        console.log('Z - In ZIP-reading for loop...');
                         var promisedContent = myZip.files[file].async('string');
                         promisesArray.push(promisedContent);
                         // console.log('Z - added promise to array');

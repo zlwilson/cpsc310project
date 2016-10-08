@@ -118,8 +118,8 @@ export default class QueryController {
         //     sections.push(instanceSection);
         // }
 
-        var sections:Section[]  = this.datasets[id];
-
+        var sections:Section[] = this.datasets[id];
+        
         if (typeof sections === 'undefined')
         {
             //throw new error("Dataset with given id hasn't been pushed yet");
