@@ -64,9 +64,19 @@ export default class DatasetController {
                 dir.forEach(function (data, err) {
                     var name = data.substring(0, data.length-5);
 
-                    var sectionResult = JSON.parse(JSON.stringify(fs.readFileSync('data/' + data, 'utf8')));
+                    var sectionArray: Section[] = [];
 
-                    var sectionArray = JSON.parse(sectionResult);
+                    var jsonData = JSON.stringify(fs.readFileSync('data/' + data, 'utf8'));
+
+                    var dataParsed = JSON.parse(jsonData);
+
+                    if (dataParsed.result !== 'undefined') {
+                        for (var f in dataParsed.result) {
+                            var section: Section = JSON.parse(dataParsed.result[f]);
+                            sectionArray.push(section);
+                            console.log('Z - just finished reading dir: ' + Object.keys(this.datasets).length);
+                        }
+                    }
                     
                     that.datasets[name] = sectionArray;
 
@@ -118,32 +128,27 @@ export default class DatasetController {
 
                     console.log('Z - ' + promisesArray);
 
-                    Promise.all(promisesArray).then(function (result) {
+                    Promise.all(promisesArray).then(function (data) {
                         console.log('Z - iterating through all Promises...');
-                        for (var r in result) {
-                            // let jsonString = JSON.stringify(result[section]);
-                            // var instanceSection = JSON.parse(jsonString);
-                            var jsonString = JSON.stringify(result[r]);
-                            var files = JSON.parse(jsonString);
-                            for (var f in files)
-                            {
-                                //Parse out files[f].rank here, if needed
+                        for (var r in data) {
+                            var jsonString = JSON.stringify(data[r]);
 
-                                if ( typeof files[f].result !== "undefined")
-                                {
-                                    var sectionArray = files[f].result;
+                            // Parse out file.rank here, if needed
 
-                                    for (var s in sectionArray)
-                                    {
-                                        var instanceSection: Section = sectionArray[s];
-                                        processedDataset.push(instanceSection);
-                                    }
+                            var dataParsed = JSON.parse(jsonString);
+
+                            if (typeof dataParsed.result == "string") {
+                                var sectionArray = dataParsed.result;
+
+                                for (var s in sectionArray) {
+                                    var instanceSection: Section = sectionArray[s];
+                                    processedDataset.push(instanceSection);
+                                    console.log('Z - this should be a section object: ' + instanceSection);
                                 }
                             }
-                            //console.log('Z - this should be a section object: ' + result[section]);
                         }
 
-                        console.log('Z - heading to save sections[]');
+                        console.log('Z - heading to save sections[], id = ' + id);
 
                         var p = that.save(id, processedDataset);
 
