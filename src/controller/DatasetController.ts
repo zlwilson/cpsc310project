@@ -250,8 +250,10 @@ export default class DatasetController {
 
     public delete(id: string) {
         try {
-            fs.unlink('data/' + id + '.json', (err) => {
-                if (err) throw err;
+            fs.unlink('data/' + id + '.json', function (err) {
+                if (err) {
+                    throw err;
+                }
                 console.log('successfully deleted data/' + id + '.json');
             });
         } catch (err) {

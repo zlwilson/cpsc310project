@@ -88,12 +88,17 @@ export default class RouteHandler {
     public static deleteDataset(req: restify.Request, res: restify.Response, next: restify.Next)
     {
         Log.trace('RouteHandler::deleteDataset(..) - params: ' + JSON.stringify(req.params));
+
+        let that = this;
         try {
             var id: string = req.params.id;
 
-           //Todo: DeleteDataset
-            req.body
+            console.log('Z - id = ' + id);
 
+
+            //Todo: DeleteDataset
+            RouteHandler.datasetController.delete(id);
+            console.log('Deleted ' + id + ' from ./data');
 
         } catch (err) {
             Log.error('RouteHandler::deleteDataset(..) - ERROR: ' + err.message);
