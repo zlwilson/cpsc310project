@@ -107,7 +107,7 @@ export default class QueryController {
             preamble = temp;
         }
 
-        var id: string = preamble[0].split("_", 2)[0];
+        var id: string = preamble[0].split("_", 2)[0]+".json";
         Log.trace(id);
 
         // var sections:Section[] = [];

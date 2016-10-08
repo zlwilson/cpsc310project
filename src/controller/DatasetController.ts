@@ -14,6 +14,12 @@ export interface Datasets {
     [id: string]: Section[];
 }
 
+export interface File
+{
+    result: Array<any>;
+    rank: any;
+}
+
 export default class DatasetController {
 
     private datasets: Datasets = {};
@@ -106,12 +112,29 @@ export default class DatasetController {
 
                     Promise.all(promisesArray).then(function (result) {
                         console.log('Z - iterating through all Promises...');
-                        for (var section in result) {
-                            let jsonString = JSON.stringify(result[section]);
-                            var instanceSection: Section = JSON.parse(jsonString);
-                            processedDataset.push(instanceSection);
-                            // console.log('Z - this should be a section object: ' + result[section]);
+                        for (var r in result) {
+                            // let jsonString = JSON.stringify(result[section]);
+                            // var instanceSection = JSON.parse(jsonString);
+                            var jsonString = JSON.stringify(result[r]);
+                            var files = JSON.parse(jsonString);
+                            for (var f in files)
+                            {
+                                //Parse out files[f].rank here, if needed
+
+                                if ( typeof files[f].result !== "undefined")
+                                {
+                                    var sectionArray = files[f].result;
+
+                                    for (var s in sectionArray)
+                                    {
+                                        var instanceSection: Section = sectionArray[s];
+                                        processedDataset.push(instanceSection);
+                                    }
+                                }
+                            }
+                            //console.log('Z - this should be a section object: ' + result[section]);
                         }
+
                         console.log('Z - heading to save sections[]');
 
                         var p = that.save(id, processedDataset);
@@ -147,7 +170,7 @@ export default class DatasetController {
      * @param id
      * @param processedDataset
      */
-     private save(id: string, processedDataset: any) {
+     private save(id: string, processedDataset: Section[]) {
         // add it to the memory model
         this.datasets[id] = processedDataset;
         console.log('Z - in save()...');
