@@ -91,7 +91,7 @@ export default class RouteHandler {
         try {
             var id: string = req.params.id;
 
-           //Todo: DeletDataset
+           //Todo: DeleteDataset
 
         } catch (err) {
             Log.error('RouteHandler::deleteDataset(..) - ERROR: ' + err.message);

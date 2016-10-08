@@ -46,40 +46,25 @@ export default class DatasetController {
 
     public getDatasets(): Datasets {
         // TODO: if datasets is empty, load all dataset files in ./data from disk
-        var allFiles:any = [];
 
         console.log('Z - in getDatasets()...');
 
-        fs.readdir('data/', function (err, files) {
-            console.log('Z - reading ./data...');
-            if (err) {
-                console.log('Z - Error reading ./data: ' + err);
-                throw err;
+        let that = this;
+
+        try {
+            let dir = fs.readdirSync('data/');
+
+            if (Object.keys(this.datasets).length == 0) {
+                dir.forEach(function (data, err) {
+                    that.datasets[data] = JSON.parse(JSON.stringify(fs.readFileSync('data/' + data, 'utf8')));
+                })
             }
+            console.log('Z - just finished reading dir: ' + Object.keys(this.datasets).length);
+        } catch (err) {
+            console.log(err)
+        }
 
-            allFiles = files;
-            console.log('Z - list of existing datasets in ./data: ' + files);
-
-            for (var file in files) {
-                console.log('Z - inside for @ ' + files[file]);
-
-                var fileName: string = files[file];
-
-                fs.readFile('data/' + fileName + '.json', function (err, data) {
-                    console.log('Z - readFile: ' + data);
-                    let jsonString = JSON.stringify(data);
-                    var instanceSection: Section = JSON.parse(jsonString);
-                });
-
-                this.datasets[fileName] = files[file];
-
-                console.log('Z - ' + this.datasets.files[file]);
-            }
-        });
-
-        console.log('Z - this.dataset: ' + this.datasets);
-
-        return this.datasets;
+        return that.datasets;
     }
 
     /**
@@ -133,6 +118,7 @@ export default class DatasetController {
 
                         p.catch(function (result) {
                             // returnCode = result;
+                            console.log('Z - error in this.save()');
                         });
 
                         console.log('Z - save ID = ' + p);
