@@ -63,7 +63,7 @@ export default class DatasetController {
             if (Object.keys(this.datasets).length == 0) {
                 dir.forEach(function (data, err) {
                     var name = data.substring(0, data.length-5);
-
+                    
                     that.datasets[name] = JSON.parse(JSON.stringify(fs.readFileSync('data/' + data, 'utf8')));
 
                 })
