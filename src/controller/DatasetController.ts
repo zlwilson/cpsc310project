@@ -63,8 +63,12 @@ export default class DatasetController {
             if (Object.keys(this.datasets).length == 0) {
                 dir.forEach(function (data, err) {
                     var name = data.substring(0, data.length-5);
+
+                    var sectionResult = JSON.parse(JSON.stringify(fs.readFileSync('data/' + data, 'utf8')));
+
+                    var sectionArray = JSON.parse(sectionResult);
                     
-                    that.datasets[name] = JSON.parse(JSON.stringify(fs.readFileSync('data/' + data, 'utf8')));
+                    that.datasets[name] = sectionArray;
 
                 })
             }
@@ -242,5 +246,16 @@ export default class DatasetController {
                 reject(false);
             }
         });
+    }
+
+    public delete(id: string) {
+        try {
+            fs.unlink('data/' + id + '.json', (err) => {
+                if (err) throw err;
+                console.log('successfully deleted data/' + id + '.json');
+            });
+        } catch (err) {
+            console.log('unsuccessful delete');
+        }
     }
 }
