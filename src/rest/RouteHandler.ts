@@ -51,7 +51,7 @@ export default class RouteHandler {
                 controller.process(id, req.body).then(function (result) {
                     Log.trace('RouteHandler::postDataset(..) - processed');
                     console.log('Z - code from process() in RouteController: ' + result);
-                    res.json(200, {success: result});
+                    res.json(result, {success: result});
                 }).catch(function (err: Error) {
                     Log.trace('RouteHandler::postDataset(..) - ERROR: ' + err.message);
                     res.json(400, {err: err.message});
