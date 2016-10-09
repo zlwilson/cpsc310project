@@ -68,20 +68,21 @@ export default class DatasetController {
 
                     var sectionArray: Section[] = [];
 
-                    var jsonData = JSON.stringify(fs.readFileSync('data/' + data, 'utf8'));
+                    var jsonString: string = JSON.stringify(fs.readFileSync('data/' + data, 'utf8'));
 
-                    var dataParsed = JSON.parse(jsonData);
+                    var dataParsed = JSON.parse(JSON.parse(jsonString));
 
-                    if (dataParsed.result !== 'undefined') {
-                        for (var f in dataParsed.result) {
-                            var section: Section = JSON.parse(dataParsed.result[f]);
-                            sectionArray.push(section);
+                    if (dataParsed.result.length > 0) {
+                        sectionArray = dataParsed.result;
+
+                        for (var s in sectionArray) {
+                            var instanceSection: Section = sectionArray[s];
+                            sectionArray.push(instanceSection);
                             console.log('Z - just finished reading dir: ' + Object.keys(this.datasets).length);
                         }
                     }
-                    
-                    that.datasets[name] = sectionArray;
 
+                    that.datasets[name] = sectionArray;
                 })
             }
             console.log('Z - just finished reading dir: ' + Object.keys(this.datasets).length);
