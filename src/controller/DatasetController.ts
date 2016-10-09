@@ -243,13 +243,11 @@ export default class DatasetController {
 
         return new Promise(function (fulfill, reject) {
             try {
-                fs.mkdir('data', function (err){
-                    if (err) {
-                        console.log('Z - ./data already exists');
-                    } else {
-                        console.log('Z - made the directory');
-                    }
-                });
+                try {
+                    fs.mkdirSync('data');
+                } catch (err) {
+                    console.log('Z - ./ data already exists');
+                }
 
                 fs.open('data/' + id + '.json', 'wx', function (err, fileDestination) {
                     if (err) {
