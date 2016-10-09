@@ -155,7 +155,19 @@ export default class DatasetController {
                                 }
                             } else {
                                 console.log('Z - invalid data set');
-                                throw 400;
+                                if (r == data.length - 1) {
+                                    /*
+                                    the last file in dataset is invalid
+                                    so check if processedDataset is empty
+                                    if it's empty reject with code 400
+                                    else break for statement and return processedDataset
+                                     */
+                                    if (processedDataset.length == 0) {
+                                        throw 400;
+                                    }
+                                } else {
+                                    break;
+                                }
                             }
                         }
 
