@@ -72,14 +72,28 @@ export default class RouteHandler {
             let datasets: Datasets = RouteHandler.datasetController.getDatasets();
             let controller = new QueryController(datasets);
             let isValid = controller.isValid(query);
-            let isPut = controller.isPut(query);
+            let id = controller.getId(query);
 
             if (isValid === true) {
-                if (isPut === true) {
-                    let result = controller.query(query);
+                var isPut:boolean;
+                var missedId: string[] = [];
+                for(var i in id)
+                {
+                    isPut = RouteHandler.datasetController.getDataset(id[i]);
+                    if( isPut === false)
+                    {
+                        missedId.push(id[i]);
+                    }
+                }
+
+                if (typeof missedId === "undefined" || missedId.length == 0)
+                {
+                    let result = controller.query(query, id[0]);
                     res.json(200, result);
-                }else {
-                    res.json(424, {missing: JSON.stringify(isPut)});
+                }
+                else
+                {
+                    res.json(424, {missing: JSON.stringify(missedId)});
                 }
             } else {
                 res.json(400, {status: 'invalid query'});

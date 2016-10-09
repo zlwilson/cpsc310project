@@ -94,7 +94,7 @@ export default class QueryController {
         return false;
     }
 
-    public isPut(query: QueryRequest):boolean|string[]{
+    public getId(query: QueryRequest):string[]{
 
         var preamble: any;
 
@@ -138,37 +138,10 @@ export default class QueryController {
             }
         }
 
-        var isPut:boolean = true;
-        var missedId: string[] = [];
-
-        for(var i in requestedId)
-        {
-            //I'm assuming only one dataset can be processed by query controller at once.
-            if(typeof this.datasets[requestedId[i]] === "undefined")
-            {
-                if (isPut === true)
-                {
-                    isPut = false;
-                    missedId[0] = requestedId[i];
-                }
-                else
-                {
-                    missedId.push(requestedId[i]);
-                }
-            }
-        }
-
-        if (isPut === true)
-        {
-            return true;
-        }
-        else
-        {
-            return missedId;
-        }
+        return requestedId;
     }
 
-    public query(query: QueryRequest): QueryResponse|string {
+    public query(query: QueryRequest, id: string): QueryResponse|string {
         Log.trace('QueryController::query( ' + JSON.stringify(query) + ' )');
 
         // TODO: implement this
@@ -188,33 +161,33 @@ export default class QueryController {
             preamble = temp;
         }
 
-        // requestedId should be an array of ids without duplicates
-        // var requestedId: string[] = [];
-        // for(var p in preamble)
-        // {
-        //     var tempId = preamble[p].split("_", 2)[0];
-        //     if (requestedId.length == 0)
-        //     {
-        //         requestedId[0] = tempId;
-        //     }
-        //     else
-        //     {
-        //         var exist: boolean = false;
-        //         for(var i in requestedId)
-        //         {
-        //             if (requestedId[i] === tempId)
-        //             {
-        //                 exist = true;
-        //                 break;
-        //             }
-        //         }
-        //         if(exist === false)
-        //         {
-        //             requestedId.push(tempId);
-        //         }
-        //     }
-        // }
-        var id = preamble[0].split("_", 2)[0];
+        // // requestedId should be an array of ids without duplicates
+        // // var requestedId: string[] = [];
+        // // for(var p in preamble)
+        // // {
+        // //     var tempId = preamble[p].split("_", 2)[0];
+        // //     if (requestedId.length == 0)
+        // //     {
+        // //         requestedId[0] = tempId;
+        // //     }
+        // //     else
+        // //     {
+        // //         var exist: boolean = false;
+        // //         for(var i in requestedId)
+        // //         {
+        // //             if (requestedId[i] === tempId)
+        // //             {
+        // //                 exist = true;
+        // //                 break;
+        // //             }
+        // //         }
+        // //         if(exist === false)
+        // //         {
+        // //             requestedId.push(tempId);
+        // //         }
+        // //     }
+        // // }
+
         var sections: Section[] = this.datasets[id];
 
         this.sections = sections;
