@@ -51,7 +51,7 @@ export default class RouteHandler {
                 controller.process(id, req.body).then(function (result) {
                     Log.trace('RouteHandler::postDataset(..) - processed');
                     console.log('Z - code from process() in RouteController: ' + result);
-                    res.json(result, {success: result});
+                    res.json(result);
                 }).catch(function (err: Error) {
                     Log.trace('RouteHandler::postDataset(..) - ERROR: ' + err.message);
                     res.json(400, {err: err.message});
@@ -103,14 +103,18 @@ export default class RouteHandler {
 
             console.log('Z - id = ' + id);
 
-
             //Todo: DeleteDataset
-            RouteHandler.datasetController.delete(id);
-            console.log('Deleted ' + id + ' from ./data');
+            RouteHandler.datasetController.delete(id).then(function (result) {
+                console.log('Deleted ' + id + ' from ./data');
+                res.json(result);
+            }).catch(function (err) {
+                console.log('Error in delete, no such file: ' + err);
+                res.json(err);
+            });
 
         } catch (err) {
             Log.error('RouteHandler::deleteDataset(..) - ERROR: ' + err.message);
-            res.send(400, {err: err.message});
+            res.send(404, {err: err.message});
         }
         return next();
     }

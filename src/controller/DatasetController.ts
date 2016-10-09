@@ -7,6 +7,7 @@ import JSZip = require('jszip');
 import Section from '../model/Section';
 import fs = require('fs');
 import {stringify} from "querystring";
+import {error} from "util";
 
 
 /**
@@ -198,8 +199,8 @@ export default class DatasetController {
                             console.log('Z - save() result: ' + result);
                             fulfill(result);
                         }).catch(function (result) {
-                            fulfill(400)
                             console.log('Z - error in this.save()');
+                            throw 400;
                         });
 
                         console.log('Z - save ID = ' + p);
@@ -242,13 +243,11 @@ export default class DatasetController {
 
         return new Promise(function (fulfill, reject) {
             try {
-                fs.mkdir('data', function (err){
-                    if (err) {
-                        console.log('Z - ./data already exists');
-                    } else {
-                        console.log('Z - made the directory');
-                    }
-                });
+                try {
+                    fs.mkdirSync('data');
+                } catch (err) {
+                    console.log('Z - ./ data already exists');
+                }
 
                 fs.open('data/' + id + '.json', 'wx', function (err, fileDestination) {
                     if (err) {
@@ -283,17 +282,27 @@ export default class DatasetController {
 
     }
 
-    public delete(id: string) {
-        try {
-            fs.unlink('data/' + id + '.json', function (err) {
-                if (err) {
-                    throw err;
-                }
-                console.log('successfully deleted data/' + id + '.json');
-            });
-        } catch (err) {
-            console.log('unsuccessful delete');
-        }
+    public delete(id: string): Promise<number> {
+
+        console.log('Z - in delete(), id = ' + id);
+
+        return new Promise(function (fulfill, reject) {
+
+            try {
+                fs.unlink('data/' + id + '.json', function (err) {
+                    if (err) {
+                        console.log('Z - no such file ' + id + '.json in ./data');
+                        reject(404);
+                    } else {
+                        console.log('Z - successfully deleted data/' + id + '.json');
+                        fulfill(204);
+                    }
+                });
+            } catch (err) {
+                console.log('Z - unsuccessful delete' + err);
+                reject(400);
+            }
+        });
     }
 
     private removeDataset(id: string, processedDataset: any) {
