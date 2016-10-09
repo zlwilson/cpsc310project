@@ -72,22 +72,20 @@ export default class RouteHandler {
             let datasets: Datasets = RouteHandler.datasetController.getDatasets();
             let controller = new QueryController(datasets);
             let isValid = controller.isValid(query);
+            let isPut = controller.isPut(query);
 
             if (isValid === true) {
-                let result = controller.query(query);
-                res.json(200, result);
+                if (isPut === true) {
+                    let result = controller.query(query);
+                    res.json(200, result);
+                }else {
+                    res.json(424, {missing: JSON.stringify(isPut)});
+                }
             } else {
                 res.json(400, {status: 'invalid query'});
             }
         } catch (err) {
-            if (err === "Invalid Query")
-            {
-                res.json(400,{status: err});
-            }
-            else
-            {
-                res.send(424, {missing: err});
-            }
+            res.json(400,{status: err});
             Log.error('RouteHandler::postQuery(..) - ERROR: ' + err);
         }
         return next();

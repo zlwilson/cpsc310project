@@ -72,6 +72,7 @@ export interface Result
 
 export default class QueryController {
     private datasets: Datasets = null;
+    private static datasetController = new DatasetController();
     private sections: Section[] = [];
 
     constructor(datasets: Datasets) {
@@ -93,11 +94,8 @@ export default class QueryController {
         return false;
     }
 
-    public query(query: QueryRequest): QueryResponse|string {
-        Log.trace('QueryController::query( ' + JSON.stringify(query) + ' )');
+    public isPut(query: QueryRequest):boolean|string[]{
 
-        // TODO: implement this
-        //Get preamble from the first half of GET part of QueryRequest
         var preamble: any;
 
         if (query.GET instanceof Array)
@@ -114,7 +112,6 @@ export default class QueryController {
         }
 
         // requestedId should be an array of ids without duplicates
-
         var requestedId: string[] = [];
         for(var p in preamble)
         {
@@ -141,31 +138,84 @@ export default class QueryController {
             }
         }
 
-        var sections: Section[] = [];
+        var isPut:boolean = true;
+        var missedId: string[] = [];
 
-        var missing: string;
         for(var i in requestedId)
         {
             //I'm assuming only one dataset can be processed by query controller at once.
-            sections = this.datasets[requestedId[i]];
-
-            if (typeof sections === "undefined" || sections.length == 0)
+            if(typeof this.datasets[requestedId[i]] === "undefined")
             {
-                if(typeof missing === "undefined")
+                if (isPut === true)
                 {
-                    missing = requestedId[i];
+                    isPut = false;
+                    missedId[0] = requestedId[i];
                 }
                 else
                 {
-                    missing = missing + ", " + requestedId[i];
+                    missedId.push(requestedId[i]);
                 }
             }
         }
 
-        if(typeof missing !== "undefined")
+        if (isPut === true)
         {
-            throw new Error("[" + missing + "]");
+            return true;
         }
+        else
+        {
+            return missedId;
+        }
+    }
+
+    public query(query: QueryRequest): QueryResponse|string {
+        Log.trace('QueryController::query( ' + JSON.stringify(query) + ' )');
+
+        // TODO: implement this
+        //Get preamble from the first half of GET part of QueryRequest
+        var preamble: any;
+
+        if (query.GET instanceof Array)
+        {
+            Log.trace("as an array");
+            preamble = query.GET;
+        }
+        else if (typeof query.GET === "string" || query.GET instanceof String)
+        {
+            Log.trace("as a string");
+            var temp:string[] = [];
+            temp.push(query.GET.toString());
+            preamble = temp;
+        }
+
+        // requestedId should be an array of ids without duplicates
+        // var requestedId: string[] = [];
+        // for(var p in preamble)
+        // {
+        //     var tempId = preamble[p].split("_", 2)[0];
+        //     if (requestedId.length == 0)
+        //     {
+        //         requestedId[0] = tempId;
+        //     }
+        //     else
+        //     {
+        //         var exist: boolean = false;
+        //         for(var i in requestedId)
+        //         {
+        //             if (requestedId[i] === tempId)
+        //             {
+        //                 exist = true;
+        //                 break;
+        //             }
+        //         }
+        //         if(exist === false)
+        //         {
+        //             requestedId.push(tempId);
+        //         }
+        //     }
+        // }
+        var id = preamble[0].split("_", 2)[0];
+        var sections: Section[] = this.datasets[id];
 
         this.sections = sections;
 
