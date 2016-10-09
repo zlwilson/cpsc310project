@@ -135,7 +135,7 @@ export default class DatasetController {
                         for (let r = 0; r < data.length; r++) {
 
                             var jsonString:string = JSON.stringify(data[r]);
-                            Log.trace(jsonString);
+                            // Log.trace(jsonString);
 
                             // Parse out file.rank here, if needed
 
@@ -151,7 +151,7 @@ export default class DatasetController {
                                     {
                                         var instanceSection: Section = sectionArray[s];
                                         processedDataset.push(instanceSection);
-                                        console.log('Z - this should be a section object: ' + instanceSection);
+                                        // console.log('Z - this should be a section object: ' + instanceSection);
                                     }
                                 }
                             }
@@ -204,27 +204,6 @@ export default class DatasetController {
         // use fs to write JSON string to  disk dir
 
         console.log('Z - fs.write() now!');
-
-        // fs.open('data/' + id + '.json', 'wx', function (err, fileDestination) {
-        //     if (err) {
-        //         if (err.code === "EEXIST") {
-        //             console.error(id + '.json already exists');
-        //             return 201;
-        //         } else {
-        //             console.error('Z - error in save(): ' + err);
-        //             return 400;
-        //         }
-        //     } else {
-        //         fs.write(fileDestination, processedDataset, function (err) {
-        //             if (err) {
-        //                 console.log('Z - error in open().write()');
-        //                 return 400;
-        //             }
-        //             console.log('Z - file saved!!!!');
-        //             return 204;
-        //         });
-        //     }
-        // });
 
         return new Promise(function (fulfill, reject) {
             try {
