@@ -38,7 +38,7 @@ export default class RouteHandler {
             // adapted from: https://github.com/restify/node-restify/issues/880#issuecomment-133485821
             let buffer: any = [];
             req.on('data', function onRequestData(chunk: any) {
-                Log.trace('RouteHandler::postDataset(..) on data; chunk length: ' + chunk.length);
+                //Log.trace('RouteHandler::postDataset(..) on data; chunk length: ' + chunk.length);
                 buffer.push(chunk);
             });
 
