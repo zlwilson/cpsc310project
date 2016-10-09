@@ -162,7 +162,7 @@ export default class DatasetController {
                         var p = that.save(id, processedDataset);
 
                         p.catch(function (result) {
-                            // returnCode = result;
+                            fulfill(400)
                             console.log('Z - error in this.save()');
                         });
 
@@ -170,7 +170,7 @@ export default class DatasetController {
 
                     }).then(function() {
                         console.log('Z - fulfilling true');
-                        fulfill(true);
+                        fulfill(204);
                     }).catch(function (err) {
                         console.log('Z - Error in Promise.all() ' + err);
                     });
@@ -192,7 +192,7 @@ export default class DatasetController {
      * @param id
      * @param processedDataset
      */
-     private save(id: string, processedDataset: Section[]) {
+     private save(id: string, processedDataset: Section[]): Promise<Number> {
         // add it to the memory model
 
 
@@ -220,7 +220,7 @@ export default class DatasetController {
                         if (err.code === "EEXIST") {
                             console.error(id + '.json already exists');
                             // returnCode = 201;
-                            fulfill(true);
+                            fulfill(201);
                         } else {
                             console.error('Z - error in save(): ' + err);
                         }
@@ -233,13 +233,13 @@ export default class DatasetController {
                         }
                         console.log('Z - file saved!!!!');
                         // returnCode = 204;
-                        fulfill(true);
-                    });
+                        fulfill(204);
+                    })
                 });
             } catch (err) {
                 console.log('Z - error saving');
                 // returnCode = 400;
-                reject(false);
+                reject(400);
             }
         });
 

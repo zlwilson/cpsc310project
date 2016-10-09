@@ -30,7 +30,7 @@ describe("DatasetController", function () {
             return controller.process('setA', data);
         }).then(function (result) {
             Log.test('Dataset processed; result: ' + result);
-            expect(result).to.equal(true);
+            expect(result).to.equal(204);
         });
 
     });
@@ -242,7 +242,7 @@ describe("DatasetController", function () {
             return controller.process('sections', data);
         }).then(function (result) {
             Log.test('Dataset processed; result: ' + result);
-            expect(result).to.equal(true);
+            expect(result).to.equal(204);
         });
 
     });
