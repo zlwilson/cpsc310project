@@ -175,6 +175,7 @@ export default class DatasetController {
                         fulfill(204);
                     }).catch(function (err) {
                         console.log('Z - Error in Promise.all() ' + err);
+                        reject(400);
                     });
                 }).catch(function (err) {
                     Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);
