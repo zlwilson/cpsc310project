@@ -41,6 +41,7 @@ export default class DatasetController {
 
     public getDataset(id: string): any { 
         // TODO: this should check if the dataset is on disk in ./data if it is not already in memory. 
+
         fs.readFile('data/' + id, 'string', function (err, data) { 
             if (err) {
                 console.log('Z - Error in getDatasets(id): ' + err);
@@ -105,6 +106,12 @@ export default class DatasetController {
         let that = this;
         return new Promise(function (fulfill, reject) {
             try {
+
+                if (id === "")
+                {
+                    throw 400;
+                }
+
                 let myZip = new JSZip();
                 myZip.loadAsync(data, {base64: true}).then(function (zip: JSZip) {
                     Log.trace('DatasetController::process(..) - unzipped');
@@ -146,29 +153,34 @@ export default class DatasetController {
                                 if (dataParsed.result.length > 0) {
                                     var sectionArray = dataParsed.result;
 
-                                    for (var s in sectionArray)
-                                    {
+                                    for (var s in sectionArray) {
                                         var instanceSection: Section = sectionArray[s];
                                         processedDataset.push(instanceSection);
                                         // console.log('Z - this should be a section object: ' + instanceSection);
                                     }
                                 }
-                            } else {
-                                console.log('Z - invalid data set');
-                                if (r == data.length - 1) {
-                                    /*
-                                    the last file in dataset is invalid
-                                    so check if processedDataset is empty
-                                    if it's empty reject with code 400
-                                    else break for statement and return processedDataset
-                                     */
-                                    if (processedDataset.length == 0) {
-                                        throw 400;
-                                    }
-                                } else {
-                                    break;
-                                }
                             }
+                            // } else {
+                            //     console.log('Z - invalid data set');
+                            //     if (r == data.length - 1) {
+                            //         /*
+                            //         the last file in dataset is invalid
+                            //         so check if processedDataset is empty
+                            //         if it's empty reject with code 400
+                            //         else break for statement and return processedDataset
+                            //          */
+                            //         if (processedDataset.length == 0) {
+                            //             throw 400;
+                            //         }
+                            //     } else {
+                            //         break;
+                            //     }
+                            // }
+                        }
+
+                        if (processedDataset.length === 0)
+                        {
+                            throw 400;
                         }
 
                         console.log('Z - heading to save sections[], id = ' + id);

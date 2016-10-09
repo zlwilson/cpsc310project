@@ -81,7 +81,10 @@ export default class QueryController {
         if (typeof query !== 'undefined'
             && query !== null
             && Object.keys(query).length > 0
-            && query.hasOwnProperty("GET")) {
+            && (typeof query.GET !== 'undefined')
+            && (typeof query.WHERE !== 'undefined')
+            && (typeof query.AS !== 'undefined')
+            && (typeof query.ORDER !== 'undefined')) {
             return true;
         }
         return false;
