@@ -190,6 +190,7 @@ export default class QueryController {
                     default:
                         // throw error
                         Log.trace("Undefined EBNF in WHERE");
+                        throw new Error('Invalid Query');
                 }
             }
             index++;
@@ -434,6 +435,7 @@ export default class QueryController {
                 break;
             default:
                 Log.error("Unexpected compare value");
+                throw new Error('Invalid Query');
         }
         // Log.trace("Comparing " + comparedKey[0] + " with " + comparedVal);
 
@@ -504,6 +506,7 @@ export default class QueryController {
                 break;
             default:
                 Log.error("Unexpected compare value");
+                throw new Error('Invalid Query');
         }
         // Log.trace("Comparing " + comparedKey[0] + " with " + comparedVal);
 
@@ -587,6 +590,7 @@ export default class QueryController {
                 break;
             default:
                 Log.error("Unexpected compare value");
+                throw new Error('Invalid Query');
         }
         // Log.trace("Comparing " + comparedKey[0] + " with " + comparedVal);
 
@@ -606,13 +610,15 @@ export default class QueryController {
             case 'courses_dept':
                 comparedVal = query.IS.courses_dept;
                 compareField = "Subject";
+
                 for (let section in sections)
                 {
                     var s:Section = sections[section];
-                    if (s.Subject === comparedVal)
+
+                    var ifContains: Boolean = this.compareStringHelper(s.Subject, comparedVal);
+                    if (ifContains)
                     {
                         filteredDs.push(s);
-                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Subject + ", equal to " + comparedVal);
                     }
                 }
                 break;
@@ -622,10 +628,11 @@ export default class QueryController {
                 for (let section in sections)
                 {
                     var s:Section = sections[section];
-                    if (s.Title === comparedVal)
+
+                    var ifContains: Boolean = this.compareStringHelper(s.Title, comparedVal);
+                    if (ifContains)
                     {
                         filteredDs.push(s);
-                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Title + ", equal to " + comparedVal);
                     }
                 }
                 break;
@@ -635,10 +642,11 @@ export default class QueryController {
                 for (let section in sections)
                 {
                     var s:Section = sections[section];
-                    if (s.Professor === comparedVal)
+
+                    var ifContains: Boolean = this.compareStringHelper(s.Professor, comparedVal);
+                    if (ifContains)
                     {
                         filteredDs.push(s);
-                        // Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Professor + ", equal to " + comparedVal);
                     }
                 }
                 break;
@@ -648,17 +656,17 @@ export default class QueryController {
                 for (let section in sections)
                 {
                     var s:Section = sections[section];
-                    // "==" is used here instead of "===" for comparing numbers with string type
-                    if (s.id == comparedVal)
+
+                    var ifContains: Boolean = this.compareStringHelper(s.id, comparedVal);
+                    if (ifContains)
                     {
                         filteredDs.push(s);
-                        // Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.id + ", equal to " + comparedVal);
-                        break;
                     }
                 }
                 break;
             default:
                 Log.error("Unexpected compare value");
+                throw new Error('Invalid Query');
         }
         // Log.trace("Comparing " + comparedKey[0] + " with " + comparedVal);
 
@@ -704,7 +712,7 @@ export default class QueryController {
 
     public validOrder(query: QueryRequest): Boolean
     {
-        if (typeof query.ORDER !== "undefined")
+        if (typeof query.ORDER === "undefined")
         {
             return true;
         }
@@ -726,6 +734,59 @@ export default class QueryController {
                 {
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    public compareStringHelper(string: string, comparedVal: string): Boolean
+    {
+        if (string === "")
+        {
+            return false;
+        }
+
+        if ((comparedVal.lastIndexOf("*", 0) == -1)
+            && (comparedVal.lastIndexOf("*", comparedVal.length -1) != -1))
+        {
+            //starts with the string
+            comparedVal = comparedVal.slice(0, -1);
+            if(string.startsWith(comparedVal))
+            {
+                Log.trace('Find ' + string + ' starts with ' + comparedVal);
+                return true;
+            }
+        }
+        if ((comparedVal.lastIndexOf("*", 0) != -1)
+            && (comparedVal.lastIndexOf("*", comparedVal.length -1) == -1))
+        {
+            //ends with the given string
+            comparedVal = comparedVal.slice(1, comparedVal.length);
+            if(string.endsWith(comparedVal))
+            {
+                Log.trace('Find ' + string + ' starts with ' + comparedVal);
+                return true;
+            }
+        }
+        if ((comparedVal.lastIndexOf("*", 0) != -1)
+            && (comparedVal.lastIndexOf("*", comparedVal.length -1) != -1))
+        {
+            //contains the string somewhere
+            comparedVal = comparedVal.slice(1, comparedVal.length -1);
+            if(string.indexOf(comparedVal) != -1)
+            {
+                Log.trace('Find ' + string + ' starts with ' + comparedVal);
+                return true;
+            }
+        }
+        if ((comparedVal.lastIndexOf("*", 0) == -1)
+            && (comparedVal.lastIndexOf("*", comparedVal.length -1) == -1))
+        {
+            //must be the exact string
+            if (string === comparedVal)
+            {
+                Log.trace('Find ' + string + ' starts with ' + comparedVal);
+                return true;
             }
         }
         return false;

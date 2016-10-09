@@ -81,7 +81,7 @@ export default class RouteHandler {
             }
         } catch (err) {
             Log.error('RouteHandler::postQuery(..) - ERROR: ' + err);
-            res.send(403);
+            res.send(400);
         }
         return next();
     }
