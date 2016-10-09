@@ -138,7 +138,7 @@ export default class QueryController {
         var orderedDs: QueryResponse = this.orderResult(query, selectedDs);
 
         //AS
-        orderedDs.render = query.AS.toLowerCase();
+        orderedDs.render = query.AS.toLocaleUpperCase();
 
         return orderedDs;
 
@@ -351,7 +351,7 @@ export default class QueryController {
                     if (s.Avg > comparedVal)
                     {
                         filteredDs.push(s);
-                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Avg + ", greater than " + comparedVal);
+                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Avg + ", greater than " + comparedVal);
                     }
                 }
                 break;
@@ -364,7 +364,7 @@ export default class QueryController {
                     if (s.Pass > comparedVal)
                     {
                         filteredDs.push(s);
-                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Pass + ", greater than " + comparedVal);
+                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Pass + ", greater than " + comparedVal);
                     }
                 }
                 break;
@@ -377,7 +377,7 @@ export default class QueryController {
                     if (s.Fail > comparedVal)
                     {
                         filteredDs.push(s);
-                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Fail + ", greater than " + comparedVal);
+                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Fail + ", greater than " + comparedVal);
                     }
                 }
                 break;
@@ -390,7 +390,7 @@ export default class QueryController {
                     if (s.Audit > comparedVal)
                     {
                         filteredDs.push(s);
-                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", greater than " + comparedVal);
+                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", greater than " + comparedVal);
                     }
                 }
                 break;
@@ -421,7 +421,7 @@ export default class QueryController {
                     if (s.Avg < comparedVal)
                     {
                         filteredDs.push(s);
-                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Avg + ", less than " + comparedVal);
+                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Avg + ", less than " + comparedVal);
                     }
                 }
                 break;
@@ -434,7 +434,7 @@ export default class QueryController {
                     if (s.Pass < comparedVal)
                     {
                         filteredDs.push(s);
-                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Pass + ", less than " + comparedVal);
+                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Pass + ", less than " + comparedVal);
                     }
                 }
                 break;
@@ -447,7 +447,7 @@ export default class QueryController {
                     if (s.Fail < comparedVal)
                     {
                         filteredDs.push(s);
-                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Fail + ", less than " + comparedVal);
+                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Fail + ", less than " + comparedVal);
                     }
                 }
                 break;
@@ -460,7 +460,7 @@ export default class QueryController {
                     if (s.Audit < comparedVal)
                     {
                         filteredDs.push(s);
-                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", less than " + comparedVal);
+                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", less than " + comparedVal);
                     }
                 }
                 break;
@@ -491,7 +491,7 @@ export default class QueryController {
                     if (s.Avg == comparedVal)
                     {
                         filteredDs.push(s);
-                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Avg + ", equal to " + comparedVal);
+                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Avg + ", equal to " + comparedVal);
                     }
                 }
                 break;
@@ -504,7 +504,7 @@ export default class QueryController {
                     if (s.Pass == comparedVal)
                     {
                         filteredDs.push(s);
-                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Pass + ", equal to " + comparedVal);
+                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Pass + ", equal to " + comparedVal);
                     }
                 }
                 break;
@@ -517,7 +517,7 @@ export default class QueryController {
                     if (s.Fail == comparedVal)
                     {
                         filteredDs.push(s);
-                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Fail + ", equal to " + comparedVal);
+                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Fail + ", equal to " + comparedVal);
                     }
                 }
                 break;
@@ -530,7 +530,7 @@ export default class QueryController {
                     if (s.Audit == comparedVal)
                     {
                         filteredDs.push(s);
-                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", equal to " + comparedVal);
+                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", equal to " + comparedVal);
                     }
                 }
                 break;
@@ -561,7 +561,7 @@ export default class QueryController {
                     if (s.Subject === comparedVal)
                     {
                         filteredDs.push(s);
-                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Subject + ", equal to " + comparedVal);
+                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Subject + ", equal to " + comparedVal);
                     }
                 }
                 break;
@@ -574,7 +574,7 @@ export default class QueryController {
                     if (s.Title === comparedVal)
                     {
                         filteredDs.push(s);
-                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Title + ", equal to " + comparedVal);
+                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Title + ", equal to " + comparedVal);
                     }
                 }
                 break;
@@ -587,7 +587,7 @@ export default class QueryController {
                     if (s.Professor === comparedVal)
                     {
                         filteredDs.push(s);
-                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Professor + ", equal to " + comparedVal);
+                        // Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Professor + ", equal to " + comparedVal);
                     }
                 }
                 break;
@@ -601,7 +601,7 @@ export default class QueryController {
                     if (s.id == comparedVal)
                     {
                         filteredDs.push(s);
-                        Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.id + ", equal to " + comparedVal);
+                        // Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.id + ", equal to " + comparedVal);
                         break;
                     }
                 }
