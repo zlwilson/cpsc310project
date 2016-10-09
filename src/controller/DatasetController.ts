@@ -132,6 +132,7 @@ export default class DatasetController {
                     Promise.all(promisesArray).then(function (data) {
                         console.log('Z - iterating through all Promises...');
 
+
                         for (let r = 0; r < data.length; r++) {
 
                             var jsonString:string = JSON.stringify(data[r]);
@@ -139,12 +140,10 @@ export default class DatasetController {
 
                             // Parse out file.rank here, if needed
 
-                            if( jsonString.indexOf("result") !== -1)
-                            {
+                            if( jsonString.indexOf("result") !== -1) {
                                 var dataParsed = JSON.parse(JSON.parse(jsonString));
 
-                                if (dataParsed.result.length > 0)
-                                {
+                                if (dataParsed.result.length > 0) {
                                     var sectionArray = dataParsed.result;
 
                                     for (var s in sectionArray)
@@ -154,6 +153,9 @@ export default class DatasetController {
                                         // console.log('Z - this should be a section object: ' + instanceSection);
                                     }
                                 }
+                            } else {
+                                console.log('Z - invalid data set');
+                                throw 400;
                             }
                         }
 
