@@ -45,7 +45,7 @@ export default class DatasetController {
     public getDataset(id: string): boolean { 
         // TODO: this should check if the dataset is on disk in ./data if it is not already in memory. 
 
-        fs.readFile('data/' + id, 'string', function (err, data) { 
+        fs.readFile('data/' + id + '.json', 'utf8', function (err, data) { 
             if (err) {
                 console.log('Z - no such file ' + id + '.json in ./data');
                 return false;
@@ -57,7 +57,6 @@ export default class DatasetController {
 
     public getDatasets(): Datasets {
         // TODO: if datasets is empty, load all dataset files in ./data from disk
-
 
         console.log('Z - in getDatasets()...');
 
