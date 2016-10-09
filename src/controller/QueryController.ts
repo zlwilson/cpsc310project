@@ -93,7 +93,7 @@ export default class QueryController {
         return false;
     }
 
-    public query(query: QueryRequest): QueryResponse {
+    public query(query: QueryRequest): QueryResponse|string {
         Log.trace('QueryController::query( ' + JSON.stringify(query) + ' )');
 
         // TODO: implement this
@@ -113,22 +113,58 @@ export default class QueryController {
             preamble = temp;
         }
 
-        var id: string = preamble[0].split("_", 2)[0];
-        Log.trace(id);
+        // requestedId should be an array of ids without duplicates
 
-        // var sections:Section[] = [];
-        //
-        // for (var r in result)
-        // {
-        //     var instanceSection: Section = result[r];
-        //     sections.push(instanceSection);
-        // }
-
-        var sections:Section[] = this.datasets[id];
-        
-        if (typeof sections === 'undefined')
+        var requestedId: string[] = [];
+        for(var p in preamble)
         {
-            //throw new error("Dataset with given id hasn't been pushed yet");
+            var tempId = preamble[p].split("_", 2)[0];
+            if (requestedId.length == 0)
+            {
+                requestedId[0] = tempId;
+            }
+            else
+            {
+                var exist: boolean = false;
+                for(var i in requestedId)
+                {
+                    if (requestedId[i] === tempId)
+                    {
+                        exist = true;
+                        break;
+                    }
+                }
+                if(exist === false)
+                {
+                    requestedId.push(tempId);
+                }
+            }
+        }
+
+        var sections: Section[] = [];
+        
+        var missing: string;
+        for(var i in requestedId)
+        {
+            //I'm assuming only one dataset can be processed by query controller at once.
+            sections = this.datasets[requestedId[i]];
+
+            if (typeof sections === "undefined" || sections.length == 0)
+            {
+                if(typeof missing === "undefined")
+                {
+                    missing = requestedId[i];
+                }
+                else
+                {
+                    missing = missing + ", " + requestedId[i];
+                }
+            }
+        }
+
+        if(typeof missing !== "undefined")
+        {
+            throw new Error("[" + missing + "]");
         }
 
         this.sections = sections;
