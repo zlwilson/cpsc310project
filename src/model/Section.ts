@@ -12,7 +12,7 @@ export default class Section {
     Stddev: number;
     Enrolled: number;
     High: number;
-    Course: number;
+    Course: string;
     Session: string;
     Pass: number;
     Fail: number;
@@ -20,7 +20,7 @@ export default class Section {
     Campus: string;
     Subject: string;
 
-    constructor (title: string, section: string, id: string, prof: string, audit: number, withdrew: number, year: number, stddev: number, enrolled: number, high: number, course: number, session: string, pass: number, fail: number, avg: number, campus: string, subject: string) {
+    constructor (title: string, section: string, id: string, prof: string, audit: number, withdrew: number, year: number, stddev: number, enrolled: number, high: number, course: string, session: string, pass: number, fail: number, avg: number, campus: string, subject: string) {
         this.Title = title;
         this.Section = section;
         this.id = id;

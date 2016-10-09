@@ -216,7 +216,7 @@ export default class QueryController {
                         result["courses_dept"] = sections[section].Subject;
                         break;
                     case 'courses_id':
-                        result["courses_id"] = sections[section].id;
+                        result["courses_id"] = sections[section].Course;
                         break;
                     case 'courses_avg':
                         result["courses_avg"] = sections[section].Avg;
@@ -581,7 +581,7 @@ export default class QueryController {
                 for (let section in sections)
                 {
                     var s:Section = sections[section];
-                    if (s.id == comparedVal)
+                    if (s.Course == comparedVal)
                     {
                         filteredDs.push(s);
                         //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", equal to " + comparedVal);
@@ -650,6 +650,7 @@ export default class QueryController {
                     }
                 }
                 break;
+
             case  'courses_id':
                 comparedVal = query.IS.courses_id;
                 compareField = "id";
@@ -657,7 +658,7 @@ export default class QueryController {
                 {
                     var s:Section = sections[section];
 
-                    var ifContains: Boolean = this.compareStringHelper(s.id, comparedVal);
+                    var ifContains: Boolean = this.compareStringHelper(s.Course, comparedVal);
                     if (ifContains)
                     {
                         filteredDs.push(s);
@@ -753,7 +754,7 @@ export default class QueryController {
             comparedVal = comparedVal.slice(0, -1);
             if(string.startsWith(comparedVal))
             {
-                Log.trace('Find ' + string + ' starts with ' + comparedVal);
+                //Log.trace('Find ' + string + ' starts with ' + comparedVal);
                 return true;
             }
         }
@@ -764,7 +765,7 @@ export default class QueryController {
             comparedVal = comparedVal.slice(1, comparedVal.length);
             if(string.endsWith(comparedVal))
             {
-                Log.trace('Find ' + string + ' starts with ' + comparedVal);
+                //Log.trace('Find ' + string + ' starts with ' + comparedVal);
                 return true;
             }
         }
@@ -775,7 +776,7 @@ export default class QueryController {
             comparedVal = comparedVal.slice(1, comparedVal.length -1);
             if(string.indexOf(comparedVal) != -1)
             {
-                Log.trace('Find ' + string + ' starts with ' + comparedVal);
+                //Log.trace('Find ' + string + ' starts with ' + comparedVal);
                 return true;
             }
         }
@@ -783,9 +784,9 @@ export default class QueryController {
             && (comparedVal.lastIndexOf("*", comparedVal.length -1) == -1))
         {
             //must be the exact string
-            if (string === comparedVal)
+            if (string == comparedVal)
             {
-                Log.trace('Find ' + string + ' starts with ' + comparedVal);
+                //Log.trace('Find ' + string + ' starts with ' + comparedVal);
                 return true;
             }
         }
