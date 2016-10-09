@@ -7,6 +7,7 @@ import JSZip = require('jszip');
 import Section from '../model/Section';
 import fs = require('fs');
 import {stringify} from "querystring";
+import {error} from "util";
 
 
 /**
@@ -198,8 +199,8 @@ export default class DatasetController {
                             console.log('Z - save() result: ' + result);
                             fulfill(result);
                         }).catch(function (result) {
-                            fulfill(400)
                             console.log('Z - error in this.save()');
+                            throw 400;
                         });
 
                         console.log('Z - save ID = ' + p);
