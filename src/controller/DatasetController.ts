@@ -58,7 +58,6 @@ export default class DatasetController {
     public getDatasets(): Datasets {
         // TODO: if datasets is empty, load all dataset files in ./data from disk
 
-
         console.log('Z - in getDatasets()...');
 
         let that = this;
