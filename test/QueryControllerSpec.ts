@@ -2,7 +2,7 @@
  * Created by rtholmes on 2016-10-31.
  */
 
-import {Datasets} from "../src/controller/DatasetController";
+import {Datasets, default as DatasetController} from "../src/controller/DatasetController";
 import QueryController from "../src/controller/QueryController";
 import {QueryRequest} from "../src/controller/QueryController";
 import Log from "../src/Util";
@@ -35,14 +35,13 @@ describe("QueryController", function () {
         expect(isValid).to.equal(false);
     });
 
-    it("Should be able to query, although the answer will be empty", function () {
-        // NOTE: this is not actually a valid query for D1, nor is the result correct.
-        let query: QueryRequest = {GET: 'food', WHERE: {IS: 'apple'}, ORDER: 'food', AS: 'table'};
+    it("Should be able to validate the simple example query from D1", function () {
+        let query: QueryRequest = {GET:  ['courses_dept', 'courses_avg'], WHERE: {'GT': {'courses_avg': 90}}, ORDER: 'course_avg', AS: 'table'};
         let dataset: Datasets = {};
         let controller = new QueryController(dataset);
-        let ret = controller.query(query);
-        Log.test('In: ' + JSON.stringify(query) + ', out: ' + JSON.stringify(ret));
-        expect(ret).not.to.be.equal(null);
-        // should check that the value is meaningful
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(true);
     });
+
 });

@@ -38,7 +38,7 @@ export default class RouteHandler {
             // adapted from: https://github.com/restify/node-restify/issues/880#issuecomment-133485821
             let buffer: any = [];
             req.on('data', function onRequestData(chunk: any) {
-                Log.trace('RouteHandler::postDataset(..) on data; chunk length: ' + chunk.length);
+                //Log.trace('RouteHandler::postDataset(..) on data; chunk length: ' + chunk.length);
                 buffer.push(chunk);
             });
 
@@ -50,6 +50,7 @@ export default class RouteHandler {
                 let controller = RouteHandler.datasetController;
                 controller.process(id, req.body).then(function (result) {
                     Log.trace('RouteHandler::postDataset(..) - processed');
+                    console.log('Z - code from process() in RouteController: ' + result);
                     res.json(200, {success: result});
                 }).catch(function (err: Error) {
                     Log.trace('RouteHandler::postDataset(..) - ERROR: ' + err.message);
@@ -81,6 +82,28 @@ export default class RouteHandler {
         } catch (err) {
             Log.error('RouteHandler::postQuery(..) - ERROR: ' + err);
             res.send(403);
+        }
+        return next();
+    }
+
+    public static deleteDataset(req: restify.Request, res: restify.Response, next: restify.Next)
+    {
+        Log.trace('RouteHandler::deleteDataset(..) - params: ' + JSON.stringify(req.params));
+
+        let that = this;
+        try {
+            var id: string = req.params.id;
+
+            console.log('Z - id = ' + id);
+
+
+            //Todo: DeleteDataset
+            RouteHandler.datasetController.delete(id);
+            console.log('Deleted ' + id + ' from ./data');
+
+        } catch (err) {
+            Log.error('RouteHandler::deleteDataset(..) - ERROR: ' + err.message);
+            res.send(400, {err: err.message});
         }
         return next();
     }
