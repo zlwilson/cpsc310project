@@ -223,6 +223,7 @@ export default class DatasetController {
                             fulfill(201);
                         } else {
                             console.error('Z - error in save(): ' + err);
+                            reject(400);
                         }
                     }
                     // writeMyData(fd); 
