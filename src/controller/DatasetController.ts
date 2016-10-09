@@ -188,7 +188,10 @@ export default class DatasetController {
 
                         var p = that.save(id, processedDataset);
 
-                        p.catch(function (result) {
+                        p.then(function (result) {
+                            console.log('Z - save() result: ' + result);
+                            fulfill(result);
+                        }).catch(function (result) {
                             fulfill(400)
                             console.log('Z - error in this.save()');
                         });
@@ -253,17 +256,18 @@ export default class DatasetController {
                             console.error('Z - error in save(): ' + err);
                             reject(400);
                         }
+                    } else {
+                        // writeMyData(fd); 
+                        fs.write(fileDestination, processedDataset, function (err) {
+                            if (err) {
+                                console.log('Z - error in open().write()');
+                                throw err;
+                            }
+                            console.log('Z - file saved!!!!');
+                            // returnCode = 204;
+                            fulfill(204);
+                        })
                     }
-                    // writeMyData(fd); 
-                    fs.write(fileDestination, processedDataset, function (err) {
-                        if (err) {
-                            console.log('Z - error in open().write()');
-                            throw err;
-                        }
-                        console.log('Z - file saved!!!!');
-                        // returnCode = 204;
-                        fulfill(204);
-                    })
                 });
             } catch (err) {
                 console.log('Z - error saving');
