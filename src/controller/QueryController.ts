@@ -142,7 +142,7 @@ export default class QueryController {
         }
 
         var sections: Section[] = [];
-        
+
         var missing: string;
         for(var i in requestedId)
         {
