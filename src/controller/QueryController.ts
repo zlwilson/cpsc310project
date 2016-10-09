@@ -6,11 +6,12 @@ import {Datasets, default as DatasetController} from "./DatasetController";
 import Log from "../Util";
 import Section from "../model/Section";
 import {error} from "util";
+import {type} from "os";
 
 export interface QueryRequest {
     GET: string|string[];
     WHERE: QueryBody;
-    ORDER: string;
+    ORDER?: string;
     AS: string;
 
 }
@@ -24,8 +25,8 @@ export interface QueryBody
         courses_title?: string;
     }
 
-    OR?:[QueryBody, QueryBody];
-    AND?:[QueryBody, QueryBody];
+    OR?:QueryBody[];
+    AND?:QueryBody[];
     GT?: {
         courses_avg?: number;
         courses_pass?: number;
@@ -44,6 +45,7 @@ export interface QueryBody
         courses_pass?: number;
         courses_fail?: number;
         courses_audit?: number;
+        courses_id?: string;
     }
 
     NOT?: QueryBody;
@@ -84,7 +86,8 @@ export default class QueryController {
             && (typeof query.GET !== 'undefined')
             && (typeof query.WHERE !== 'undefined')
             && (typeof query.AS !== 'undefined')
-            && (typeof query.ORDER !== 'undefined')) {
+            && (this.validOrder(query))
+        ) {
             return true;
         }
         return false;
@@ -137,8 +140,12 @@ export default class QueryController {
         //GET
         var selectedDs: QueryResponse = this.getColumn(preamble, filteredDs);
 
+        var orderedDs: QueryResponse = selectedDs;
+
         //ORDER
-        var orderedDs: QueryResponse = this.orderResult(query, selectedDs);
+        if (query.ORDER !== "undefined") {
+            orderedDs = this.orderResult(query, selectedDs);
+        }
 
         //AS
         orderedDs.render = query.AS.toLocaleUpperCase();
@@ -319,16 +326,44 @@ export default class QueryController {
 
     public logicOr (query: QueryBody, sections: Section[]): Section[]
     {
-        var or: Section[] = this.filter(query.OR[0], sections).concat(this.filter(query.OR[1], sections));
-        or = this.removeDuplicate(or);
+        var or: Section[] = [];
+        var subQueries = query.OR;
+
+        if(subQueries.length > 0 &&(subQueries instanceof Array))
+        {
+            for(var q = 0; q < subQueries.length; q++)
+            {
+                or = or.concat(this.filter(query.OR[q], sections));
+            }
+
+            or = this.removeDuplicate(or);
+        }
+        else
+        {
+            throw new Error('Invalid Query');
+        }
+
         return or;
     }
 
     public logicAnd (query: QueryBody, sections: Section[]): any
     {
-        var applyFirst: Section[] = this.filter(query.AND[0], sections);
-        var applySecond: Section[] = this.filter(query.AND[1], applyFirst);
-        return applySecond;
+        var and: Section[] = sections;
+        var subQueries = query.AND;
+
+        if (subQueries.length > 0 && (subQueries instanceof Array))
+        {
+            for (var q = 0; q < subQueries.length; q++)
+            {
+                and = this.filter(query.AND[q], and);
+            }
+        }
+        else
+        {
+            throw new Error('Invalid Query');
+        }
+
+        return and;
     }
 
     //Todo: deal with wrong input
@@ -479,7 +514,7 @@ export default class QueryController {
     public equalTo (query: QueryBody, sections:Section[]):any
     {
         var comparedKey = Object.keys(query.EQ);
-        var comparedVal: number;
+        var comparedVal: string | number;
         var compareField: string;
 
         var filteredDs:Section[] = [];
@@ -531,6 +566,19 @@ export default class QueryController {
                 {
                     var s:Section = sections[section];
                     if (s.Audit == comparedVal)
+                    {
+                        filteredDs.push(s);
+                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", equal to " + comparedVal);
+                    }
+                }
+                break;
+            case 'courses_id':
+                comparedVal = query.EQ.courses_id;
+                compareField = "id";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.id == comparedVal)
                     {
                         filteredDs.push(s);
                         //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", equal to " + comparedVal);
@@ -652,5 +700,34 @@ export default class QueryController {
             }
         }
         return dupArray;
+    }
+
+    public validOrder(query: QueryRequest): Boolean
+    {
+        if (typeof query.ORDER !== "undefined")
+        {
+            return true;
+        }
+        else
+        {
+            if (query.GET instanceof Array)
+            {
+                for (var k = 0; k<query.GET.length; k++)
+                {
+                    if (query.GET[k] === query.ORDER)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (typeof query.GET === "string" || query.GET instanceof String)
+            {
+                if (query.GET.toString() === query.ORDER)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
