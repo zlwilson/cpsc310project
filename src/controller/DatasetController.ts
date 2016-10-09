@@ -6,6 +6,7 @@ import Log from '../Util';
 import JSZip = require('jszip');
 import Section from '../model/Section';
 import fs = require('fs');
+import {stringify} from "querystring";
 
 /**
  * In memory representation of all datasets.
@@ -126,24 +127,32 @@ export default class DatasetController {
                         // console.log('Z - added promise to array');
                     }
 
-                    console.log('Z - ' + promisesArray);
+                    //console.log('Z - ' + promisesArray);
 
                     Promise.all(promisesArray).then(function (data) {
                         console.log('Z - iterating through all Promises...');
-                        for (var r in data) {
-                            var jsonString = JSON.stringify(data[r]);
+
+                        for (let r = 0; r < data.length; r++) {
+
+                            var jsonString:string = JSON.stringify(data[r]);
+                            Log.trace(jsonString);
 
                             // Parse out file.rank here, if needed
 
-                            var dataParsed = JSON.parse(jsonString);
+                            if( jsonString.indexOf("result") !== -1)
+                            {
+                                var dataParsed = JSON.parse(JSON.parse(jsonString));
 
-                            if (typeof dataParsed.result == "string") {
-                                var sectionArray = dataParsed.result;
+                                if (dataParsed.result.length > 0)
+                                {
+                                    var sectionArray = dataParsed.result;
 
-                                for (var s in sectionArray) {
-                                    var instanceSection: Section = sectionArray[s];
-                                    processedDataset.push(instanceSection);
-                                    console.log('Z - this should be a section object: ' + instanceSection);
+                                    for (var s in sectionArray)
+                                    {
+                                        var instanceSection: Section = sectionArray[s];
+                                        processedDataset.push(instanceSection);
+                                        console.log('Z - this should be a section object: ' + instanceSection);
+                                    }
                                 }
                             }
                         }
@@ -185,8 +194,11 @@ export default class DatasetController {
      */
      private save(id: string, processedDataset: Section[]) {
         // add it to the memory model
-        this.datasets[id] = processedDataset;
+
+
         console.log('Z - in save()...');
+
+        this.datasets[id] = processedDataset;
 
         // TODO: actually write to disk in the ./data directory
         // use fs to write JSON string to  disk dir
@@ -251,6 +263,8 @@ export default class DatasetController {
                 reject(false);
             }
         });
+
+
     }
 
     public delete(id: string) {
