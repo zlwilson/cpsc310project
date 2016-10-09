@@ -42,17 +42,23 @@ export default class DatasetController {
      */
 
 
-    public getDataset(id: string): boolean { 
+    public getDataset(id: string): Promise<boolean> { 
         // TODO: this should check if the dataset is on disk in ./data if it is not already in memory. 
-
-        fs.readFile('data/' + id + '.json', 'utf8', function (err, data) { 
-            if (err) {
-                console.log('Z - no such file ' + id + '.json in ./data');
-                return false;
-            } 
-            console.log('Z - ' + id + '.json exists in ./data'); 
-        }); 
-        return true;
+        return new Promise (function (fulfill, reject) {
+            try {
+                fs.readFile('data/' + id + '.json', 'utf8', function (err, data) {
+                    if (err) {
+                        console.log('Z - in getDatasets(id), no such file ' + id + '.json in ./data');
+                        fulfill(false);
+                    }
+                    console.log('Z - ' + id + '.json exists in ./data');
+                    fulfill(true);
+                });
+            } catch (err) {
+                console.log('Z - error in getDatasets(id): ' + err)
+                reject(false);
+            }
+        });
     }
 
     public getDatasets(): Datasets {
@@ -72,6 +78,8 @@ export default class DatasetController {
                     var sectionArray: Section[] = [];
 
                     var jsonString: string = JSON.stringify(fs.readFileSync('data/' + data, 'utf8'));
+
+                    console.log('Z - got jsonString');
 
                     var dataParsed = JSON.parse(JSON.parse(jsonString));
 
