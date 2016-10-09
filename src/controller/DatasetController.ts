@@ -284,17 +284,27 @@ export default class DatasetController {
 
     }
 
-    public delete(id: string) {
-        try {
-            fs.unlink('data/' + id + '.json', function (err) {
-                if (err) {
-                    throw err;
-                }
-                console.log('successfully deleted data/' + id + '.json');
-            });
-        } catch (err) {
-            console.log('unsuccessful delete');
-        }
+    public delete(id: string): Promise<number> {
+
+        console.log('Z - in delete(), id = ' + id);
+
+        return new Promise(function (fulfill, reject) {
+
+            try {
+                fs.unlink('data/' + id + '.json', function (err) {
+                    if (err) {
+                        console.log('Z - no such file ' + id + '.json in ./data');
+                        reject(404);
+                    } else {
+                        console.log('Z - successfully deleted data/' + id + '.json');
+                        fulfill(204);
+                    }
+                });
+            } catch (err) {
+                console.log('Z - unsuccessful delete' + err);
+                reject(400);
+            }
+        });
     }
 
     private removeDataset(id: string, processedDataset: any) {
