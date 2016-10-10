@@ -303,7 +303,7 @@ export default class QueryController {
                         result["courses_pass"] = sections[section].Pass;
                         break;
                     case 'courses_fail':
-                        result["courses_fail"] = sections[section].Pass;
+                        result["courses_fail"] = sections[section].Fail;
                         break;
                     case 'courses_audit':
                         result["courses_audit"] = sections[section].Audit;
