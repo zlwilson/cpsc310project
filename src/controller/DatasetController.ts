@@ -302,7 +302,4 @@ export default class DatasetController {
         });
     }
 
-    private removeDataset(id: string, processedDataset: any) {
-        // delete dataset
-    }
 }
