@@ -72,34 +72,31 @@ export default class RouteHandler {
             let datasets: Datasets = RouteHandler.datasetController.getDatasets();
             let controller = new QueryController(datasets);
             let isValid = controller.isValid(query);
-            let id = controller.getId(query);
+            let idList = controller.getId(query);
 
             if (isValid === true) {
                 var isPut:boolean;
                 var missedId: string[] = [];
-                for(var i in id)
-                {
-                    console.log('Z - checking if dataset ' + id[i] + ' exists');
+                for(var i = 0; i < idList.length; i++) {
+                    console.log('Z - checking if dataset ' + idList[i] + ' exists');
                     // p is Promise<boolean>
-                    let p = RouteHandler.datasetController.getDataset(id[i]).then(function (result) {
+                    let p = RouteHandler.datasetController.getDataset(idList[i]).then(function (result) {
                         isPut = result;
                     }).then(function () {
-                        console.log('Z - isPut? ' + isPut);
-                        if( isPut === false) {
-                            missedId.push(id[i]);
-                        }
-                    }).then(function () {
-                        if (typeof missedId === "undefined" || missedId.length == 0)
-                        {
-                            let result = controller.query(query, id[0]);
-                            res.json(200, result);
-                        }
-                        else
-                        {
-                            res.json(424, {missing: JSON.stringify(missedId)});
+                        console.log('Z - isPut? ' + idList[i] + " " + isPut);
+                        if (isPut === false) {
+                            missedId.push(idList[i]);
                         }
                     });
                 }
+
+                    if (typeof missedId === "undefined" || missedId.length == 0) {
+                        let result = controller.query(query, idList[0]);
+                        res.json(200, result);
+                    }
+                    else {
+                        res.json(424, {missing: JSON.stringify(missedId)});
+                    }
             } else {
                 res.json(400, {status: 'invalid query'});
             }
