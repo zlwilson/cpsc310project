@@ -217,11 +217,11 @@ export default class QueryController {
     public filter(query: QueryBody, sections: Section[]): Section[]
     {
         var filteredDs: Section[]=[];
-        var index = 0;
+        //var index = 0;
         for (let q in query)
         {
-            if(index === 0)
-            {
+            //if(index === 0)
+            //{
                 Log.trace(q);
                 switch (q)
                 {
@@ -251,8 +251,8 @@ export default class QueryController {
                         Log.trace("Undefined EBNF in WHERE");
                         throw new Error('Invalid Query');
                 }
-            }
-            index++;
+            //}
+            //index++;
         }
         return filteredDs;
     }
@@ -415,7 +415,8 @@ export default class QueryController {
         {
             for (var q = 0; q < subQueries.length; q++)
             {
-                and = this.filter(query.AND[q], and);
+                var temp = this.filter(query.AND[q], and);
+                and = temp;
             }
         }
         else
@@ -738,7 +739,7 @@ export default class QueryController {
     {
         var filteredDs: Section[] = this.filter(query.NOT, sections);
 
-        var negatedDs: Section[] =  this.sections.filter(function (el) {
+        var negatedDs: Section[] =  sections.filter(function (el) {
             return !filteredDs.includes(el);
         })
 
