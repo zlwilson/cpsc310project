@@ -81,7 +81,6 @@ export default class RouteHandler {
                     console.log('Z - checking if dataset ' + idList[i] + ' exists');
                     // p is Promise<boolean>
                     let idName = idList[i];
-
                     let p = RouteHandler.datasetController.getDataset(idList[i]).then(function (result) {
                         isPut = result;
                         console.log('Z - isPut? ' + isPut);
@@ -89,6 +88,7 @@ export default class RouteHandler {
                             missedId.push(idName);
                             console.log('Z - missing id: ' + idName);
                         }
+
                         if (typeof missedId === "undefined" || missedId.length == 0) {
                             let result = controller.query(query, idList[0]);
                             res.json(200, result);

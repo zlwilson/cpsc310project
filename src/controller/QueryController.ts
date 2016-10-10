@@ -115,7 +115,19 @@ export default class QueryController {
         var requestedId: string[] = [];
         for(var p in preamble)
         {
-            var tempId = preamble[p].split("_", 2)[0];
+            var tempId = preamble[p].split("_")[0];
+
+            if((preamble[p].indexOf("_") === -1)
+                || (typeof tempId === "undefined")
+                || (tempId === "")
+                || (preamble[p].split("_")[1] === "")
+                || (typeof preamble[p].split("_")[1] === "undefined")
+                || (preamble[p].split("_").length !== 2)
+            )
+            {
+                throw new Error('Invalid Query');
+            }
+
             if (requestedId.length == 0)
             {
                 requestedId[0] = tempId;
@@ -297,6 +309,7 @@ export default class QueryController {
                         break;
                     default:
                         Log.error("Unexpected GET input");
+                        throw new Error("Invalid Query");
                 }
             }
             selectedDs.result.push(result);
@@ -743,15 +756,6 @@ export default class QueryController {
             return !filteredDs.includes(el);
         })
 
-        // for (let n in negatedDs)
-        // {
-        //     Log.trace(negatedDs[n].id);
-        // }
-        // Log.trace("Filtered:");
-        // for (let f in filteredDs)
-        // {
-        //     Log.trace(filteredDs[f].id);
-        // }
         return negatedDs;
     }
 
