@@ -87,16 +87,16 @@ export default class RouteHandler {
                         if (isPut === false) {
                             missedId.push(idList[i]);
                         }
+                    }).then(function () {
+                        if (typeof missedId === "undefined" || missedId.length == 0) {
+                            let result = controller.query(query, idList[0]);
+                            res.json(200, result);
+                        }
+                        else {
+                            res.json(424, {missing: JSON.stringify(missedId)});
+                        }
                     });
                 }
-
-                    if (typeof missedId === "undefined" || missedId.length == 0) {
-                        let result = controller.query(query, idList[0]);
-                        res.json(200, result);
-                    }
-                    else {
-                        res.json(424, {missing: JSON.stringify(missedId)});
-                    }
             } else {
                 res.json(400, {status: 'invalid query'});
             }

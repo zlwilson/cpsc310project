@@ -86,7 +86,7 @@ export default class DatasetController {
                         var jsonString: string = (fs.readFileSync('data/' + data, 'utf8'));
 
                         jsonString = '{"result": ' + jsonString + '}';
-                        console.log('Z - got jsonString: ' + jsonString);
+                        // console.log('Z - got jsonString: ' + jsonString);
 
                         var dataParsed = JSON.parse(jsonString);
 
