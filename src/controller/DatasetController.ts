@@ -49,10 +49,11 @@ export default class DatasetController {
                 fs.readFile('data/' + id + '.json', 'utf8', function (err, data) {
                     if (err) {
                         console.log('Z - in getDatasets(id), no such file ' + id + '.json in ./data');
-                        fulfill(false);
+                        throw err;
+                    } else {
+                        console.log('Z - ' + id + '.json exists in ./data');
+                        fulfill(true);
                     }
-                    console.log('Z - ' + id + '.json exists in ./data');
-                    fulfill(true);
                 });
             } catch (err) {
                 console.log('Z - error in getDatasets(id): ' + err)
@@ -75,35 +76,40 @@ export default class DatasetController {
                 dir.forEach(function (data, err) {
                     var name = data.substring(0, data.length-5);
 
-                    var sectionArray: Section[] = [];
+                    console.log('Z - name(0,1) = ' + name.substr(0,1));
 
-                    var jsonString: string = JSON.stringify(fs.readFileSync('data/' + data, 'utf8'));
+                    if (name.substr(0,1) !== '.') {
+                        var sectionArray: Section[] = [];
 
-                    console.log('Z - got jsonString');
+                        console.log('Z - name of file: ' + name);
 
-                    var dataParsed = JSON.parse(JSON.parse(jsonString));
+                        var jsonString: string = (fs.readFileSync('data/' + data, 'utf8'));
 
-                    if (dataParsed.result.length > 0) {
-                        sectionArray = dataParsed.result;
+                        jsonString = '{"result": ' + jsonString + '}';
+                        console.log('Z - got jsonString: ' + jsonString);
 
-                        for (var s in sectionArray) {
-                            var instanceSection: Section = sectionArray[s];
-                            sectionArray.push(instanceSection);
-                            console.log('Z - just finished reading dir: ' + Object.keys(this.datasets).length);
+                        var dataParsed = JSON.parse(jsonString);
+
+                        if (dataParsed.result.length > 0) {
+                            var innersectionArray = dataParsed.result;
+
+                            for (var s in innersectionArray) {
+                                var instanceSection: Section = innersectionArray[s];
+                                sectionArray.push(instanceSection);
+                                // console.log('Z - just finished reading dir: ' + Object.keys(that.datasets).length);
+                            }
                         }
+                        that.datasets[name] = sectionArray;
                     }
-
-                    that.datasets[name] = sectionArray;
                 })
             }
-            console.log('Z - just finished reading dir: ' + Object.keys(this.datasets).length);
+            console.log('Z - just finished reading /data, size = ' + Object.keys(this.datasets).length);
         } catch (err) {
             console.log(err)
         }
 
         console.log('Z - this.datasets = ' + that.datasets);
         return that.datasets;
-
     }
 
     /**
@@ -175,22 +181,6 @@ export default class DatasetController {
                                     }
                                 }
                             }
-                            // } else {
-                            //     console.log('Z - invalid data set');
-                            //     if (r == data.length - 1) {
-                            //         /*
-                            //         the last file in dataset is invalid
-                            //         so check if processedDataset is empty
-                            //         if it's empty reject with code 400
-                            //         else break for statement and return processedDataset
-                            //          */
-                            //         if (processedDataset.length == 0) {
-                            //             throw 400;
-                            //         }
-                            //     } else {
-                            //         break;
-                            //     }
-                            // }
                         }
 
                         if (processedDataset.length === 0)
@@ -268,7 +258,7 @@ export default class DatasetController {
                         }
                     } else {
                         // writeMyData(fd); 
-                        fs.write(fileDestination, processedDataset, function (err) {
+                        fs.write(fileDestination, JSON.stringify(processedDataset), function (err) {
                             if (err) {
                                 console.log('Z - error in open().write()');
                                 throw err;
