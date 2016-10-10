@@ -54,13 +54,13 @@ export default class RouteHandler {
                     res.json(result);
                 }).catch(function (err: Error) {
                     Log.trace('RouteHandler::postDataset(..) - ERROR: ' + err.message);
-                    res.json(400, {err: err.message});
+                    res.json(400, {error: err.message});
                 });
             });
 
         } catch (err) {
             Log.error('RouteHandler::postDataset(..) - ERROR: ' + err.message);
-            res.send(400, {err: err.message});
+            res.send(400, {error: err.message});
         }
         return next();
     }
@@ -104,14 +104,14 @@ export default class RouteHandler {
                     }
                 }).catch(function (err: Error) {
                     Log.trace('RouteHandler::postQuery(..) - ERROR: ' + err.message);
-                    res.json(400, {err: err.message});
+                    res.json(400, {error: err.message});
                 });
 
             } else {
-                res.json(400, {status: 'invalid query'});
+                res.json(400, {error: 'invalid query'});
             }
         } catch (err) {
-            res.json(400,{status: err});
+            res.json(400,{error: err});
             Log.error('RouteHandler::postQuery(..) - ERROR: ' + err);
         }
         return next();
