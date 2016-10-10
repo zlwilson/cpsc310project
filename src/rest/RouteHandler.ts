@@ -102,11 +102,7 @@ export default class RouteHandler {
                         console.log('Z - missing an id, about to throw 424');
                         res.json(424, {missing: missedId});
                     }
-                }).catch(function (err: Error) {
-                    Log.trace('RouteHandler::postQuery(..) - ERROR: ' + err.message);
-                    res.json(400, {err: err.message});
                 });
-
             } else {
                 res.json(400, {status: 'invalid query'});
             }
