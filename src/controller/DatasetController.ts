@@ -49,10 +49,11 @@ export default class DatasetController {
                 fs.readFile('data/' + id + '.json', 'utf8', function (err, data) {
                     if (err) {
                         console.log('Z - in getDatasets(id), no such file ' + id + '.json in ./data');
-                        fulfill(false);
+                        throw err;
+                    } else {
+                        console.log('Z - ' + id + '.json exists in ./data');
+                        fulfill(true);
                     }
-                    console.log('Z - ' + id + '.json exists in ./data');
-                    fulfill(true);
                 });
             } catch (err) {
                 console.log('Z - error in getDatasets(id): ' + err)
@@ -95,22 +96,20 @@ export default class DatasetController {
                             for (var s in innersectionArray) {
                                 var instanceSection: Section = innersectionArray[s];
                                 sectionArray.push(instanceSection);
-                                console.log('Z - just finished reading dir: ' + Object.keys(that.datasets).length);
+                                // console.log('Z - just finished reading dir: ' + Object.keys(that.datasets).length);
                             }
                         }
-
                         that.datasets[name] = sectionArray;
                     }
                 })
             }
-            console.log('Z - just finished reading dir: ' + Object.keys(this.datasets).length);
+            console.log('Z - just finished reading /data, size = ' + Object.keys(this.datasets).length);
         } catch (err) {
             console.log(err)
         }
 
         console.log('Z - this.datasets = ' + that.datasets);
         return that.datasets;
-
     }
 
     /**
