@@ -23,6 +23,7 @@ export interface QueryBody
         courses_id?: string;
         courses_instructor?: string;
         courses_title?: string;
+        courses_fail?: number;
     }
 
     OR?:QueryBody[];
@@ -732,6 +733,20 @@ export default class QueryController {
                     var s:Section = sections[section];
 
                     var ifContains: Boolean = this.compareStringHelper(s.Course, comparedVal);
+                    if (ifContains)
+                    {
+                        filteredDs.push(s);
+                    }
+                }
+                break;
+            case 'courses_fail':
+                comparedVal = query.IS.courses_fail.toLocaleString();
+                compareField = "fail";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+
+                    var ifContains: Boolean = this.compareStringHelper(s.Fail.toLocaleString(), comparedVal);
                     if (ifContains)
                     {
                         filteredDs.push(s);
