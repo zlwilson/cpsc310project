@@ -106,7 +106,6 @@ export default class RouteHandler {
                     Log.trace('RouteHandler::postQuery(..) - ERROR: ' + err.message);
                     res.json(400, {error: err.message});
                 });
-
             } else {
                 res.json(400, {error: 'invalid query'});
             }
