@@ -66,49 +66,59 @@ export default class RouteHandler {
     }
 
     public static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
-        Log.trace('RouteHandler::postQuery(..) - params: ' + JSON.stringify(req.params));
+        //Log.trace('RouteHandler::postQuery(..) - params: ' + JSON.stringify(req.params));
         try {
-            let query: QueryRequest = req.params;
-            let datasets: Datasets = RouteHandler.datasetController.getDatasets();
-            let controller = new QueryController(datasets);
-            let isValid = controller.isValid(query);
-            let idList = controller.getId(query);
-            console.log('Z - the list of ids to check: ' + idList);
 
-            if (isValid === true) {
-                var isPut:boolean;
-                var missedId: string[] = [];
+            if(RouteHandler.isJson(req.params))
+            {
+                let query: QueryRequest = req.params;
 
-                var promisedArray: Promise<any>[] = [];
+                let datasets: Datasets = RouteHandler.datasetController.getDatasets();
+                let controller = new QueryController(datasets);
+                let isValid = controller.isValid(query);
+                let idList = controller.getId(query);
+                console.log('Z - the list of ids to check: ' + idList);
 
-                for (var e in idList) {
-                    let p = RouteHandler.datasetController.getDataset(idList[e]);
-                    promisedArray.push(p);
+                if (isValid === true) {
+                    var isPut:boolean;
+                    var missedId: string[] = [];
 
-                }
+                    var promisedArray: Promise<any>[] = [];
 
-                Promise.all(promisedArray).then(function (result) {
-                    for (var x in result) {
-                        if (!result[x]) {
-                            missedId.push(idList[x]);
+                    for (var e in idList) {
+                        let p = RouteHandler.datasetController.getDataset(idList[e]);
+                        promisedArray.push(p);
+
+                    }
+
+                    Promise.all(promisedArray).then(function (result) {
+                        for (var x in result) {
+                            if (!result[x]) {
+                                missedId.push(idList[x]);
+                            }
+                            console.log('Z - ' + idList[x] + ' exists: ' + result[x]);
                         }
-                        console.log('Z - ' + idList[x] + ' exists: ' + result[x]);
-                    }
-                }).then(function () {
-                    if (typeof missedId === "undefined" || missedId.length == 0) {
-                        let result = controller.query(query, idList[0]);
-                        res.json(200, result);
-                    }  else {
-                        console.log('Z - missing an id, about to throw 424');
-                        res.json(424, {missing: missedId});
-                    }
-                }).catch(function (err: Error) {
-                    Log.trace('RouteHandler::postQuery(..) - ERROR: ' + err.message);
-                    res.json(400, {error: err.message});
-                });
-            } else {
+                    }).then(function () {
+                        if (typeof missedId === "undefined" || missedId.length == 0) {
+                            let result = controller.query(query, idList[0]);
+                            res.json(200, result);
+                        }  else {
+                            console.log('Z - missing an id, about to throw 424');
+                            res.json(424, {missing: missedId});
+                        }
+                    }).catch(function (err: Error) {
+                        Log.trace('RouteHandler::postQuery(..) - ERROR: ' + err.message);
+                        res.json(400, {error: err.message});
+                    });
+                } else {
+                    res.json(400, {error: 'invalid query'});
+                }
+            }
+            else
+            {
                 res.json(400, {error: 'invalid query'});
             }
+
         } catch (err) {
             res.json(400,{error: err});
             Log.error('RouteHandler::postQuery(..) - ERROR: ' + err);
@@ -140,5 +150,16 @@ export default class RouteHandler {
             res.send(404, {err: err.message});
         }
         return next();
+    }
+
+    public static isJson(query: any):boolean
+    {
+        try {
+
+            JSON.parse(JSON.stringify(query));
+        } catch (e) {
+            return false;
+        }
+        return true;
     }
 }
