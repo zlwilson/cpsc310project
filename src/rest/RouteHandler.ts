@@ -80,21 +80,25 @@ export default class RouteHandler {
                 for(var i = 0; i < idList.length; i++) {
                     console.log('Z - checking if dataset ' + idList[i] + ' exists');
                     // p is Promise<boolean>
+                    let idName = idList[i];
                     let p = RouteHandler.datasetController.getDataset(idList[i]).then(function (result) {
                         isPut = result;
-                    }).then(function () {
-                        console.log('Z - isPut? ' + idList[i] + " " + isPut);
+                        console.log('Z - isPut? ' + isPut);
                         if (isPut === false) {
-                            missedId.push(idList[i]);
+                            missedId.push(idName);
+                            console.log('Z - missing id: ' + idName);
                         }
-                    }).then(function () {
+
                         if (typeof missedId === "undefined" || missedId.length == 0) {
                             let result = controller.query(query, idList[0]);
                             res.json(200, result);
-                        }
-                        else {
+                        }  else {
+                            console.log('Z - missing an id, about to throw 424');
                             res.json(424, {missing: JSON.stringify(missedId)});
                         }
+                    }).catch(function (err) {
+                        // res.json(424, {missing: JSON.stringify(missedId)});
+                        console.log('Z - this is the ERROR: ' + err);
                     });
                 }
             } else {

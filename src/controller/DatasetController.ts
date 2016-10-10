@@ -48,8 +48,8 @@ export default class DatasetController {
             try {
                 fs.readFile('data/' + id + '.json', 'utf8', function (err, data) {
                     if (err) {
-                        console.log('Z - in getDatasets(id), no such file ' + id + '.json in ./data');
-                        throw err;
+                        console.log('Z - in getDatasets(id), no such file: ' + id + '.json in ./data');
+                        fulfill(false);
                     } else {
                         console.log('Z - ' + id + '.json exists in ./data');
                         fulfill(true);
@@ -57,7 +57,7 @@ export default class DatasetController {
                 });
             } catch (err) {
                 console.log('Z - error in getDatasets(id): ' + err)
-                reject(false);
+                fulfill(false);
             }
         });
     }
