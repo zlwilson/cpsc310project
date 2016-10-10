@@ -41,6 +41,32 @@ export default class DatasetController {
      * @returns {{}}
      */
 
+    // return a promise of an array of all the missing id's
+    public getDatasetArray(ids: string[]): Promise<Array<string>> {
+
+        return new Promise (function (fulfill, reject) {
+            try {
+                var promisedArray: string[] = [];
+
+                for (var i in ids) {
+                    fs.readFile('data/' + ids[i] + '.json', 'utf8', function (err, data) {
+                        if (err) {
+                            console.log('Z - in getDatasetArray(id), no such file: ' + ids[i] + '.json in ./data');
+                            promisedArray.push(ids[i]);
+                        } else {
+                            console.log('Z - ' + ids[i] + '.json exists in ./data');
+                        }
+                    });
+                }
+
+                fulfill(promisedArray);
+
+            } catch (err) {
+                console.log('Z - error in getDatasets(id): ' + err)
+                fulfill(false);
+            }
+        });
+    }
 
     public getDataset(id: string): Promise<boolean> { 
         // TODO: this should check if the dataset is on disk in ./data if it is not already in memory. 
