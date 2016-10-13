@@ -88,7 +88,6 @@ export default class RouteHandler {
                     for (var e in idList) {
                         let p = RouteHandler.datasetController.getDataset(idList[e]);
                         promisedArray.push(p);
-
                     }
 
                     Promise.all(promisedArray).then(function (result) {
