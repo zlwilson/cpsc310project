@@ -37,8 +37,9 @@ describe("QueryController", function () {
 
     it("Should be able to validate the simple example query from D1", function () {
         let query: QueryRequest = {GET:  ['courses_dept', 'courses_avg'], WHERE: {'GT': {'courses_avg': 90}}, ORDER: 'course_avg', AS: 'table'};
-        let dataset: Datasets = {};
-        let controller = new QueryController(dataset);
+        // let datasets: Datasets = DatasetController.getDatasets();
+        let datasets: Datasets = {};
+        let controller = new QueryController(datasets);
         let isValid = controller.isValid(query);
 
         expect(isValid).to.equal(true);

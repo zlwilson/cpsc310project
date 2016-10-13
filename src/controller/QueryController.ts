@@ -11,9 +11,44 @@ import {type} from "os";
 export interface QueryRequest {
     GET: string|string[];
     WHERE: QueryBody;
+    APPLYTOKEN?: QueryApply[];
+    GROUP?: string[];
     ORDER?: string;
-    AS: string;
+    VIEW: {
+        AS: string;
+    }
+}
 
+export interface QueryApply {
+    [id: string]: {
+        MAX?: {
+            courses_avg?: number;
+            courses_pass?: number;
+            courses_fail?: number;
+            courses_audit?: number;
+        }
+
+        MIN?: {
+            courses_avg?: number;
+            courses_pass?: number;
+            courses_fail?: number;
+            courses_audit?: number;
+        }
+
+        AVG?: {
+            courses_avg?: number;
+            courses_pass?: number;
+            courses_fail?: number;
+            courses_audit?: number;
+        }
+
+        COUNT?: {
+            courses_avg?: number;
+            courses_pass?: number;
+            courses_fail?: number;
+            courses_audit?: number;
+        }
+    };
 }
 
 export interface QueryBody
@@ -87,7 +122,7 @@ export default class QueryController {
             && Object.keys(query).length > 0
             && (typeof query.GET !== 'undefined')
             && (typeof query.WHERE !== 'undefined')
-            && (typeof query.AS !== 'undefined')
+            && (typeof query.VIEW.AS !== 'undefined')
             && (this.validOrder(query))
         ) {
             return true;
@@ -220,7 +255,7 @@ export default class QueryController {
         }
 
         //AS
-        orderedDs.render = query.AS.toLocaleUpperCase();
+        orderedDs.render = query.VIEW.AS.toLocaleUpperCase();
 
         return orderedDs;
 

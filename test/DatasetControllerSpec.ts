@@ -242,8 +242,7 @@ describe("DatasetController", function () {
             return controller.process('sections', data);
         }).then(function (result) {
             Log.test('Dataset processed; result: ' + result);
-            expect(result).to.equal(201);
+            expect((result == 201 || result == 204)).to.equal(true);
         });
     });
-
 });

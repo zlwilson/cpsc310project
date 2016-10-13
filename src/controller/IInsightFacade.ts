@@ -19,7 +19,7 @@ export interface IInsightFacade {
      * The promise should return an InsightResponse for both fullfill and reject.
      * fulfill should be for 2XX codes and reject for everything else.
      */
-    addDataset(id: string, content: string): Promise<InsightResponse>;
+    addDataset(id: string, content: string): Promise<InsightResponse> ;
 
     /**
      * Remove a dataset from UBCInsight.
