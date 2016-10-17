@@ -76,8 +76,6 @@ export default class InsightFacade implements IInsightFacade {
                 //set the initial code to be 400
                 var response = {code:400, body:{}};
 
-                if(InsightFacade.isJson(query))
-                {
                     let datasets: Datasets = InsightFacade.datasetController.getDatasets();
                     let controller = new QueryController(datasets);
                     let isValid = controller.isValid(query);
@@ -123,12 +121,6 @@ export default class InsightFacade implements IInsightFacade {
                         response.body = {error: 'invalid query'};
                         reject(response);
                     }
-                }
-                else
-                {
-                    response.body = {error: 'invalid query'};
-                    reject(response);
-                }
 
             } catch (err) {
                 Log.trace('InsightFacad::performQuery(..) - ERROR: ' + err.message);
@@ -136,17 +128,6 @@ export default class InsightFacade implements IInsightFacade {
                 reject(response);
             }
         });
-    }
-
-    public static isJson(query: any):boolean
-    {
-        try {
-
-            JSON.parse(JSON.stringify(query));
-        } catch (e) {
-            return false;
-        }
-        return true;
     }
 
 }

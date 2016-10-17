@@ -4,16 +4,12 @@
 import restify = require('restify');
 import fs = require('fs');
 
-import DatasetController from '../controller/DatasetController';
-import {Datasets} from '../controller/DatasetController';
-import QueryController from '../controller/QueryController';
-
-import {QueryRequest} from "../controller/QueryController";
+import InsightFacade from "../controller/InsightFacade";
 import Log from '../Util';
 
 export default class RouteHandler {
 
-    private static datasetController = new DatasetController();
+    private static insightFacade = new InsightFacade();
 
     public static getHomepage(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RoutHandler::getHomepage(..)');
@@ -47,15 +43,11 @@ export default class RouteHandler {
                 req.body = concated.toString('base64');
                 Log.trace('RouteHandler::postDataset(..) on end; total length: ' + req.body.length);
 
-                let controller = RouteHandler.datasetController;
-                controller.process(id, req.body).then(function (result) {
-                    Log.trace('RouteHandler::postDataset(..) - processed');
-                    console.log('Z - code from process() in RouteController: ' + result);
-                    res.json(result);
-                }).catch(function (err: Error) {
-                    Log.trace('RouteHandler::postDataset(..) - ERROR: ' + err.message);
-                    res.json(400, {error: err.message});
-                });
+                RouteHandler.insightFacade.addDataset(id, req.body).then(function (response) {
+                    res.json(response.code, response.body);
+                }).catch(function (response) {
+                    res.json(response.code, response.body);
+                })
             });
 
         } catch (err) {
@@ -69,52 +61,13 @@ export default class RouteHandler {
         Log.trace('RouteHandler::postQuery(..) - params: ' + JSON.stringify(req.params));
         try {
 
-            if(RouteHandler.isJson(req.params))
-            {
-                let query: QueryRequest = req.params;
-
-                let datasets: Datasets = RouteHandler.datasetController.getDatasets();
-                let controller = new QueryController(datasets);
-                let isValid = controller.isValid(query);
-                let idList = controller.getId(query);
-                console.log('Z - the list of ids to check: ' + idList);
-
-                if (isValid === true) {
-                    var isPut:boolean;
-                    var missedId: string[] = [];
-
-                    var promisedArray: Promise<any>[] = [];
-
-                    for (var e in idList) {
-                        let p = RouteHandler.datasetController.getDataset(idList[e]);
-                        promisedArray.push(p);
-                    }
-
-                    Promise.all(promisedArray).then(function (result) {
-                        for (var x in result) {
-                            if (!result[x]) {
-                                missedId.push(idList[x]);
-                            }
-                            console.log('Z - ' + idList[x] + ' exists: ' + result[x]);
-                        }
-                    }).then(function () {
-                        if (typeof missedId === "undefined" || missedId.length == 0) {
-                            let result = controller.query(query, idList[0]);
-                            res.json(200, result);
-                        }  else {
-                            console.log('Z - missing an id, about to throw 424');
-                            res.json(424, {missing: missedId});
-                        }
-                    }).catch(function (err: Error) {
-                        Log.trace('RouteHandler::postQuery(..) - ERROR: ' + err.message);
-                        res.json(400, {error: err.message});
-                    });
-                } else {
-                    res.json(400, {error: 'invalid query'});
-                }
-            }
-            else
-            {
+            if(RouteHandler.isJson(req.params)) {
+                RouteHandler.insightFacade.performQuery(req.params).then(function (response) {
+                    res.json(response.code, response.body);
+                }).catch(function (response) {
+                    res.json(response.code, response.body);
+                });
+            } else {
                 res.json(400, {error: 'invalid query'});
             }
 
@@ -135,13 +88,10 @@ export default class RouteHandler {
 
             console.log('Z - id = ' + id);
 
-            //Todo: DeleteDataset
-            RouteHandler.datasetController.delete(id).then(function (result) {
-                console.log('Deleted ' + id + ' from ./data');
-                res.json(result);
-            }).catch(function (err) {
-                console.log('Error in delete, no such file: ' + err);
-                res.json(err);
+            RouteHandler.insightFacade.removeDataset(id).then(function (response) {
+                res.json(response.code, response.body);
+            }).catch(function (response) {
+                res.json(response.code, response.body);
             });
 
         } catch (err) {
