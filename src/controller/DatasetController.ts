@@ -74,15 +74,15 @@ export default class DatasetController {
             try {
                 fs.readFile('data/' + id + '.json', 'utf8', function (err, data) {
                     if (err) {
-                        console.log('Z - in getDatasets(id), no such file: ' + id + '.json in ./data');
+                        // console.log('Z - in getDatasets(id), no such file: ' + id + '.json in ./data');
                         fulfill(false);
                     } else {
-                        console.log('Z - ' + id + '.json exists in ./data');
+                        // console.log('Z - ' + id + '.json exists in ./data');
                         fulfill(true);
                     }
                 });
             } catch (err) {
-                console.log('Z - error in getDatasets(id): ' + err)
+                // console.log('Z - error in getDatasets(id): ' + err)
                 fulfill(false);
             }
         });
@@ -91,7 +91,7 @@ export default class DatasetController {
     public getDatasets(): Datasets {
         // TODO: if datasets is empty, load all dataset files in ./data from disk
 
-        console.log('Z - in getDatasets()...');
+        // console.log('Z - in getDatasets()...');
 
         let that = this;
 
@@ -102,12 +102,12 @@ export default class DatasetController {
                 dir.forEach(function (data, err) {
                     var name = data.substring(0, data.length-5);
 
-                    console.log('Z - name(0,1) = ' + name.substr(0,1));
+                    // console.log('Z - name(0,1) = ' + name.substr(0,1));
 
                     if (name.substr(0,1) !== '.') {
                         var sectionArray: Section[] = [];
 
-                        console.log('Z - name of file: ' + name);
+                        // console.log('Z - name of file: ' + name);
 
                         var jsonString: string = (fs.readFileSync('data/' + data, 'utf8'));
 
@@ -129,12 +129,12 @@ export default class DatasetController {
                     }
                 })
             }
-            console.log('Z - just finished reading /data, size = ' + Object.keys(this.datasets).length);
+            // console.log('Z - just finished reading /data, size = ' + Object.keys(this.datasets).length);
         } catch (err) {
             console.log(err)
         }
 
-        console.log('Z - this.datasets = ' + that.datasets);
+        // console.log('Z - this.datasets = ' + that.datasets);
         return that.datasets;
     }
 
@@ -172,7 +172,7 @@ export default class DatasetController {
 
                     var promisesArray: Promise<any>[] = [];
 
-                    console.log('Z - reading ZIP...');
+                    // console.log('Z - reading ZIP...');
 
                     for (var file in myZip.files) {
                         // console.log('Z - In ZIP-reading for loop...');
@@ -185,7 +185,7 @@ export default class DatasetController {
 
 
                     Promise.all(promisesArray).then(function (data) {
-                        console.log('Z - iterating through all Promises...');
+                        // console.log('Z - iterating through all Promises...');
 
                         for (let r = 0; r < data.length; r++) {
 
@@ -214,22 +214,22 @@ export default class DatasetController {
                             throw 400;
                         }
 
-                        console.log('Z - heading to save sections[], id = ' + id);
+                        // console.log('Z - heading to save sections[], id = ' + id);
 
                         var p = that.save(id, processedDataset);
 
                         p.then(function (result) {
-                            console.log('Z - save() result: ' + result);
+                            // console.log('Z - save() result: ' + result);
                             fulfill(result);
                         }).catch(function (result) {
-                            console.log('Z - error in this.save()');
+                            // console.log('Z - error in this.save()');
                             throw 400;
                         });
 
-                        console.log('Z - save ID = ' + p);
+                        // console.log('Z - save ID = ' + p);
 
                     }).catch(function (err) {
-                        console.log('Z - Error in Promise.all() ' + err);
+                        // console.log('Z - Error in Promise.all() ' + err);
                         reject(400);
                     });
                 }).catch(function (err) {
@@ -255,27 +255,27 @@ export default class DatasetController {
         // add it to the memory model
 
 
-        console.log('Z - in save()...');
+        // console.log('Z - in save()...');
 
         this.datasets[id] = processedDataset;
 
         // TODO: actually write to disk in the ./data directory
         // use fs to write JSON string to  disk dir
 
-        console.log('Z - fs.write() now!');
+        // console.log('Z - fs.write() now!');
 
         return new Promise(function (fulfill, reject) {
             try {
                 try {
                     fs.mkdirSync('data');
                 } catch (err) {
-                    console.log('Z - ./ data already exists');
+                    // console.log('Z - ./ data already exists');
                 }
 
                 fs.open('data/' + id + '.json', 'wx', function (err, fileDestination) {
                     if (err) {
                         if (err.code === "EEXIST") {
-                            console.error(id + '.json already exists');
+                            // console.error(id + '.json already exists');
                             // returnCode = 201;
                             fulfill(201);
                         } else {
@@ -289,14 +289,14 @@ export default class DatasetController {
                                 console.log('Z - error in open().write()');
                                 throw err;
                             }
-                            console.log('Z - file saved!!!!');
+                            // console.log('Z - file saved!!!!');
                             // returnCode = 204;
                             fulfill(204);
                         })
                     }
                 });
             } catch (err) {
-                console.log('Z - error saving');
+                // console.log('Z - error saving');
                 // returnCode = 400;
                 reject(400);
             }
@@ -307,17 +307,17 @@ export default class DatasetController {
 
     public delete(id: string): Promise<number> {
 
-        console.log('Z - in delete(), id = ' + id);
+        // console.log('Z - in delete(), id = ' + id);
 
         return new Promise(function (fulfill, reject) {
 
             try {
                 fs.unlink('data/' + id + '.json', function (err) {
                     if (err) {
-                        console.log('Z - no such file ' + id + '.json in ./data');
+                        // console.log('Z - no such file ' + id + '.json in ./data');
                         reject(404);
                     } else {
-                        console.log('Z - successfully deleted data/' + id + '.json');
+                        // console.log('Z - successfully deleted data/' + id + '.json');
                         fulfill(204);
                     }
                 });
