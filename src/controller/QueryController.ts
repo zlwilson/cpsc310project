@@ -22,9 +22,9 @@ export interface QueryRequest {
         //     keys: string[];
         // }
     //}
-    //VIEW: {
+    VIEW: {
         AS: string;
-    //}
+    }
 }
 
 export interface QueryToken {
@@ -130,7 +130,7 @@ export default class QueryController {
             && Object.keys(query).length > 0
             && (typeof query.GET !== 'undefined')
             && (typeof query.WHERE !== 'undefined')
-            && (typeof query.AS !== 'undefined')
+            && (typeof query.VIEW.AS !== 'undefined')
             && (this.validOrder(query))
         ) {
             return true;
@@ -263,7 +263,7 @@ export default class QueryController {
         }
 
         //AS
-        orderedDs.render = query.AS.toLocaleUpperCase();
+        orderedDs.render = query.VIEW.AS.toLocaleUpperCase();
 
         return orderedDs;
 
