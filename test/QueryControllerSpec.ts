@@ -233,7 +233,16 @@ describe("QueryController", function () {
     });
 
     it("Should be able to validate the simple example query from D1", function () {
-        let query: QueryRequest = {GET:  ['courses_dept', 'courses_avg'], WHERE: {'GT': {'courses_avg': 90}}, ORDER: 'course_avg', VIEW: {AS: 'table'}};
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_avg'],
+            WHERE: {
+                'GT': {'courses_avg': 90}
+            },
+            ORDER: 'course_avg',
+            VIEW: {
+                AS: 'table'
+            }
+        };
         // let datasets: Datasets = DatasetController.getDataset();
         let datasets: Datasets = {};
         let controller = new QueryController(datasets);
@@ -242,8 +251,38 @@ describe("QueryController", function () {
         expect(isValid).to.equal(false);
     });
 
-    it("Should return missing dataset names if don't exist", function () {
-        let query: QueryRequest = {GET:  ['courses_dept', 'courses_avg'], WHERE: {'GT': {'courses_avg': 90}}, ORDER: 'course_avg', VIEW: {AS: 'table'}};
+    it("Should return the names of missing datasets", function () {
+        let query: QueryRequest = {
+            GET:  ['missing_dept', 'other_avg'],
+            WHERE: {
+                'GT': {'courses_avg': 90}
+            },
+            ORDER: 'other_avg',
+            VIEW: {
+                AS: 'table'
+            }
+        };
+        // let datasets: Datasets = DatasetController.getDataset();
+        let datasets: Datasets = {};
+        let controller = new QueryController(datasets);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(false);
+    });
+
+    it("Should be able to process a NOT query", function () {
+        let query: QueryRequest = {
+            GET:  ['missing_dept', 'other_avg'],
+            WHERE: {
+                'NOT': {
+                    'GT': {'courses_avg': 90}
+                }
+            },
+            ORDER: 'other_avg',
+            VIEW: {
+                AS: 'table'
+            }
+        };
         // let datasets: Datasets = DatasetController.getDataset();
         let datasets: Datasets = {};
         let controller = new QueryController(datasets);
