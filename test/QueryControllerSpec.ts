@@ -250,45 +250,4 @@ describe("QueryController", function () {
 
         expect(isValid).to.equal(false);
     });
-
-    it("Should return the names of missing datasets", function () {
-        let query: QueryRequest = {
-            GET:  ['missing_dept', 'other_avg'],
-            WHERE: {
-                'GT': {'courses_avg': 90}
-            },
-            ORDER: 'other_avg',
-            VIEW: {
-                AS: 'table'
-            }
-        };
-        // let datasets: Datasets = DatasetController.getDataset();
-        let datasets: Datasets = {};
-        let controller = new QueryController(datasets);
-        let isValid = controller.isValid(query);
-
-        expect(isValid).to.equal(false);
-    });
-
-    it("Should be able to process a NOT query", function () {
-        let query: QueryRequest = {
-            GET:  ['missing_dept', 'other_avg'],
-            WHERE: {
-                'NOT': {
-                    'GT': {'courses_avg': 90}
-                }
-            },
-            ORDER: 'other_avg',
-            VIEW: {
-                AS: 'table'
-            }
-        };
-        // let datasets: Datasets = DatasetController.getDataset();
-        let datasets: Datasets = {};
-        let controller = new QueryController(datasets);
-        let isValid = controller.isValid(query);
-
-        expect(isValid).to.equal(false);
-    });
-
 });
