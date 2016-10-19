@@ -268,4 +268,47 @@ describe("InsightController", function () {
             expect.fail('Should not happen');
         });
     });
+
+    // Invalid query tests
+
+    it("Should return all missing datasets (424)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['missing_dept', 'other_avg'],
+            WHERE: {
+                'GT': {'courses_avg': 90}
+            },
+            ORDER: 'missing_avg',
+            VIEW: {
+                AS: 'table'
+            }
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect.fail();
+        }).catch(function (response: InsightResponse) {
+            expect(response.code).to.equal(424);
+            expect(response.body).to.be("{missing: ['missing.json', 'other.json']}");
+        });
+    });
+
+    it("Should invalidate an invalid query (400)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['invalid querry', 'other_avg'],
+            WHERE: {
+                'GT': {'courses_avg': 90}
+            },
+            ORDER: 'missing_avg',
+            VIEW: {
+                AS: 'table'
+            }
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect.fail();
+        }).catch(function (response: InsightResponse) {
+            expect(response.code).to.equal(400);
+        });
+    });
 });
