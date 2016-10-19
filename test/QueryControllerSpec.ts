@@ -6,6 +6,7 @@ import {Datasets, default as DatasetController} from "../src/controller/DatasetC
 import QueryController from "../src/controller/QueryController";
 import {QueryRequest} from "../src/controller/QueryController";
 import Log from "../src/Util";
+import JSZip = require('jszip');
 
 import {expect} from 'chai';
 describe("QueryController", function () {
