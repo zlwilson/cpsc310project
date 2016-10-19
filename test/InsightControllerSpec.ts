@@ -6,6 +6,7 @@ import Log from "../src/Util";
 import {expect} from 'chai';
 import InsightFacade from "../src/controller/InsightFacade";
 import {InsightResponse} from "../src/controller/IInsightFacade";
+import {QueryRequest} from "../src/controller/QueryController";
 
 describe("InsightController", function () {
 
@@ -57,6 +58,26 @@ describe("InsightController", function () {
             expect.fail();
         }).catch(function (response: InsightResponse) {
             expect(response.code).to.equal(400);
+        });
+    });
+
+    it("Should be able to answer a valid query (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_avg'],
+            WHERE: {
+                'GT': {'courses_avg': 90}
+            },
+            ORDER: 'course_avg',
+            VIEW: {
+                AS: 'table'
+            }
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
         });
     });
 });
