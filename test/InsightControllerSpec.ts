@@ -12,6 +12,7 @@ describe("InsightController", function () {
 
     var zipFileContents: string = null;
     var facade: InsightFacade = null;
+
     before(function () {
         Log.info('InsightController::before() - start');
         // this zip might be in a different spot for you
@@ -33,13 +34,13 @@ describe("InsightController", function () {
 
     // Dataset tests
 
-    it("Should be able to add a add a new dataset (204)", function () {
+    it("IF - Should be able to add a add a new dataset (204)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         return facade.addDataset('courses', zipFileContents).then(function (response: InsightResponse) {
             expect(response.code).to.equal(204);
         }).catch(function (response: InsightResponse) {
-            expect.fail('Should not happen');
+            expect.fail('This should not happen');
         });
     });
 

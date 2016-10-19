@@ -26,7 +26,7 @@ export default class InsightFacade implements IInsightFacade {
 
                 let controller = InsightFacade.datasetController;
                 controller.process(id, content).then(function (result) {
-                    Log.trace('InsightFacad::addDataset(..) - processed');
+                    Log.trace('InsightFacade::addDataset(..) - processed');
                     response.code = result;
                     fullfill(response);
                 }).catch(function (err: Error) {

@@ -220,6 +220,7 @@ export default class DatasetController {
 
                         p.then(function (result) {
                             // console.log('Z - save() result: ' + result);
+                            Log.trace('DatasetController::process(..) - saved with code: ' + result);
                             fulfill(result);
                         }).catch(function (result) {
                             // console.log('Z - error in this.save()');
