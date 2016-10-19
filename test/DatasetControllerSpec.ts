@@ -16,7 +16,7 @@ describe("DatasetController", function () {
     afterEach(function () {
     });
 
-    it("Should be able to receive a Section", function () {
+    it("Should be able to receive courses", function () {
         Log.test('Creating dataset - sections');
         let content = {key: 'value'};
         let zip = new JSZip();

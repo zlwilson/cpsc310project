@@ -20,10 +20,10 @@ describe("InsightController", function () {
         try {
             // what you delete here is going to depend on your impl, just make sure
             // all of your temporary files and directories are deleted
-            fs.unlinkSync('./id.json');
+            fs.rmdirSync('data/');
         } catch (err) {
             // silently fail, but don't crash; this is fine
-            Log.warn('InsightController::before() - id.json not removed (probably not present)');
+            Log.warn('InsightController::before() - /data not removed (probably not present)');
         }
         Log.info('InsightController::before() - done');
     });
@@ -34,7 +34,7 @@ describe("InsightController", function () {
 
     // Dataset tests
 
-    it("IF - Should be able to add a add a new dataset (204)", function () {
+    it("Should be able to add a add a new dataset (204)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         return facade.addDataset('courses', zipFileContents).then(function (response: InsightResponse) {
