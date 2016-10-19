@@ -271,7 +271,7 @@ describe("InsightController", function () {
 
     // Invalid query tests
 
-    it("Should return all missing datasets (424)", function () {
+    it("Should return a list of all missing datasets (424)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         let query: QueryRequest = {
