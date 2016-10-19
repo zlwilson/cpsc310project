@@ -31,6 +31,8 @@ describe("InsightController", function () {
         facade = new InsightFacade();
     });
 
+    // Dataset tests
+
     it("Should be able to add a add a new dataset (204)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
@@ -61,7 +63,9 @@ describe("InsightController", function () {
         });
     });
 
-    it("Should be able to answer a valid query (200)", function () {
+    // Query tests of math functions over courses_avg
+
+    it("Should be able to answer a valid GT query (200)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         let query: QueryRequest = {
@@ -72,6 +76,190 @@ describe("InsightController", function () {
             ORDER: 'course_avg',
             VIEW: {
                 AS: 'table'
+            }
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to answer a valid LT query (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_avg'],
+            WHERE: {
+                'GT': {'courses_avg': 50}
+            },
+            ORDER: 'course_avg',
+            VIEW: {
+                AS: 'table'
+            }
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to answer a valid EQ query (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_avg'],
+            WHERE: {
+                'EQ': {'courses_avg': 90}
+            },
+            ORDER: 'course_avg',
+            VIEW: {
+                AS: 'table'
+            }
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    // Query tests of NOT math functions over courses_avg
+
+    it("Should be able to answer a valid NOT EQ query (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_avg'],
+            WHERE: {
+                NOT: {
+                    'EQ': {'courses_avg': 90}
+                }
+            },
+            ORDER: 'course_avg',
+            VIEW: {
+                AS: 'table'
+            }
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to answer a valid NOT LT query (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_avg'],
+            WHERE: {
+                NOT: {
+                    'LT': {'courses_avg': 90}
+                }
+            },
+            ORDER: 'course_avg',
+            VIEW: {
+                AS: 'table'
+            }
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to answer a valid NOT GT query (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_avg'],
+            WHERE: {
+                NOT: {
+                    'LT': {'courses_avg': 50}
+                }
+            },
+            ORDER: 'course_avg',
+            VIEW: {
+                AS: 'table'
+            }
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    // Query tests for logical operators
+
+    it("Should be able to answer a valid OR query (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_avg'],
+            WHERE: {
+                OR: [
+                    {"EQ": {"courses_avg": 60}},
+                    {"EQ": {"courses_avg": 90}}
+                ]
+            },
+            ORDER: 'course_avg',
+            VIEW: {
+                AS: 'table'
+            }
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to answer a valid AND query (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_avg'],
+            WHERE: {
+                AND: [
+                    {"IS": {"courses_dept": "adhe"}},
+                    {"EQ": {"courses_avg": 90}}
+                ]
+            },
+            ORDER: 'course_avg',
+            VIEW: {
+                AS: 'table'
+            }
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    // Other complex query tests
+
+    it("Should be able to answer the complex query from D1 (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET: ["courses_dept", "courses_id", "courses_avg"],
+            WHERE: {
+                OR: [
+                    { AND: [
+                        {"GT": {"courses_avg": 70}},
+                        {"IS": {"courses_dept": "adhe"}}
+                    ]},
+                    {"EQ": {"courses_avg": 90}}
+                ]
+            },
+            ORDER: "courses_avg",
+            VIEW: {
+                AS: "TABLE"
             }
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
