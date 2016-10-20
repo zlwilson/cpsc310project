@@ -12,7 +12,7 @@ import sort = require("core-js/fn/array/sort");
 export interface QueryRequest {
     GET: string|string[];
     WHERE: QueryBody;
-    GROUP?:string[];
+    GROUP?: string[];
     APPLY?:QueryToken[];
     //SORT?:{
     ORDER?: string;
@@ -240,15 +240,14 @@ export default class QueryController {
         //GET
         var selectedDs: QueryResponse = this.getColumn(preamble, filteredDs);
 
-        var orderedDs: QueryResponse = selectedDs;
+        var groupedDs: QueryResponse = selectedDs;
 
         //GROUP
-        if (typeof query.GROUP !== "undefined") {
+        if (query.GROUP instanceof Array) {
             Log.info('QueryController::query() - GROUP BY');
             var grouped: any = this.groupBy(query, selectedDs.result);
+            groupedDs.result = this.dictToResults(grouped);
         }
-
-        orderedDs.result = this.dictToResults(grouped);
 
         // Log.info('QueryController::query() - orderedDs result is:');
         // for (var i = 0; i <= 5; i++) {
@@ -256,8 +255,11 @@ export default class QueryController {
         // }
 
         //ORDER
+
+        var orderedDs = groupedDs;
+
         if (typeof query.ORDER !== "undefined") {
-            orderedDs = this.orderResult(query, selectedDs);
+            orderedDs = this.orderResult(query, groupedDs);
         }
 
         //AS
