@@ -96,15 +96,6 @@ describe("InsightController", function () {
         });
     });
 
-
-
-
-
-
-
-
-
-
     // Query tests of math functions over courses_avg
 
     it("Should be able to answer a valid GT query (200)", function () {
@@ -285,6 +276,24 @@ describe("InsightController", function () {
             },
             ORDER: "courses_avg",
             AS: "TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query across two datasets (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['sections_dept', 'sections_avg', 'courses_dept', 'courses_avg'],
+            WHERE: {
+                'GT': {'courses_avg': 90}
+            },
+            ORDER: 'courses_avg',
+            AS: 'table'
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
             expect(response.code).to.equal(200);

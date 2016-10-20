@@ -238,10 +238,10 @@ export default class QueryController {
         var orderedDs: QueryResponse = selectedDs;
 
         //GROUP
-        var groupedDs: Array<Section[]>;
+        var groupedDs: QueryResponse;
 
         if (typeof query.GROUP !== "undefined") {
-            groupedDs = this.groupResult(query, selectedDs);
+            groupedDs.result = this.groupResult(query, selectedDs);
         }
 
         //APPLY
@@ -261,18 +261,13 @@ export default class QueryController {
 
     }
 
-    public groupResult(query: QueryRequest, selectedDs: QueryResponse): Array<Section[]> {
-        var response: Array<Section[]>;
-
-        // for (let i in selectedDs) {
-        //     response.concat(selectedDs[i]);
-        // }
+    public groupResult(query: QueryRequest, selectedDs: QueryResponse): Array<Result> {
+        var response: Array<Result> = selectedDs.result;
 
         for (let key in query.GROUP) {
-            // sort into each key
-            let criteria = query.GROUP[key];
+            // sort into arrays by key
 
-            switch (criteria) {
+            switch (query.GROUP[key]) {
                 case 'courses_dept':
                     for (let element in response) {
                         selectedDs.result.sort(function (a,b) {
@@ -288,52 +283,11 @@ export default class QueryController {
                         });
                         break;
                     }
-                case 'courses_id':
-                    selectedDs.result.sort(function (a,b) {
-                        if (a.courses_dept < b.courses_dept)
-                        {
-                            return -1;
-                        }
-                        if (a.courses_dept > b.courses_dept)
-                        {
-                            return 1;
-                        }
-                        return 0;
-                    });
-                    break;
-                case 'courses_instructor':
-                    selectedDs.result.sort(function (a,b) {
-                        if (a.courses_instructor < b.courses_instructor)
-                        {
-                            return -1;
-                        }
-                        if (a.courses_instructor > b.courses_instructor)
-                        {
-                            return 1;
-                        }
-                        return 0;
-                    });
-                    break;
-                case 'courses_title':
-                    selectedDs.result.sort(function (a,b) {
-                        if (a.courses_title < b.courses_title)
-                        {
-                            return -1;
-                        }
-                        if (a.courses_title > b.courses_title)
-                        {
-                            return 1;
-                        }
-                        return 0;
-                    });
-                    break;
             }
         }
-
-
         return response;
     }
-    
+
     //return the filtered dataset , section should be Section[]
     public filter(query: QueryBody, sections: Section[]): Section[]
     {
