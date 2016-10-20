@@ -262,18 +262,9 @@ export default class QueryController {
     public groupResult(query: QueryRequest, selectedDs: QueryResponse): Array<Section[]> {
         var response: Array<Section[]>;
 
-        selectedDs.result.sort(function (a, b) {
-            if (a.courses_dept < b.courses_dept)
-            {
-                return -1;
-            }
-            if (a.courses_dept > b.courses_dept)
-            {
-                return 1;
-            }
-            return 0;
-        });
-
+        for (let i in selectedDs) {
+            response.concat(selectedDs[i]);
+        }
 
         for (let key in query.GROUP) {
             // sort into each key
@@ -281,18 +272,20 @@ export default class QueryController {
 
             switch (criteria) {
                 case 'courses_dept':
-                    selectedDs.result.sort(function (a,b) {
-                        if (a.courses_dept < b.courses_dept)
-                        {
-                            return -1;
-                        }
-                        if (a.courses_dept > b.courses_dept)
-                        {
-                            return 1;
-                        }
-                        return 0;
-                    });
-                    break;
+                    for (let element in response) {
+                        selectedDs.result.sort(function (a,b) {
+                            if (a.courses_dept < b.courses_dept)
+                            {
+                                return -1;
+                            }
+                            if (a.courses_dept > b.courses_dept)
+                            {
+                                return 1;
+                            }
+                            return 0;
+                        });
+                        break;
+                    }
                 case 'courses_id':
                     selectedDs.result.sort(function (a,b) {
                         if (a.courses_dept < b.courses_dept)
@@ -338,7 +331,7 @@ export default class QueryController {
 
         return response;
     }
-
+    
     //return the filtered dataset , section should be Section[]
     public filter(query: QueryBody, sections: Section[]): Section[]
     {
