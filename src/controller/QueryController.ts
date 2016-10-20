@@ -7,6 +7,7 @@ import Log from "../Util";
 import Section from "../model/Section";
 import {error} from "util";
 import {type} from "os";
+import sort = require("core-js/fn/array/sort");
 
 export interface QueryRequest {
     GET: string|string[];
@@ -112,6 +113,10 @@ export interface Result
     courses_pass?: number;
     courses_fail?: number;
     courses_audit?: number;
+}
+
+export interface GroupByDictionary {
+    [id: string]: Result[];
 }
 
 export default class QueryController {
@@ -241,7 +246,7 @@ export default class QueryController {
         var groupedDs: QueryResponse;
 
         if (typeof query.GROUP !== "undefined") {
-            groupedDs.result = this.groupResult(query, selectedDs);
+            var groupBY: GroupByDictionary = this.groupResult(query, selectedDs);
         }
 
         //APPLY
@@ -261,28 +266,65 @@ export default class QueryController {
 
     }
 
-    public groupResult(query: QueryRequest, selectedDs: QueryResponse): Array<Result> {
-        var response: Array<Result> = selectedDs.result;
+    public groupResult(query: QueryRequest, selectedDs: QueryResponse): GroupByDictionary {
+        var response: GroupByDictionary;
 
-        for (let key in query.GROUP) {
-            // sort into arrays by key
+        var result: Array<Result> = selectedDs.result;
 
-            switch (query.GROUP[key]) {
-                case 'courses_dept':
-                    for (let element in response) {
-                        selectedDs.result.sort(function (a,b) {
-                            if (a.courses_dept < b.courses_dept)
-                            {
-                                return -1;
-                            }
-                            if (a.courses_dept > b.courses_dept)
-                            {
-                                return 1;
-                            }
-                            return 0;
-                        });
-                        break;
-                    }
+        switch (query.GROUP[0]) {
+            case 'courses_dept':
+                for(let i in result) {
+                    let key = result[i].courses_dept;
+                    response[key].concat(result[i]);
+                }
+                break;
+            case 'courses_id':
+                for(let i in result) {
+                    let key = result[i].courses_id;
+                    response[key].concat(result[i]);
+                }
+                break;
+            case 'courses_instructor':
+                for(let i in result) {
+                    let key = result[i].courses_instructor;
+                    response[key].concat(result[i]);
+                }
+                break;
+            case 'courses_title':
+                for(let i in result) {
+                    let key = result[i].courses_title;
+                    response[key].concat(result[i]);
+                }
+                break;
+            case 'courses_avg':
+                for(let i in result) {
+                    let key = result[i].courses_avg;
+                    response[key].concat(result[i]);
+                }
+                break;
+            case 'courses_pass':
+                for(let i in result) {
+                    let key = result[i].courses_pass;
+                    response[key].concat(result[i]);
+                }
+                break;
+            case 'courses_fail':
+                for(let i in result) {
+                    let key = result[i].courses_fail;
+                    response[key].concat(result[i]);
+                }
+                break;
+            case 'courses_audit':
+                for(let i in result) {
+                    let key = result[i].courses_audit;
+                    response[key].concat(result[i]);
+                }
+                break;
+        }
+
+        for (let i in response) {
+            for (let j in response[i]) {
+                
             }
         }
         return response;
