@@ -34,7 +34,17 @@ describe("InsightController", function () {
 
     // Dataset tests
 
-    it("Should be able to add a add a new dataset (204)", function () {
+    it("Should be able to delete a dataset (204)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        return facade.removeDataset('courses').then(function (response: InsightResponse) {
+            expect(response.code).to.equal(204);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('This should not happen');
+        });
+    });
+
+    it("Should be able to add a new dataset (204)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         return facade.addDataset('courses', zipFileContents).then(function (response: InsightResponse) {
