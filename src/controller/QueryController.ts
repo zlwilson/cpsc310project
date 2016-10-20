@@ -324,7 +324,112 @@ export default class QueryController {
 
         for (let i in response) {
             for (let j in response[i]) {
-                
+                switch (query.GROUP[0]) {
+                    case 'courses_dept':
+                        response[j].sort(function (a,b) {
+                            if (a.courses_dept < b.courses_dept)
+                            {
+                                return -1;
+                            }
+                            if (a.courses_dept > b.courses_dept)
+                            {
+                                return 1;
+                            }
+                            return 0;
+                        })
+                        break;
+                    case 'courses_id':
+                        response[j].sort(function (a,b) {
+                            if (a.courses_id < b.courses_id)
+                            {
+                                return -1;
+                            }
+                            if (a.courses_id > b.courses_id)
+                            {
+                                return 1;
+                            }
+                            return 0;
+                        })
+                        break;
+                    case 'courses_instructor':
+                        response[j].sort(function (a,b) {
+                            if (a.courses_instructor < b.courses_instructor)
+                            {
+                                return -1;
+                            }
+                            if (a.courses_instructor > b.courses_instructor)
+                            {
+                                return 1;
+                            }
+                            return 0;
+                        })
+                        break;
+                    case 'courses_title':
+                        response[j].sort(function (a,b) {
+                            if (a.courses_title < b.courses_title)
+                            {
+                                return -1;
+                            }
+                            if (a.courses_title > b.courses_title)
+                            {
+                                return 1;
+                            }
+                            return 0;
+                        })
+                        break;
+                    case 'courses_avg':
+                        response[j].sort(function (a,b) {
+                            if (a.courses_avg < b.courses_avg)
+                            {
+                                return -1;
+                            }
+                            if (a.courses_avg > b.courses_avg)
+                            {
+                                return 1;
+                            }
+                            return 0;
+                        })
+                        break;
+                    case 'courses_pass':
+                        response[j].sort(function (a,b) {
+                            if (a.courses_pass < b.courses_pass)
+                            {
+                                return -1;
+                            }
+                            if (a.courses_pass > b.courses_pass)
+                            {
+                                return 1;
+                            }
+                            return 0;
+                        })
+                        break;
+                    case 'courses_fail':
+                        response[j].sort(function (a,b) {
+                            if (a.courses_fail < b.courses_fail)
+                            {
+                                return -1;
+                            }
+                            if (a.courses_fail > b.courses_fail)
+                            {
+                                return 1;
+                            }
+                            return 0;
+                        })
+                        break;
+                    case 'courses_audit':
+                        response[j].sort(function (a,b) {
+                            if (a.courses_audit < b.courses_audit)
+                            {
+                                return -1;
+                            }
+                            if (a.courses_audit > b.courses_audit)
+                            {
+                                return 1;
+                            }
+                            return 0;
+                        })
+                        break;
+                }
             }
         }
         return response;
