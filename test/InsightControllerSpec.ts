@@ -84,7 +84,7 @@ describe("InsightController", function () {
             WHERE: {
                 'GT': {'courses_avg': 90}
             },
-            ORDER: 'course_avg',
+            ORDER: 'courses_avg',
             VIEW: {
                 AS: 'table'
             }
@@ -104,7 +104,7 @@ describe("InsightController", function () {
             WHERE: {
                 'GT': {'courses_avg': 50}
             },
-            ORDER: 'course_avg',
+            ORDER: 'courses_avg',
             VIEW: {
                 AS: 'table'
             }
@@ -124,7 +124,7 @@ describe("InsightController", function () {
             WHERE: {
                 'EQ': {'courses_avg': 90}
             },
-            ORDER: 'course_avg',
+            ORDER: 'courses_avg',
             VIEW: {
                 AS: 'table'
             }
@@ -148,7 +148,7 @@ describe("InsightController", function () {
                     'EQ': {'courses_avg': 90}
                 }
             },
-            ORDER: 'course_avg',
+            ORDER: 'courses_avg',
             VIEW: {
                 AS: 'table'
             }
@@ -170,7 +170,7 @@ describe("InsightController", function () {
                     'LT': {'courses_avg': 90}
                 }
             },
-            ORDER: 'course_avg',
+            ORDER: 'courses_avg',
             VIEW: {
                 AS: 'table'
             }
@@ -192,7 +192,7 @@ describe("InsightController", function () {
                     'LT': {'courses_avg': 50}
                 }
             },
-            ORDER: 'course_avg',
+            ORDER: 'courses_avg',
             VIEW: {
                 AS: 'table'
             }
@@ -217,7 +217,7 @@ describe("InsightController", function () {
                     {"EQ": {"courses_avg": 90}}
                 ]
             },
-            ORDER: 'course_avg',
+            ORDER: 'courses_avg',
             VIEW: {
                 AS: 'table'
             }
@@ -240,7 +240,7 @@ describe("InsightController", function () {
                     {"EQ": {"courses_avg": 90}}
                 ]
             },
-            ORDER: 'course_avg',
+            ORDER: 'courses_avg',
             VIEW: {
                 AS: 'table'
             }
@@ -290,7 +290,7 @@ describe("InsightController", function () {
             WHERE: {
                 'GT': {'courses_avg': 90}
             },
-            ORDER: 'missing_avg',
+            ORDER: 'other_avg',
             VIEW: {
                 AS: 'table'
             }

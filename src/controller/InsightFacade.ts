@@ -82,6 +82,7 @@ export default class InsightFacade implements IInsightFacade {
                     let idList = controller.getId(query);
 
                     if (isValid === true) {
+                        Log.trace('InsightFacades::performQuery(..) - isValid = true');
                         var isPut:boolean;
                         var missedId: string[] = [];
 
@@ -102,7 +103,7 @@ export default class InsightFacade implements IInsightFacade {
                         }).then(function () {
                             if (typeof missedId === "undefined" || missedId.length == 0) {
                                 let result = controller.query(query, idList[0]);
-                                Log.trace('InsightFacad::performQuery(..) - processedQuery');
+                                Log.trace('InsightFacades::performQuery(..) - processedQuery');
                                 response.code = 200;
                                 response.body = result;
                                 fullfill(response);
@@ -118,6 +119,7 @@ export default class InsightFacade implements IInsightFacade {
                             reject(response);
                         });
                     } else {
+                        Log.trace('InsightFacades::performQuery(..) - isValid = false');
                         response.body = {error: 'invalid query'};
                         reject(response);
                     }

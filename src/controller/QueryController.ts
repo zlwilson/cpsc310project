@@ -125,6 +125,8 @@ export default class QueryController {
 
     public isValid(query: QueryRequest): boolean {
         //Added an invalid condition - when GET is not included, query is not valid
+        Log.trace('QueryController::isValid(..) - validOrder = ' + this.validOrder(query));
+
         if (typeof query !== 'undefined'
             && query !== null
             && Object.keys(query).length > 0
@@ -134,8 +136,9 @@ export default class QueryController {
             && (this.validOrder(query))
         ) {
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     public getId(query: QueryRequest):string[]{
@@ -835,12 +838,9 @@ export default class QueryController {
 
     public validOrder(query: QueryRequest): Boolean
     {
-        if (typeof query.ORDER === "undefined")
-        {
+        if (typeof query.ORDER === "undefined") {
             return true;
-        }
-        else
-        {
+        } else {
             if (query.GET instanceof Array)
             {
                 for (var k = 0; k<query.GET.length; k++)
