@@ -61,15 +61,15 @@ export default class RouteHandler {
         Log.trace('RouteHandler::postQuery(..) - params: ' + JSON.stringify(req.params));
         try {
 
-            if(RouteHandler.isJson(req.params)) {
+            // if(RouteHandler.isJson(req.params)) {
                 RouteHandler.insightFacade.performQuery(req.params).then(function (response) {
                     res.json(response.code, response.body);
                 }).catch(function (response) {
                     res.json(response.code, response.body);
                 });
-            } else {
-                res.json(400, {error: 'invalid query'});
-            }
+            // } else {
+            //     res.json(400, {error: 'invalid query'});
+            // }
 
         } catch (err) {
             res.json(400,{error: err});
@@ -100,15 +100,15 @@ export default class RouteHandler {
         }
         return next();
     }
-
-    public static isJson(query: any):boolean
-    {
-        try {
-
-            JSON.parse(JSON.stringify(query));
-        } catch (e) {
-            return false;
-        }
-        return true;
-    }
+    //
+    // public static isJson(query: any):boolean
+    // {
+    //     try {
+    //
+    //         JSON.parse(JSON.stringify(query));
+    //     } catch (e) {
+    //         return false;
+    //     }
+    //     return true;
+    // }
 }

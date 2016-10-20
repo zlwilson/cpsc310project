@@ -224,29 +224,29 @@ describe("QueryController", function () {
     afterEach(function () {
     });
 
-    it("Should be able to invalidate an invalid query", function () {
-        let query: any = null;
-        let dataset: Datasets = {};
-        let controller = new QueryController(dataset);
-        let isValid = controller.isValid(query);
-
-        expect(isValid).to.equal(false);
-    });
-
-    it("Should be able to validate the simple example query from D1", function () {
-        let query: QueryRequest = {
-            GET:  ['courses_dept', 'courses_avg'],
-            WHERE: {
-                'GT': {'courses_avg': 90}
-            },
-            ORDER: 'course_avg',
-            AS: 'table'
-        };
-        // let datasets: Datasets = DatasetController.getDataset();
-        let datasets: Datasets = {};
-        let controller = new QueryController(datasets);
-        let isValid = controller.isValid(query);
-
-        expect(isValid).to.equal(false);
-    });
+    // it("Should be able to invalidate an invalid query", function () {
+    //     let query: any = null;
+    //     let dataset: Datasets = {};
+    //     let controller = new QueryController(dataset);
+    //     let isValid = controller.isValid(query);
+    //
+    //     expect(isValid).to.equal(false);
+    // });
+    //
+    // it("Should be able to validate the simple example query from D1", function () {
+    //     let query: QueryRequest = {
+    //         GET:  ['courses_dept', 'courses_avg'],
+    //         WHERE: {
+    //             'GT': {'courses_avg': 90}
+    //         },
+    //         ORDER: 'course_avg',
+    //         AS: 'table'
+    //     };
+    //     // let datasets: Datasets = DatasetController.getDataset();
+    //     let datasets: Datasets = {};
+    //     let controller = new QueryController(datasets);
+    //     let isValid = controller.isValid(query);
+    //
+    //     expect(isValid).to.equal(true);
+    // });
 });

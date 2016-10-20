@@ -14,7 +14,7 @@ export interface QueryRequest {
     GROUP?:string[];
     APPLY?:QueryToken[];
     //SORT?:{
-    ORDER: string;
+    ORDER?: string;
 
             // Comment out for testing
         //     {
@@ -131,12 +131,11 @@ export default class QueryController {
             && (typeof query.GET !== 'undefined')
             && (typeof query.WHERE !== 'undefined')
             && (typeof query.AS !== 'undefined')
-            && (this.validOrder(query))
-        ) {
-            return true;
-        } else {
-            return false;
-        }
+            && (this.validOrder(query))) {
+                return true;
+            }
+
+        return false;
     }
 
     public getId(query: QueryRequest):string[]{
@@ -154,6 +153,10 @@ export default class QueryController {
             var temp:string[] = [];
             temp.push(query.GET.toString());
             preamble = temp;
+        }
+        else
+        {
+            throw 400;
         }
 
         // requestedId should be an array of ids without duplicates
@@ -218,32 +221,6 @@ export default class QueryController {
             preamble = temp;
         }
 
-        // // requestedId should be an array of ids without duplicates
-        // // var requestedId: string[] = [];
-        // // for(var p in preamble)
-        // // {
-        // //     var tempId = preamble[p].split("_", 2)[0];
-        // //     if (requestedId.length == 0)
-        // //     {
-        // //         requestedId[0] = tempId;
-        // //     }
-        // //     else
-        // //     {
-        // //         var exist: boolean = false;
-        // //         for(var i in requestedId)
-        // //         {
-        // //             if (requestedId[i] === tempId)
-        // //             {
-        // //                 exist = true;
-        // //                 break;
-        // //             }
-        // //         }
-        // //         if(exist === false)
-        // //         {
-        // //             requestedId.push(tempId);
-        // //         }
-        // //     }
-        // // }
 
         var sections: Section[] = this.datasets[id];
 
@@ -485,7 +462,6 @@ export default class QueryController {
         return and;
     }
 
-    //Todo: deal with wrong input
     public greaterThan (query: QueryBody, sections:Section[]):any
     {
         //get the object inseide GT, use key to iterate through sections to find targeted value and compare
@@ -838,10 +814,11 @@ export default class QueryController {
     {
         if (typeof query.ORDER === "undefined") {
             return true;
-        } else {
-            if (query.GET instanceof Array)
-            {
-                for (var k = 0; k<query.GET.length; k++)
+        }
+
+        if (query.GET instanceof Array)
+        {
+            for (var k = 0; k<query.GET.length; k++)
                 {
                     if (query.GET[k] === query.ORDER)
                     {
@@ -849,14 +826,14 @@ export default class QueryController {
                     }
                 }
             }
-            else if (typeof query.GET === "string" || query.GET instanceof String)
+        else if (typeof query.GET === "string" || query.GET instanceof String)
+        {
+            if (query.GET.toString() === query.ORDER)
             {
-                if (query.GET.toString() === query.ORDER)
-                {
                     return true;
-                }
             }
         }
+
         return false;
     }
 
