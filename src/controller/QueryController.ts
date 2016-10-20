@@ -269,9 +269,9 @@ export default class QueryController {
     /*
         citation: http://codereview.stackexchange.com/questions/37028/grouping-elements-in-array-by-multiple-properties
         groupBy() returns a dictionary where:
-            key: [group by keys]
+            key: an array of strings (the group by queries)
             body: array of results
-        eg: the key ['CPSC','310'] maps to [ all the sections for 310 ... ]
+        eg: the key ['CPSC','310'] maps to [ all the sections of CPSC 310 ... ]
      */
     public groupBy(query: QueryRequest, array: Array<Result>): {} {
         var groups: any = {};
@@ -280,15 +280,15 @@ export default class QueryController {
 
         Log.info('QueryController::groupBy() - array size = ' + array.length);
 
-        var keys: any = this.getKeys(query);
+        var keys: string[] = this.getKeys(query);
         Log.info('QueryController::groupBy() - keys = ' + keys);
 
 
         for (let i in array) {
 
             var key: any = this.getValues(keys, array[i]);
-            Log.info('QueryController::groupBy() - key = ' + key);
-
+            // Log.info('QueryController::groupBy() - key = ' + key + ', # of elements in key = ' + key.length);
+            // Log.info('QueryController::groupBy() - key[] = ' + key[0] + ' & key[1] = ' + key[1]);
             if (key in groups) {
                 groups[key].push(array[i])
             } else {
@@ -303,10 +303,10 @@ export default class QueryController {
     public getKeys(query: QueryRequest): string[] {
         var result: any;
 
-        if (query.GET instanceof Array) {
-            result = query.GET;
+        if (query.GROUP instanceof Array) {
+            result = query.GROUP;
         } else {
-            result.push(query.GET.toString());
+            result.push(query.GROUP.toString());
         }
         return result;
     }
