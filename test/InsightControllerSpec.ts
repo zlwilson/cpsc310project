@@ -282,7 +282,7 @@ describe("InsightController", function () {
 
     // Invalid query tests
 
-    it("Should return a list of all missing datasets (424)", function () {
+    it("Should return 424 when dataset(s) missing (424)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         let query: QueryRequest = {
@@ -299,7 +299,26 @@ describe("InsightController", function () {
             expect.fail();
         }).catch(function (response: InsightResponse) {
             expect(response.code).to.equal(424);
-            expect(response.body).to.be("{missing: ['missing.json', 'other.json']}");
+        });
+    });
+
+    it("Should return a list of all missing datasets (424)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['missing_dept', 'other_avg'],
+            WHERE: {
+                'GT': {'courses_avg': 90}
+            },
+            ORDER: 'other_avg',
+            VIEW: {
+                AS: 'table'
+            }
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect.fail();
+        }).catch(function (response: InsightResponse) {
+            expect(response.body).to.equal("{ missing: " + [' missing', 'other'] + "}");
         });
     });
 

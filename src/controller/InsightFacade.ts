@@ -108,9 +108,10 @@ export default class InsightFacade implements IInsightFacade {
                                 response.body = result;
                                 fullfill(response);
                             }  else {
-                                Log.trace('InsightFacad::performQuery(..) - missing files, about to throw 424');
+                                Log.trace('InsightFacade::performQuery(..) - missing files, about to throw 424');
+                                Log.trace('InsightFacade::performQuery(..) - missing: ' + missedId);
                                 response.code = 424;
-                                response.body = {missing:missedId};
+                                response.body = {missing: missedId};
                                 reject(response);
                             }
                         }).catch(function (err: Error) {
