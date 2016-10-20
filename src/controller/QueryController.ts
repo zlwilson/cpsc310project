@@ -266,7 +266,13 @@ export default class QueryController {
         return orderedDs;
     }
 
-    // http://codereview.stackexchange.com/questions/37028/grouping-elements-in-array-by-multiple-properties
+    /*
+        citation: http://codereview.stackexchange.com/questions/37028/grouping-elements-in-array-by-multiple-properties
+        groupBy() returns a dictionary where:
+            key: [group by keys]
+            body: array of results
+        eg: the key ['CPSC','310'] maps to [ all the sections for 310 ... ]
+     */
     public groupBy(query: QueryRequest, array: Array<Result>): {} {
         var groups: any = {};
 
@@ -293,6 +299,7 @@ export default class QueryController {
         return groups;
     }
 
+    // helpers for groupBy()
     public getKeys(query: QueryRequest): string[] {
         var result: any;
 
