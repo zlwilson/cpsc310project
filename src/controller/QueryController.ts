@@ -14,7 +14,7 @@ export interface QueryRequest {
     GROUP?:string[];
     APPLY?:QueryToken[];
     //SORT?:{
-        ORDER: string;
+    ORDER: string;
 
             // Comment out for testing
         //     {
@@ -22,9 +22,7 @@ export interface QueryRequest {
         //     keys: string[];
         // }
     //}
-    VIEW: {
-        AS: string;
-    }
+    AS: string;
 }
 
 export interface QueryToken {
@@ -132,7 +130,7 @@ export default class QueryController {
             && Object.keys(query).length > 0
             && (typeof query.GET !== 'undefined')
             && (typeof query.WHERE !== 'undefined')
-            && (typeof query.VIEW.AS !== 'undefined')
+            && (typeof query.AS !== 'undefined')
             && (this.validOrder(query))
         ) {
             return true;
@@ -266,7 +264,7 @@ export default class QueryController {
         }
 
         //AS
-        orderedDs.render = query.VIEW.AS.toLocaleUpperCase();
+        orderedDs.render = query.AS.toLocaleUpperCase();
 
         return orderedDs;
 

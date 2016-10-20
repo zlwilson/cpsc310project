@@ -240,9 +240,7 @@ describe("QueryController", function () {
                 'GT': {'courses_avg': 90}
             },
             ORDER: 'course_avg',
-            VIEW: {
-                AS: 'table'
-            }
+            AS: 'table'
         };
         // let datasets: Datasets = DatasetController.getDataset();
         let datasets: Datasets = {};

@@ -85,9 +85,7 @@ describe("InsightController", function () {
                 'GT': {'courses_avg': 90}
             },
             ORDER: 'courses_avg',
-            VIEW: {
-                AS: 'table'
-            }
+            AS: 'table'
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
             expect(response.code).to.equal(200);
@@ -105,9 +103,7 @@ describe("InsightController", function () {
                 'GT': {'courses_avg': 50}
             },
             ORDER: 'courses_avg',
-            VIEW: {
-                AS: 'table'
-            }
+            AS: 'table'
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
             expect(response.code).to.equal(200);
@@ -125,9 +121,7 @@ describe("InsightController", function () {
                 'EQ': {'courses_avg': 90}
             },
             ORDER: 'courses_avg',
-            VIEW: {
-                AS: 'table'
-            }
+            AS: 'table'
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
             expect(response.code).to.equal(200);
@@ -149,9 +143,7 @@ describe("InsightController", function () {
                 }
             },
             ORDER: 'courses_avg',
-            VIEW: {
-                AS: 'table'
-            }
+            AS: 'table'
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
             expect(response.code).to.equal(200);
@@ -171,9 +163,7 @@ describe("InsightController", function () {
                 }
             },
             ORDER: 'courses_avg',
-            VIEW: {
-                AS: 'table'
-            }
+            AS: 'table'
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
             expect(response.code).to.equal(200);
@@ -193,9 +183,7 @@ describe("InsightController", function () {
                 }
             },
             ORDER: 'courses_avg',
-            VIEW: {
                 AS: 'table'
-            }
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
             expect(response.code).to.equal(200);
@@ -218,9 +206,7 @@ describe("InsightController", function () {
                 ]
             },
             ORDER: 'courses_avg',
-            VIEW: {
-                AS: 'table'
-            }
+            AS: 'table'
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
             expect(response.code).to.equal(200);
@@ -241,9 +227,7 @@ describe("InsightController", function () {
                 ]
             },
             ORDER: 'courses_avg',
-            VIEW: {
-                AS: 'table'
-            }
+            AS: 'table'
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
             expect(response.code).to.equal(200);
@@ -269,9 +253,7 @@ describe("InsightController", function () {
                 ]
             },
             ORDER: "courses_avg",
-            VIEW: {
-                AS: "TABLE"
-            }
+            AS: "TABLE"
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
             expect(response.code).to.equal(200);
@@ -291,9 +273,7 @@ describe("InsightController", function () {
                 'GT': {'courses_avg': 90}
             },
             ORDER: 'other_avg',
-            VIEW: {
-                AS: 'table'
-            }
+            AS: 'table'
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
             expect.fail();
@@ -311,9 +291,7 @@ describe("InsightController", function () {
                 'GT': {'courses_avg': 90}
             },
             ORDER: 'other_avg',
-            VIEW: {
-                AS: 'table'
-            }
+            AS: 'table'
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
             expect.fail();
@@ -331,9 +309,7 @@ describe("InsightController", function () {
                 'GT': {'courses_avg': 90}
             },
             ORDER: 'missing_avg',
-            VIEW: {
-                AS: 'table'
-            }
+            AS: 'table'
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
             expect.fail();
