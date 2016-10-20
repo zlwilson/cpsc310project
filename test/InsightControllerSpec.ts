@@ -593,5 +593,23 @@ describe("InsightController", function () {
         });
     });
 
+    // Deliverable 2 tests
 
+    it("Should be able to answer a valid GROUP BY query (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_id', 'courses_avg'],
+            WHERE: {
+                IS: {"courses_dept": "cpsc"}
+            },
+            GROUP: ['courses_id'],
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
 });

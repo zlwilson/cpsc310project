@@ -243,16 +243,11 @@ export default class QueryController {
         var orderedDs: QueryResponse = selectedDs;
 
         //GROUP
-        var groupedDs: QueryResponse;
-
         if (typeof query.GROUP !== "undefined") {
             var groupBY: GroupByDictionary = this.groupResult(query, selectedDs);
         }
 
-        //APPLY
-        if (typeof query.ORDER !== "undefined") {
-            orderedDs = this.orderResult(query, selectedDs);
-        }
+        orderedDs.result = this.dictToResults(groupBY);
 
         //ORDER
         if (typeof query.ORDER !== "undefined") {
@@ -267,9 +262,14 @@ export default class QueryController {
     }
 
     public groupResult(query: QueryRequest, selectedDs: QueryResponse): GroupByDictionary {
-        var response: GroupByDictionary;
+        var response: GroupByDictionary = {};
 
         var result: Array<Result> = selectedDs.result;
+        Log.info('QueryController::groupResult - start');
+        Log.info('QueryController::groupResult - grouping = ' + query.GROUP[0]);
+
+        Log.info('QueryController::groupResult - response = ' + typeof response);
+
 
         switch (query.GROUP[0]) {
             case 'courses_dept':
@@ -279,10 +279,16 @@ export default class QueryController {
                 }
                 break;
             case 'courses_id':
+                Log.info('QueryController::groupResult - switch case courses_id');
                 for(let i in result) {
                     let key = result[i].courses_id;
+                    Log.info('QueryController::groupResult - in for - key = ' + key);
+                    Log.info('QueryController::groupResult - in for - response[key] type = ' + typeof response[key]);
                     response[key].concat(result[i]);
+                    Log.info('QueryController::groupResult - in for - after concat - key = ' + key);
+                    Log.info('QueryController::groupResult - in for - after concat');
                 }
+                Log.info('QueryController::groupResult - after for, response = ' + typeof response);
                 break;
             case 'courses_instructor':
                 for(let i in result) {
@@ -322,117 +328,119 @@ export default class QueryController {
                 break;
         }
 
-        for (let i in response) {
-            for (let j in response[i]) {
-                switch (query.GROUP[0]) {
-                    case 'courses_dept':
-                        response[j].sort(function (a,b) {
-                            if (a.courses_dept < b.courses_dept)
-                            {
-                                return -1;
-                            }
-                            if (a.courses_dept > b.courses_dept)
-                            {
-                                return 1;
-                            }
-                            return 0;
-                        })
-                        break;
-                    case 'courses_id':
-                        response[j].sort(function (a,b) {
-                            if (a.courses_id < b.courses_id)
-                            {
-                                return -1;
-                            }
-                            if (a.courses_id > b.courses_id)
-                            {
-                                return 1;
-                            }
-                            return 0;
-                        })
-                        break;
-                    case 'courses_instructor':
-                        response[j].sort(function (a,b) {
-                            if (a.courses_instructor < b.courses_instructor)
-                            {
-                                return -1;
-                            }
-                            if (a.courses_instructor > b.courses_instructor)
-                            {
-                                return 1;
-                            }
-                            return 0;
-                        })
-                        break;
-                    case 'courses_title':
-                        response[j].sort(function (a,b) {
-                            if (a.courses_title < b.courses_title)
-                            {
-                                return -1;
-                            }
-                            if (a.courses_title > b.courses_title)
-                            {
-                                return 1;
-                            }
-                            return 0;
-                        })
-                        break;
-                    case 'courses_avg':
-                        response[j].sort(function (a,b) {
-                            if (a.courses_avg < b.courses_avg)
-                            {
-                                return -1;
-                            }
-                            if (a.courses_avg > b.courses_avg)
-                            {
-                                return 1;
-                            }
-                            return 0;
-                        })
-                        break;
-                    case 'courses_pass':
-                        response[j].sort(function (a,b) {
-                            if (a.courses_pass < b.courses_pass)
-                            {
-                                return -1;
-                            }
-                            if (a.courses_pass > b.courses_pass)
-                            {
-                                return 1;
-                            }
-                            return 0;
-                        })
-                        break;
-                    case 'courses_fail':
-                        response[j].sort(function (a,b) {
-                            if (a.courses_fail < b.courses_fail)
-                            {
-                                return -1;
-                            }
-                            if (a.courses_fail > b.courses_fail)
-                            {
-                                return 1;
-                            }
-                            return 0;
-                        })
-                        break;
-                    case 'courses_audit':
-                        response[j].sort(function (a,b) {
-                            if (a.courses_audit < b.courses_audit)
-                            {
-                                return -1;
-                            }
-                            if (a.courses_audit > b.courses_audit)
-                            {
-                                return 1;
-                            }
-                            return 0;
-                        })
-                        break;
+        Log.info('QueryController::groupResult - done switch 1');
+        Log.info('QueryController::groupResult - grouping = ' + query.GROUP[0]);
+
+        if (query.GROUP[1] !== 'undefined' || query.GROUP[1] !== null) {
+            for (let i in response) {
+                for (let j in response[i]) {
+                    switch (query.GROUP[1]) {
+                        case 'courses_dept':
+                            response[j].sort(function (a, b) {
+                                if (a.courses_dept < b.courses_dept) {
+                                    return -1;
+                                }
+                                if (a.courses_dept > b.courses_dept) {
+                                    return 1;
+                                }
+                                return 0;
+                            })
+                            break;
+                        case 'courses_id':
+                            response[j].sort(function (a, b) {
+                                if (a.courses_id < b.courses_id) {
+                                    return -1;
+                                }
+                                if (a.courses_id > b.courses_id) {
+                                    return 1;
+                                }
+                                return 0;
+                            })
+                            break;
+                        case 'courses_instructor':
+                            response[j].sort(function (a, b) {
+                                if (a.courses_instructor < b.courses_instructor) {
+                                    return -1;
+                                }
+                                if (a.courses_instructor > b.courses_instructor) {
+                                    return 1;
+                                }
+                                return 0;
+                            })
+                            break;
+                        case 'courses_title':
+                            response[j].sort(function (a, b) {
+                                if (a.courses_title < b.courses_title) {
+                                    return -1;
+                                }
+                                if (a.courses_title > b.courses_title) {
+                                    return 1;
+                                }
+                                return 0;
+                            })
+                            break;
+                        case 'courses_avg':
+                            response[j].sort(function (a, b) {
+                                if (a.courses_avg < b.courses_avg) {
+                                    return -1;
+                                }
+                                if (a.courses_avg > b.courses_avg) {
+                                    return 1;
+                                }
+                                return 0;
+                            })
+                            break;
+                        case 'courses_pass':
+                            response[j].sort(function (a, b) {
+                                if (a.courses_pass < b.courses_pass) {
+                                    return -1;
+                                }
+                                if (a.courses_pass > b.courses_pass) {
+                                    return 1;
+                                }
+                                return 0;
+                            })
+                            break;
+                        case 'courses_fail':
+                            response[j].sort(function (a, b) {
+                                if (a.courses_fail < b.courses_fail) {
+                                    return -1;
+                                }
+                                if (a.courses_fail > b.courses_fail) {
+                                    return 1;
+                                }
+                                return 0;
+                            })
+                            break;
+                        case 'courses_audit':
+                            response[j].sort(function (a, b) {
+                                if (a.courses_audit < b.courses_audit) {
+                                    return -1;
+                                }
+                                if (a.courses_audit > b.courses_audit) {
+                                    return 1;
+                                }
+                                return 0;
+                            })
+                            break;
+                    }
                 }
             }
         }
         return response;
+    }
+
+    public dictToResults(dictionary: GroupByDictionary): Result[] {
+        var result: Result[] = [];
+
+        //do things
+        for (let key in dictionary) {
+            for (let i in dictionary[key]) {
+                result.concat(dictionary[key][i]);
+            }
+        }
+
+        return result;
     }
 
     //return the filtered dataset , section should be Section[]
