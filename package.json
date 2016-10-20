@@ -13,6 +13,7 @@
     "chai": "^3.5.0",
     "icedfrisby": "^0.2.4",
     "istanbul": "^0.4.4",
+    "istanbul-harmony": "^0.3.16",
     "joi": "^8.4.2",
     "mocha": "^2.5.3",
     "typescript": "^1.8.7",

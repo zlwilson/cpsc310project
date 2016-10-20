@@ -16,6 +16,10 @@ curl to query localhost
 
 eg: curl localhost:4321/dataset/test --upload-file XXX.zip
 
+npm install istabul-harmony --save-dev
+node --harmony node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --timeout 10000  -u exports -R spec
+
+
 
 
 

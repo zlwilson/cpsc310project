@@ -25,6 +25,8 @@ export interface QueryRequest {
     AS: string;
 }
 
+
+
 export interface QueryToken {
     [name: string]: {
         MAX?: {
@@ -262,9 +264,9 @@ export default class QueryController {
     public groupResult(query: QueryRequest, selectedDs: QueryResponse): Array<Section[]> {
         var response: Array<Section[]>;
 
-        for (let i in selectedDs) {
-            response.concat(selectedDs[i]);
-        }
+        // for (let i in selectedDs) {
+        //     response.concat(selectedDs[i]);
+        // }
 
         for (let key in query.GROUP) {
             // sort into each key
@@ -871,9 +873,13 @@ export default class QueryController {
     public negation (query: QueryBody, sections:Section[]): Section[]
     {
         var filteredDs: Section[] = this.filter(query.NOT, sections);
+        var filteredId: string[] = [];
+        for (var s in filteredDs) {
+            filteredId.push(filteredDs[s].id);
+        }
 
         var negatedDs: Section[] =  sections.filter(function (el) {
-            return !filteredDs.includes(el);
+            return filteredId.indexOf(el.id) > -1;
         })
 
         return negatedDs;
@@ -974,4 +980,5 @@ export default class QueryController {
         }
         return false;
     }
+
 }

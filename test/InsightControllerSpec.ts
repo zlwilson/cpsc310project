@@ -190,7 +190,7 @@ describe("InsightController", function () {
             GET:  ['courses_dept', 'courses_avg'],
             WHERE: {
                 NOT: {
-                    'LT': {'courses_avg': 50}
+                    'LT': {'courses_avg': 90}
                 }
             },
             ORDER: 'courses_avg',
@@ -210,7 +210,7 @@ describe("InsightController", function () {
             GET:  ['courses_dept', 'courses_avg'],
             WHERE: {
                 NOT: {
-                    'GT': {'courses_avg': 90}
+                    'GT': {'courses_avg': 50}
                 }
             },
             ORDER: 'courses_avg',
