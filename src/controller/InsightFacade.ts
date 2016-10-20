@@ -17,7 +17,7 @@ export default class InsightFacade implements IInsightFacade {
     private static datasetController = new DatasetController();
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
-        Log.trace('InsightFacade::addDataset(..) - params: ' + id);
+        // Log.trace('InsightFacade::addDataset(..) - params: ' + id);
 
         return new Promise(function (fullfill, reject) {
             //set the initial code to be 400
@@ -26,17 +26,17 @@ export default class InsightFacade implements IInsightFacade {
 
                 let controller = InsightFacade.datasetController;
                 controller.process(id, content).then(function (result) {
-                    Log.trace('InsightFacade::addDataset(..) - processed');
+                    // Log.trace('InsightFacade::addDataset(..) - processed');
                     response.code = result;
                     fullfill(response);
                 }).catch(function (err: Error) {
-                    Log.trace('InsightFacad::addDataset(..) - ERROR: ' + err.message);
+                    // Log.trace('InsightFacad::addDataset(..) - ERROR: ' + err.message);
                     response.body = {error:err.message};
                     reject(response);
                 });
 
             } catch (err) {
-                Log.trace('InsightFacad::addDataset(..) - ERROR: ' + err.message);
+                // Log.trace('InsightFacad::addDataset(..) - ERROR: ' + err.message);
                 response.body = {error:err.message};
                 reject(response);
             }
@@ -45,23 +45,23 @@ export default class InsightFacade implements IInsightFacade {
 
     removeDataset(id: string): Promise<InsightResponse> {
         return new Promise(function (fullfill, reject) {
-            Log.trace('InsightFacade::removeDataset(..) - params: ' + id);
+            // Log.trace('InsightFacade::removeDataset(..) - params: ' + id);
             //set the initial code to be 400
             var response = {code:404, body:{}};
             try {
                InsightFacade.datasetController.delete(id).then(function (result) {
-                    console.log('Deleted ' + id + ' from ./data');
+                    // console.log('Deleted ' + id + ' from ./data');
                     response.code = result;
                     fullfill(response);
                 }).catch(function (err) {
-                   Log.trace('InsightFacad::removeDataset(..) - ERROR: ' + err.message);
+                   // Log.trace('InsightFacad::removeDataset(..) - ERROR: ' + err.message);
                    response.body = {error:err.message};
                    reject(response);
                 });
 
             } catch (err) {
                 //Todo: Is ther any other error that might not due to inexisting file?
-                Log.trace('InsightFacad::removeDataset(..) - ERROR: ' + err.message);
+                // Log.trace('InsightFacad::removeDataset(..) - ERROR: ' + err.message);
                 response.body = {error:err.message};
                 reject(response);
             }
@@ -82,7 +82,7 @@ export default class InsightFacade implements IInsightFacade {
                     let idList = controller.getId(query);
 
                     if (isValid === true) {
-                        Log.trace('InsightFacades::performQuery(..) - isValid = true');
+                        // Log.trace('InsightFacades::performQuery(..) - isValid = true');
                         var isPut:boolean;
                         var missedId: string[] = [];
 
@@ -103,24 +103,24 @@ export default class InsightFacade implements IInsightFacade {
                         }).then(function () {
                             if (typeof missedId === "undefined" || missedId.length == 0) {
                                 let result = controller.query(query, idList[0]);
-                                Log.trace('InsightFacades::performQuery(..) - processedQuery');
+                                // Log.trace('InsightFacades::performQuery(..) - processedQuery');
                                 response.code = 200;
                                 response.body = result;
                                 fullfill(response);
                             }  else {
-                                Log.trace('InsightFacade::performQuery(..) - missing files, about to throw 424');
+                                // Log.trace('InsightFacade::performQuery(..) - missing files, about to throw 424');
                                 Log.trace('InsightFacade::performQuery(..) - missing: ' + missedId);
                                 response.code = 424;
                                 response.body = {missing: JSON.stringify(missedId)};
                                 reject(response);
                             }
                         }).catch(function (err: Error) {
-                            Log.trace('InsightFacad::performQuery(..) - ERROR: ' + err.message);
+                            // Log.trace('InsightFacad::performQuery(..) - ERROR: ' + err.message);
                             response.body = {error: err.message};
                             reject(response);
                         });
                     } else {
-                        Log.trace('InsightFacades::performQuery(..) - isValid = false');
+                        // Log.trace('InsightFacades::performQuery(..) - isValid = false');
                         response.body = {error: 'invalid query'};
                         reject(response);
                     }

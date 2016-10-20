@@ -235,6 +235,18 @@ export default class QueryController {
 
         var orderedDs: QueryResponse = selectedDs;
 
+        //GROUP
+        var groupedDs: Array<Section[]>;
+
+        if (typeof query.GROUP !== "undefined") {
+            groupedDs = this.groupResult(query, selectedDs);
+        }
+
+        //APPLY
+        if (typeof query.ORDER !== "undefined") {
+            orderedDs = this.orderResult(query, selectedDs);
+        }
+
         //ORDER
         if (typeof query.ORDER !== "undefined") {
             orderedDs = this.orderResult(query, selectedDs);
@@ -245,6 +257,86 @@ export default class QueryController {
 
         return orderedDs;
 
+    }
+
+    public groupResult(query: QueryRequest, selectedDs: QueryResponse): Array<Section[]> {
+        var response: Array<Section[]>;
+
+        selectedDs.result.sort(function (a, b) {
+            if (a.courses_dept < b.courses_dept)
+            {
+                return -1;
+            }
+            if (a.courses_dept > b.courses_dept)
+            {
+                return 1;
+            }
+            return 0;
+        });
+
+
+        for (let key in query.GROUP) {
+            // sort into each key
+            let criteria = query.GROUP[key];
+
+            switch (criteria) {
+                case 'courses_dept':
+                    selectedDs.result.sort(function (a,b) {
+                        if (a.courses_dept < b.courses_dept)
+                        {
+                            return -1;
+                        }
+                        if (a.courses_dept > b.courses_dept)
+                        {
+                            return 1;
+                        }
+                        return 0;
+                    });
+                    break;
+                case 'courses_id':
+                    selectedDs.result.sort(function (a,b) {
+                        if (a.courses_dept < b.courses_dept)
+                        {
+                            return -1;
+                        }
+                        if (a.courses_dept > b.courses_dept)
+                        {
+                            return 1;
+                        }
+                        return 0;
+                    });
+                    break;
+                case 'courses_instructor':
+                    selectedDs.result.sort(function (a,b) {
+                        if (a.courses_instructor < b.courses_instructor)
+                        {
+                            return -1;
+                        }
+                        if (a.courses_instructor > b.courses_instructor)
+                        {
+                            return 1;
+                        }
+                        return 0;
+                    });
+                    break;
+                case 'courses_title':
+                    selectedDs.result.sort(function (a,b) {
+                        if (a.courses_title < b.courses_title)
+                        {
+                            return -1;
+                        }
+                        if (a.courses_title > b.courses_title)
+                        {
+                            return 1;
+                        }
+                        return 0;
+                    });
+                    break;
+            }
+        }
+
+
+        return response;
     }
 
     //return the filtered dataset , section should be Section[]
