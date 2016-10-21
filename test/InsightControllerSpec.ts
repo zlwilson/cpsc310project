@@ -152,6 +152,244 @@ describe("InsightController", function () {
         });
     });
 
+    // Extra tests for coverage
+
+    it("Should be able to query on courses_pass EQ (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_pass'],
+            WHERE: {
+                'EQ': {'courses_pass': 90}
+            },
+            ORDER: 'courses_pass',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on courses_pass LT (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_pass'],
+            WHERE: {
+                'LT': {'courses_pass': 50}
+            },
+            ORDER: 'courses_pass',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on courses_pass GT (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_pass'],
+            WHERE: {
+                'GT': {'courses_pass': 90}
+            },
+            ORDER: 'courses_pass',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on courses_fail EQ (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_fail'],
+            WHERE: {
+                'EQ': {'courses_fail': 50}
+            },
+            ORDER: 'courses_fail',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on courses_fail LT (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_fail'],
+            WHERE: {
+                'LT': {'courses_fail': 40}
+            },
+            ORDER: 'courses_fail',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on courses_fail GT (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_fail'],
+            WHERE: {
+                'GT': {'courses_fail': 50}
+            },
+            ORDER: 'courses_fail',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on courses_audit GT (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_audit'],
+            WHERE: {
+                'GT': {'courses_audit': 8}
+            },
+            ORDER: 'courses_audit',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on courses_audit LT (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_audit'],
+            WHERE: {
+                'LT': {'courses_audit': 2}
+            },
+            ORDER: 'courses_audit',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on courses_audit EQ (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_audit'],
+            WHERE: {
+                'EQ': {'courses_audit': 2}
+            },
+            ORDER: 'courses_audit',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on courses_dept (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_avg'],
+            WHERE: {
+                'IS': {'courses_dept': 'cpsc'}
+            },
+            ORDER: 'courses_dept',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    // Todo: make this test more robust
+    it("Should be able to query on courses_instructor (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_instructor'],
+            WHERE: {
+                'IS': {'courses_instructor': 'Murphy, Gail '}
+            },
+            ORDER: 'courses_instructor',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    // Todo: make this test more robust
+    it("Should be able to query on courses_title (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_title'],
+            WHERE: {
+                'IS': {'courses_title': 'intro'}
+            },
+            ORDER: 'courses_title',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+    
+    it("Should be able to query on courses_id (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_id'],
+            WHERE: {
+                'IS': {'courses_id': '100'}
+            },
+            ORDER: 'courses_id',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
     // Query tests of NOT math functions over courses_avg
 
     it("Should be able to answer a valid NOT EQ query (200)", function () {
@@ -484,6 +722,8 @@ describe("InsightController", function () {
         });
     });
 
+    // More valid query tests
+
     it("Should be able to answer a valid OR query with a string inside GET(200)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
@@ -595,7 +835,7 @@ describe("InsightController", function () {
 
     // Deliverable 2 tests
 
-    it("Should be able to answer a valid GROUP BY query (200)", function () {
+    it("Should be able to answer a valid GROUP BY courses_id query (200)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         let query: QueryRequest = {
@@ -604,6 +844,96 @@ describe("InsightController", function () {
                 IS: {"courses_dept": "cpsc"}
             },
             GROUP: ['courses_id'],
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to answer a valid GROUP BY courses_dept and courses_avg query (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_id', 'courses_avg', 'courses_dept'],
+            WHERE: {
+                IS: {"courses_dept": "cpsc"}
+            },
+            GROUP: ['courses_dept', 'courses_avg'],
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to answer a valid GROUP BY courses_instructor query (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_instructor', 'courses_avg'],
+            WHERE: {
+                IS: {"courses_dept": "cpsc"}
+            },
+            GROUP: ['courses_instructor'],
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to answer a valid GROUP BY courses_pass (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_id', 'courses_pass'],
+            WHERE: {
+                IS: {"courses_dept": "cpsc"}
+            },
+            GROUP: ['courses_pass'],
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to answer a valid GROUP BY courses_fail (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_id', 'courses_fail'],
+            WHERE: {
+                IS: {"courses_dept": "cpsc"}
+            },
+            GROUP: ['courses_fail'],
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to answer a valid GROUP BY courses_audit (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_id', 'courses_audit'],
+            WHERE: {
+                IS: {"courses_dept": "cpsc"}
+            },
+            GROUP: ['courses_audit'],
             AS: 'table'
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
