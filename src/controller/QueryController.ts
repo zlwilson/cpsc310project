@@ -791,19 +791,20 @@ export default class QueryController {
                     }
                 }
                 break;
-            case 'courses_id':
-                comparedVal = query.EQ.courses_id;
-                compareField = "id";
-                for (let section in sections)
-                {
-                    var s:Section = sections[section];
-                    if (s.Course == comparedVal)
-                    {
-                        filteredDs.push(s);
-                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", equal to " + comparedVal);
-                    }
-                }
-                break;
+            // Todo: delete this because can't compare id with number
+            // case 'courses_id':
+            //     comparedVal = query.EQ.courses_id;
+            //     compareField = "id";
+            //     for (let section in sections)
+            //     {
+            //         var s:Section = sections[section];
+            //         if (s.Course == comparedVal)
+            //         {
+            //             filteredDs.push(s);
+            //             //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", equal to " + comparedVal);
+            //         }
+            //     }
+            //     break;
             default:
                 Log.error("Unexpected compare value");
                 throw new Error('Invalid Query');
@@ -881,20 +882,21 @@ export default class QueryController {
                     }
                 }
                 break;
-            case 'courses_fail':
-                comparedVal = query.IS.courses_fail.toLocaleString();
-                compareField = "fail";
-                for (let section in sections)
-                {
-                    var s:Section = sections[section];
-
-                    var ifContains: Boolean = this.compareStringHelper(s.Fail.toLocaleString(), comparedVal);
-                    if (ifContains)
-                    {
-                        filteredDs.push(s);
-                    }
-                }
-                break;
+            // Todo: delete this because can't compare fail to string
+            // case 'courses_fail':
+            //     comparedVal = query.IS.courses_fail.toLocaleString();
+            //     compareField = "fail";
+            //     for (let section in sections)
+            //     {
+            //         var s:Section = sections[section];
+            //
+            //         var ifContains: Boolean = this.compareStringHelper(s.Fail.toLocaleString(), comparedVal);
+            //         if (ifContains)
+            //         {
+            //             filteredDs.push(s);
+            //         }
+            //     }
+            //     break;
             default:
                 Log.error("Unexpected compare value");
                 throw new Error('Invalid Query');
