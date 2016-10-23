@@ -942,4 +942,23 @@ describe("InsightController", function () {
             expect.fail('Should not happen');
         });
     });
+
+    it("Should be able to answer a valid APPLY MAX courses_avg (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_id', 'maxAvg'],
+            WHERE: {
+                IS: {"courses_dept": "cpsc"}
+            },
+            GROUP: ['courses_id'],
+            APPLY: [{'maxAvg':{'MAX':"courses_avg"}}],
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
 });

@@ -52,6 +52,11 @@ export interface QueryToken {
         }
 
         COUNT?: {
+            courses_dept?: string;
+            courses_id?: string;
+            courses_instructor?: string;
+            courses_title?: string;
+
             courses_avg?: number;
             courses_pass?: number;
             courses_fail?: number;
@@ -98,7 +103,7 @@ export interface QueryBody
 
 export interface QueryResponse
 {
-    result: Array<Result>;
+    result: Array<any>;
     render: string;
 }
 
@@ -113,6 +118,7 @@ export interface Result
     courses_pass?: number;
     courses_fail?: number;
     courses_audit?: number;
+
 }
 
 export interface GroupByDictionary {
@@ -141,25 +147,25 @@ export default class QueryController {
             && (this.validOrder(query))) {
                 return true;
             }
+            //Todo: check if Group and Apply go together
 
         return false;
     }
 
     public getId(query: QueryRequest):string[]{
 
-        var preamble: any;
+        var preamble: string[] = [];
 
         if (query.GET instanceof Array)
         {
             Log.trace("as an array");
-            preamble = query.GET;
+            var temp = query.GET as string[];
+            preamble = temp;
         }
         else if (typeof query.GET === "string" || query.GET instanceof String)
         {
             Log.trace("as a string");
-            var temp:string[] = [];
-            temp.push(query.GET.toString());
-            preamble = temp;
+            preamble.push(query.GET.toString());
         }
         else
         {
@@ -168,6 +174,21 @@ export default class QueryController {
 
         // requestedId should be an array of ids without duplicates
         var requestedId: string[] = [];
+
+        //if there is any APPLY key, delete it from preamble.
+        if (typeof query.APPLY !== 'undefined') {
+            var applyKeys:string[] = [];
+
+            for (var a in query.APPLY) {
+                var keyTemp = Object.keys(query.APPLY[a]);
+                applyKeys.concat(keyTemp);
+            }
+
+            preamble = preamble.filter(function (el) {
+                return applyKeys.indexOf(el) > -1;
+            })
+        }
+
         for(var p in preamble)
         {
             var tempId = preamble[p].split("_")[0];
@@ -237,17 +258,35 @@ export default class QueryController {
         var jsonwhere = query.WHERE;
         var filteredDs: Section[]  = this.filter(jsonwhere, sections);
 
-        //GET
-        var selectedDs: QueryResponse = this.getColumn(preamble, filteredDs);
+        var groupedDs:any;
+        var applyTerms : string[] = [];
 
-        var groupedDs: QueryResponse = selectedDs;
-
-        //GROUP
+        //GROUP & APPLY
         if (query.GROUP instanceof Array) {
+
             Log.info('QueryController::query() - GROUP BY');
-            var grouped: any = this.groupBy(query, selectedDs.result);
-            groupedDs.result = this.dictToResults(grouped);
+            var grouped: any = this.groupBy(query, filteredDs);
+
+            Log.info('QueryController::query() - APPLY');
+            for (var a in query.APPLY) {
+                applyTerms.concat(Object.keys(query.APPLY[a]));
+            }
+
+            var applied: any = this.apply(query, grouped);
+            groupedDs = this.dictToResults(applied);
+
+        } else if (typeof query.GROUP === 'undefined') {
+
+            groupedDs = filteredDs;
+
+        } else {
+
+            throw new Error('QueryController:: GROUP - Invalid Query');
         }
+
+        //GET
+        var selectedDs: QueryResponse = this.getColumn(preamble, groupedDs, applyTerms);
+
 
         // Log.info('QueryController::query() - orderedDs result is:');
         // for (var i = 0; i <= 5; i++) {
@@ -256,10 +295,10 @@ export default class QueryController {
 
         //ORDER
 
-        var orderedDs = groupedDs;
+        var orderedDs = selectedDs;
 
         if (typeof query.ORDER !== "undefined") {
-            orderedDs = this.orderResult(query, groupedDs);
+            orderedDs = this.orderResult(query, selectedDs);
         }
 
         //AS
@@ -275,7 +314,7 @@ export default class QueryController {
             body: array of results
         eg: the key ['CPSC','310'] maps to [ all the sections of CPSC 310 ... ]
      */
-    public groupBy(query: QueryRequest, array: Array<Result>): {} {
+    public groupBy(query: QueryRequest, array: Section[]): {} {
         var groups: any = {};
 
         Log.info('QueryController::groupBy()...');
@@ -313,11 +352,57 @@ export default class QueryController {
         return result;
     }
 
+    public apply(query: QueryRequest, groups:any):{} {
+        var result:any = {};
+
+        try {
+            //Loop through each group
+            for (var g in groups) {
+
+                //Create dictionary for each group to store the result of calculations
+                var groupResult:any = {};
+
+                //Loop through each applyToken
+                for (var i in query.APPLY) {
+                    var term: string = Object.keys(query.APPLY[i])[0];
+                    var calculation: any = query.APPLY[i][term];
+
+                    var token = Object.keys(calculation)[0];
+
+                    //Switch to different calculations according to applyToken
+                    switch (token) {
+                        case 'MAX':
+                            groupResult[term] = this.max(groups[g], calculation[token]);
+                            break;
+                        case 'MIN':
+                            groupResult[term] = this.min(groups[g], calculation[token]);
+                            break;
+                        case 'AVG':
+                            groupResult[term] = this.avg(groups[g], calculation[token]);
+                            break;
+                        case 'COUNT':
+                            groupResult[term] = this.count(groups[g], calculation[token]);
+                            break;
+                        default:
+                            Log.error("Unexpected Apply Token");
+                            throw  new Error("Invalid Apply Token");
+                    }
+                }
+
+                //add dictionary to result[current group]
+                result[g] = groupResult;
+            }
+        } catch (err) {
+            Log.error("QueryController::Apply() + Error: " + err);
+        }
+
+        return result;
+    }
+
     public dictToResults(dictionary: any): Result[] {
         var result: Result[] = [];
         Log.info('QueryController::dictToResults - start');
 
-        //do things
         for (let key in dictionary) {
             // Log.info('QueryController::dictToResults - for - key = ' + key);
             // Log.info('QueryController::dictToResults - key ' + key + ' length = ' + dictionary[key].length);
@@ -369,6 +454,8 @@ export default class QueryController {
         return result;
     }
 
+
+
     //return the filtered dataset , section should be Section[]
     public filter(query: QueryBody, sections: Section[]): Section[]
     {
@@ -413,13 +500,13 @@ export default class QueryController {
         return filteredDs;
     }
 
-    public getColumn(preamble: string[], sections: Section[]): QueryResponse
+    public getColumn(preamble: string[], sections: Array<any>, applyTerms: string[]): QueryResponse
     {
         var selectedDs: QueryResponse = { result:[], render:""};
 
         for (let section in sections)
         {
-            var result: Result = {};
+            var result:any = {};
 
             for (let p in preamble)
             {
@@ -452,8 +539,12 @@ export default class QueryController {
                         result["courses_audit"] = sections[section].Audit;
                         break;
                     default:
-                        Log.error("Unexpected GET input");
-                        throw new Error("Invalid Query");
+                         if(p in applyTerms) {
+                            result[p] = sections[section][p];
+                        } else {
+                             Log.error("Unexpected GET input");
+                             throw new Error("Invalid Query");
+                         }
                 }
             }
             selectedDs.result.push(result);
@@ -1016,6 +1107,31 @@ export default class QueryController {
             }
         }
         return false;
+    }
+
+    private max(setions: Section[], key:string):number {
+        var numArray : number[] = [];
+
+        for (var s in setions) {
+            var section: any = setions[s];
+            numArray.push(section[key]);
+        }
+
+        var maxNum = Math.max.apply(null, numArray);
+
+        return maxNum;
+    }
+
+    private min(setions: Section[], key:string):number {
+        return 0;
+    }
+
+    private avg(setions: Section[], key:string):number {
+        return 0;
+    }
+
+    private count(setions: Section[], key:string):number {
+        return 0;
     }
 
 }
