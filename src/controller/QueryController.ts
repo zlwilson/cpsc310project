@@ -421,34 +421,34 @@ export default class QueryController {
         return result;
     }
 
-    public getValues(preamble: string[], section: Result): string[] {
+    public getValues(preamble: string[], section: Section): string[] {
         var result: any = [];
 
         for (let p in preamble) {
             switch (preamble[p]) {
                 case 'courses_dept':
-                    result.push(section.courses_dept);
+                    result.push(section.Subject);
                     break;
                 case 'courses_id':
-                    result.push(section.courses_id);
+                    result.push(section.Course);
                     break;
                 case 'courses_avg':
-                    result.push(section.courses_avg);
+                    result.push(section.Avg);
                     break;
                 case 'courses_instructor':
-                    result.push(section.courses_instructor);
+                    result.push(section.Professor);
                     break;
                 case 'courses_title':
-                    result.push(section.courses_title);
+                    result.push(section.Title);
                     break;
                 case 'courses_pass':
-                    result.push(section.courses_pass);
+                    result.push(section.Pass);
                     break;
                 case 'courses_fail':
-                    result.push(section.courses_fail);
+                    result.push(section.Fail);
                     break;
                 case 'courses_audit':
-                    result.push(section.courses_audit);
+                    result.push(section.Audit);
                     break;
                 default:
                     Log.error("Unexpected GET input");
