@@ -144,7 +144,12 @@ export default class QueryController {
             && (typeof query.GET !== 'undefined')
             && (typeof query.WHERE !== 'undefined')
             && (typeof query.AS !== 'undefined')
-            && (this.validOrder(query))) {
+            && (this.validOrder(query))
+            && (
+                ((typeof query.GROUP === 'undefined') && (typeof query.APPLY === 'undefined'))
+             ||((typeof query.GROUP !== 'undefined') && (typeof query.APPLY !== 'undefined'))
+            )
+        ) {
                 return true;
             }
             //Todo: check if Group and Apply go together
@@ -181,11 +186,11 @@ export default class QueryController {
 
             for (var a in query.APPLY) {
                 var keyTemp = Object.keys(query.APPLY[a]);
-                applyKeys.concat(keyTemp);
+                applyKeys.push(keyTemp[0]); // assume each apply token has exactly one key
             }
 
             preamble = preamble.filter(function (el) {
-                return applyKeys.indexOf(el) > -1;
+                return applyKeys.indexOf(el) === -1;
             })
         }
 
@@ -265,15 +270,14 @@ export default class QueryController {
         if (query.GROUP instanceof Array) {
 
             Log.info('QueryController::query() - GROUP BY');
-            var grouped: any = this.groupBy(query, filteredDs);
+            var grouped: any = this.groupBy(query, filteredDs); // return a dictionary of groups
 
             Log.info('QueryController::query() - APPLY');
             for (var a in query.APPLY) {
-                applyTerms.concat(Object.keys(query.APPLY[a]));
+                applyTerms.concat(Object.keys(query.APPLY[a])); // to pass applyTerms to getColumn()
             }
-
-            var applied: any = this.apply(query, grouped);
-            groupedDs = this.dictToResults(applied);
+            var applied: any = this.apply(query, grouped); // return a dictionary of groups with applied value
+            groupedDs = this.dictToResults(applied); // return an array of results
 
         } else if (typeof query.GROUP === 'undefined') {
 
@@ -284,7 +288,7 @@ export default class QueryController {
             throw new Error('QueryController:: GROUP - Invalid Query');
         }
 
-        //GET
+        //GET:: takes either an array of sections or an array of results, and return a QueryResponse (render, result)
         var selectedDs: QueryResponse = this.getColumn(preamble, groupedDs, applyTerms);
 
 
@@ -500,6 +504,11 @@ export default class QueryController {
         return filteredDs;
     }
 
+
+    // Parameters:
+    //      - preamble: columns to get
+    //      - sections: an array of sections or grouped & applied sections
+    //      - applyTerms: names of calculated values
     public getColumn(preamble: string[], sections: Array<any>, applyTerms: string[]): QueryResponse
     {
         var selectedDs: QueryResponse = { result:[], render:""};

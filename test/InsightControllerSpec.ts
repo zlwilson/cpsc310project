@@ -835,10 +835,10 @@ describe("InsightController", function () {
 
     // Deliverable 2 tests
 
-    it("Should be able to answer a valid GROUP BY courses_id query (200)", function () {
+    it("Should invalidate an query with GROUP but no APPLY (400)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
-        let query: QueryRequest = {
+        let query: any = {
             GET:  ['courses_id', 'courses_avg'],
             WHERE: {
                 IS: {"courses_dept": "cpsc"}
@@ -847,101 +847,119 @@ describe("InsightController", function () {
             AS: 'table'
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
-            expect(response.code).to.equal(200);
+            expect.fail();
         }).catch(function (response: InsightResponse) {
-            expect.fail('Should not happen');
+            expect(response.code).to.equal(400);
         });
     });
 
-    it("Should be able to answer a valid GROUP BY courses_dept and courses_avg query (200)", function () {
-        var that = this;
-        Log.trace("Starting test: " + that.test.title);
-        let query: QueryRequest = {
-            GET:  ['courses_id', 'courses_avg', 'courses_dept'],
-            WHERE: {
-                IS: {"courses_dept": "cpsc"}
-            },
-            GROUP: ['courses_dept', 'courses_avg'],
-            AS: 'table'
-        };
-        return facade.performQuery(query).then(function (response: InsightResponse) {
-            expect(response.code).to.equal(200);
-        }).catch(function (response: InsightResponse) {
-            expect.fail('Should not happen');
-        });
-    });
+    // it("Should be able to answer a valid GROUP BY courses_id query (200)", function () {
+    //     var that = this;
+    //     Log.trace("Starting test: " + that.test.title);
+    //     let query: QueryRequest = {
+    //         GET:  ['courses_id', 'courses_avg'],
+    //         WHERE: {
+    //             IS: {"courses_dept": "cpsc"}
+    //         },
+    //         GROUP: ['courses_id'],
+    //         AS: 'table'
+    //     };
+    //     return facade.performQuery(query).then(function (response: InsightResponse) {
+    //         expect(response.code).to.equal(200);
+    //     }).catch(function (response: InsightResponse) {
+    //         expect.fail('Should not happen');
+    //     });
+    // });
+    //
+    // it("Should be able to answer a valid GROUP BY courses_dept and courses_avg query (200)", function () {
+    //     var that = this;
+    //     Log.trace("Starting test: " + that.test.title);
+    //     let query: QueryRequest = {
+    //         GET:  ['courses_id', 'courses_avg', 'courses_dept'],
+    //         WHERE: {
+    //             IS: {"courses_dept": "cpsc"}
+    //         },
+    //         GROUP: ['courses_dept', 'courses_avg'],
+    //         AS: 'table'
+    //     };
+    //     return facade.performQuery(query).then(function (response: InsightResponse) {
+    //         expect(response.code).to.equal(200);
+    //     }).catch(function (response: InsightResponse) {
+    //         expect.fail('Should not happen');
+    //     });
+    // });
+    //
+    // it("Should be able to answer a valid GROUP BY courses_instructor query (200)", function () {
+    //     var that = this;
+    //     Log.trace("Starting test: " + that.test.title);
+    //     let query: QueryRequest = {
+    //         GET:  ['courses_instructor', 'courses_avg'],
+    //         WHERE: {
+    //             IS: {"courses_dept": "cpsc"}
+    //         },
+    //         GROUP: ['courses_instructor'],
+    //         AS: 'table'
+    //     };
+    //     return facade.performQuery(query).then(function (response: InsightResponse) {
+    //         expect(response.code).to.equal(200);
+    //     }).catch(function (response: InsightResponse) {
+    //         expect.fail('Should not happen');
+    //     });
+    // });
+    //
+    // it("Should be able to answer a valid GROUP BY courses_pass (200)", function () {
+    //     var that = this;
+    //     Log.trace("Starting test: " + that.test.title);
+    //     let query: QueryRequest = {
+    //         GET:  ['courses_id', 'courses_pass'],
+    //         WHERE: {
+    //             IS: {"courses_dept": "cpsc"}
+    //         },
+    //         GROUP: ['courses_pass'],
+    //         AS: 'table'
+    //     };
+    //     return facade.performQuery(query).then(function (response: InsightResponse) {
+    //         expect(response.code).to.equal(200);
+    //     }).catch(function (response: InsightResponse) {
+    //         expect.fail('Should not happen');
+    //     });
+    // });
 
-    it("Should be able to answer a valid GROUP BY courses_instructor query (200)", function () {
-        var that = this;
-        Log.trace("Starting test: " + that.test.title);
-        let query: QueryRequest = {
-            GET:  ['courses_instructor', 'courses_avg'],
-            WHERE: {
-                IS: {"courses_dept": "cpsc"}
-            },
-            GROUP: ['courses_instructor'],
-            AS: 'table'
-        };
-        return facade.performQuery(query).then(function (response: InsightResponse) {
-            expect(response.code).to.equal(200);
-        }).catch(function (response: InsightResponse) {
-            expect.fail('Should not happen');
-        });
-    });
-
-    it("Should be able to answer a valid GROUP BY courses_pass (200)", function () {
-        var that = this;
-        Log.trace("Starting test: " + that.test.title);
-        let query: QueryRequest = {
-            GET:  ['courses_id', 'courses_pass'],
-            WHERE: {
-                IS: {"courses_dept": "cpsc"}
-            },
-            GROUP: ['courses_pass'],
-            AS: 'table'
-        };
-        return facade.performQuery(query).then(function (response: InsightResponse) {
-            expect(response.code).to.equal(200);
-        }).catch(function (response: InsightResponse) {
-            expect.fail('Should not happen');
-        });
-    });
-
-    it("Should be able to answer a valid GROUP BY courses_fail (200)", function () {
-        var that = this;
-        Log.trace("Starting test: " + that.test.title);
-        let query: QueryRequest = {
-            GET:  ['courses_id', 'courses_fail'],
-            WHERE: {
-                IS: {"courses_dept": "cpsc"}
-            },
-            GROUP: ['courses_fail'],
-            AS: 'table'
-        };
-        return facade.performQuery(query).then(function (response: InsightResponse) {
-            expect(response.code).to.equal(200);
-        }).catch(function (response: InsightResponse) {
-            expect.fail('Should not happen');
-        });
-    });
-
-    it("Should be able to answer a valid GROUP BY courses_audit (200)", function () {
-        var that = this;
-        Log.trace("Starting test: " + that.test.title);
-        let query: QueryRequest = {
-            GET:  ['courses_id', 'courses_audit'],
-            WHERE: {
-                IS: {"courses_dept": "cpsc"}
-            },
-            GROUP: ['courses_audit'],
-            AS: 'table'
-        };
-        return facade.performQuery(query).then(function (response: InsightResponse) {
-            expect(response.code).to.equal(200);
-        }).catch(function (response: InsightResponse) {
-            expect.fail('Should not happen');
-        });
-    });
+    // it("Should be able to answer a valid GROUP BY courses_fail (200)", function () {
+    //     var that = this;
+    //     Log.trace("Starting test: " + that.test.title);
+    //     let query: QueryRequest = {
+    //         GET:  ['courses_id', 'courses_fail'],
+    //         WHERE: {
+    //             IS: {"courses_dept": "cpsc"}
+    //         },
+    //         GROUP: ['courses_fail'],
+    //         AS: 'table'
+    //     };
+    //     return facade.performQuery(query).then(function (response: InsightResponse) {
+    //         expect(response.code).to.equal(200);
+    //     }).catch(function (response: InsightResponse) {
+    //         expect.fail('Should not happen');
+    //     });
+    // });
+    //
+    // it("Should be able to answer a valid GROUP BY courses_audit (200)", function () {
+    //     var that = this;
+    //     Log.trace("Starting test: " + that.test.title);
+    //     let query: QueryRequest = {
+    //         GET:  ['courses_id', 'courses_audit'],
+    //         WHERE: {
+    //             IS: {"courses_dept": "cpsc"}
+    //         },
+    //         GROUP: ['courses_audit'],
+    //         AS: 'table'
+    //     };
+    //     return facade.performQuery(query).then(function (response: InsightResponse) {
+    //         expect(response.code).to.equal(200);
+    //     }).catch(function (response: InsightResponse) {
+    //         expect.fail('Should not happen');
+    //     });
+    //});
 
     it("Should be able to answer a valid APPLY MAX courses_avg (200)", function () {
         var that = this;
