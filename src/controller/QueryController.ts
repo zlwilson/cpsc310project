@@ -274,7 +274,7 @@ export default class QueryController {
 
             Log.info('QueryController::query() - APPLY');
             for (var a in query.APPLY) {
-                applyTerms.concat(Object.keys(query.APPLY[a])); // to pass applyTerms to getColumn()
+                applyTerms.push(Object.keys(query.APPLY[a])[0]); // to pass applyTerms to getColumn()
             }
             var applied: any = this.apply(query, grouped); // return a dictionary of groups with applied value
             groupedDs = this.dictToResults(applied); // return an array of results
@@ -366,6 +366,13 @@ export default class QueryController {
                 //Create dictionary for each group to store the result of calculations
                 var groupResult:any = {};
 
+                //Add group key information to groupResult
+                for(var gk in query.GROUP) {
+                    var groupKey = this.sectionTranslator(query.GROUP[gk]);
+                    var groupValue = groups[g][0][groupKey];
+                    groupResult[groupKey] = groupValue;
+                }
+
                 //Loop through each applyToken
                 for (var i in query.APPLY) {
                     var term: string = Object.keys(query.APPLY[i])[0];
@@ -411,9 +418,7 @@ export default class QueryController {
             // Log.info('QueryController::dictToResults - for - key = ' + key);
             // Log.info('QueryController::dictToResults - key ' + key + ' length = ' + dictionary[key].length);
 
-            for (let i in dictionary[key]) {
-                result.push(dictionary[key][i]);
-            }
+            result.push(dictionary[key]);
         }
 
         Log.info('QueryController::dictToResults - result = ' + result.length);
@@ -421,7 +426,7 @@ export default class QueryController {
         return result;
     }
 
-    public getValues(preamble: string[], section: Section): string[] {
+    public getValues(preamble: string[], section: Section): Array<any> {
         var result: any = [];
 
         for (let p in preamble) {
@@ -524,32 +529,18 @@ export default class QueryController {
                 switch (preamble[p])
                 {
                     case 'courses_dept':
-                        result["courses_dept"] = sections[section].Subject;
-                        break;
                     case 'courses_id':
-                        result["courses_id"] = sections[section].Course;
-                        break;
                     case 'courses_avg':
-                        result["courses_avg"] = sections[section].Avg;
-                        break;
                     case 'courses_instructor':
-                        result["courses_instructor"] = sections[section].Professor;
-                        break;
                     case 'courses_title':
-                        result["courses_title"] = sections[section].Title;
-                        break;
                     case 'courses_pass':
-                        result["courses_pass"] = sections[section].Pass;
-                        break;
                     case 'courses_fail':
-                        result["courses_fail"] = sections[section].Fail;
-                        break;
                     case 'courses_audit':
-                        result["courses_audit"] = sections[section].Audit;
+                        result[preamble[p]] = sections[section][this.sectionTranslator(preamble[p])];
                         break;
                     default:
-                         if(p in applyTerms) {
-                            result[p] = sections[section][p];
+                         if(applyTerms.indexOf(preamble[p]) > -1) {
+                            result[preamble[p]] = sections[section][preamble[p]];
                         } else {
                              Log.error("Unexpected GET input");
                              throw new Error("Invalid Query");
@@ -1118,12 +1109,14 @@ export default class QueryController {
         return false;
     }
 
-    private max(setions: Section[], key:string):number {
+    private max(sections: Section[], key:string):number {
         var numArray : number[] = [];
 
-        for (var s in setions) {
-            var section: any = setions[s];
-            numArray.push(section[key]);
+        var transKey = this.sectionTranslator(key);
+
+        for (var s in sections) {
+            var section: any = sections[s];
+            numArray.push(section[transKey]);
         }
 
         var maxNum = Math.max.apply(null, numArray);
@@ -1131,16 +1124,84 @@ export default class QueryController {
         return maxNum;
     }
 
-    private min(setions: Section[], key:string):number {
-        return 0;
+    private min(sections: Section[], key:string):number {
+        var numArray : number[] = [];
+
+        var transKey = this.sectionTranslator(key);
+
+        for (var s in sections) {
+            var section: any = sections[s];
+            numArray.push(section[transKey]);
+        }
+
+        var mimNum = Math.min.apply(null, numArray);
+
+        return mimNum;
     }
 
-    private avg(setions: Section[], key:string):number {
-        return 0;
+    private avg(sections: Section[], key:string):number {
+        var sum: number = 0;
+
+        var transKey = this.sectionTranslator(key);
+
+        for (var s in sections) {
+            var section: any = sections[s];
+            sum += section[transKey];
+        }
+
+        var sectionNum = sections.length;
+        return sum/sectionNum;
     }
 
-    private count(setions: Section[], key:string):number {
-        return 0;
+    private count(sections: Section[], key:string):number {
+        var array: Array<any> = [];
+
+        var transKey = this.sectionTranslator(key);
+
+        for (var s in sections) {
+            var section: any = sections[s];
+            if( array.indexOf(section[transKey]) === -1) {
+                array.push(section[transKey]);
+            }
+        }
+        return array.length;
+    }
+
+    //Translate query to what section can understand
+    private sectionTranslator(key: string) : string {
+
+        var translated: string = key;
+
+        switch (key) {
+            case 'courses_dept':
+                translated = "Subject";
+                break;
+            case 'courses_id':
+                translated = "Course";
+                break;
+            case 'courses_avg':
+                translated = "Avg";
+                break;
+            case 'courses_instructor':
+                translated = "Professor";
+                break;
+            case 'courses_title':
+                translated = "Title";
+                break;
+            case 'courses_pass':
+                translated = "Pass";
+                break;
+            case 'courses_fail':
+                translated = "Fail";
+                break;
+            case 'courses_audit':
+                translated = "Audit";
+                break;
+            default:
+
+        }
+
+        return translated;
     }
 
 }
