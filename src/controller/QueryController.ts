@@ -319,18 +319,15 @@ export default class QueryController {
     public groupBy(query: QueryRequest, array: Section[]): {} {
         var groups: any = {};
 
-        Log.info('QueryController::groupBy()...');
-
-        Log.info('QueryController::groupBy() - array size = ' + array.length);
+        // Log.info('QueryController::groupBy()...');
+        //
+        // Log.info('QueryController::groupBy() - array size = ' + array.length);
 
         var keys: string[] = this.getKeys(query);
-        Log.info('QueryController::groupBy() - keys = ' + keys);
-
 
         for (let i in array) {
 
             var key: any = this.getValues(keys, array[i]);
-            Log.info('QueryController::groupBy() - key = ' + key);
             // Log.info('QueryController::groupBy() - key = ' + key + ', # of elements in key = ' + key.length);
             // Log.info('QueryController::groupBy() - key[] = ' + key[0] + ' & key[1] = ' + key[1]);
             if (key in groups) {
@@ -425,7 +422,6 @@ export default class QueryController {
     public getValues(preamble: string[], section: Section): any {
         var result: string[] = [];
 
-        Log.info('QueryController::getValues() - preamble = ' + preamble[0]);
 
         for (let p in preamble) {
             switch (preamble[p]) {
@@ -460,7 +456,6 @@ export default class QueryController {
                     throw new Error("Invalid Query");
             }
         }
-        Log.info('QueryController::getValues() - result = ' + result);
         return result;
     }
 
