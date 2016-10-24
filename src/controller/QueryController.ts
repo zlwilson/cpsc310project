@@ -142,6 +142,7 @@ export default class QueryController {
             && (typeof query.GET !== 'undefined')
             && (typeof query.WHERE !== 'undefined')
             && (typeof query.AS !== 'undefined')
+            && (this.validGroup(query))
             && (this.validOrder(query))
             && (
                 ((typeof query.GROUP === 'undefined') && (typeof query.APPLY === 'undefined'))
@@ -612,7 +613,15 @@ export default class QueryController {
                         if (order.length > 1) {
                             var subOrder = order;
                             subOrder.splice(0, 1);
-                            result = this.basicOrder(subOrder, resultA, resultB, direction, applyTerms);
+                            if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) > 0) {
+                                result = 1;
+                            }
+                            if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) < 0) {
+                                result = -1;
+                            }
+                            if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) === 0){
+                                result = 0;
+                            }
                         } else {
                             result = 0;
                         }
@@ -628,7 +637,15 @@ export default class QueryController {
                 if (result === 0 && order.length > 1) {
                     var subOrder = order;
                     subOrder.splice(0,1);
-                    result = this.basicOrder(subOrder, resultA, resultB, direction, applyTerms);
+                    if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) > 0){
+                        result = 1;
+                    }
+                    if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) < 0){
+                        result = -1
+                    }
+                    if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) === 0){
+                        result = 0;
+                    }
                 }
                 break;
             default:
@@ -638,7 +655,15 @@ export default class QueryController {
                     if (result === 0 && order.length > 1) {
                         var subOrder = order;
                         subOrder.splice(0,1)
-                        result = this.basicOrder(subOrder, resultA, resultB, direction, applyTerms);
+                        if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) > 0){
+                            result = 1;
+                        }
+                        if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) < 0){
+                            result = -1
+                        }
+                        if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) === 0){
+                            result = 0;
+                        }
                     }
 
                 } else {
@@ -1233,6 +1258,30 @@ export default class QueryController {
         }
 
         return translated;
+    }
+
+    private validGroup(query: QueryRequest): boolean {
+        if (typeof query.GROUP === "undefined") {
+            return true;
+        }
+
+        var keys = Object.keys(query.GROUP);
+        if (keys.length === 0) {
+            return false;
+        }
+
+        for (var k in keys){
+            if (query.GET instanceof Array) {
+                if (query.GET.indexOf(keys[k]) === -1){
+                    return false;
+                }
+            } else {
+                if (query.GET != keys[k]) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 }
