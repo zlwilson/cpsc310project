@@ -357,7 +357,6 @@ export default class QueryController {
 
             //Loop through each group
             for (var g in groups) {
-
                 //Create dictionary for each group to store the result of calculations
                 var groupResult:any = {};
 
