@@ -361,7 +361,7 @@ export default class QueryController {
                 //Create dictionary for each group to store the result of calculations
                 var groupResult:any = {};
 
-                //Add group key information to groupResult
+                // Add group key information to groupResult
                 // for(var gk in query.GROUP) {
                 //     var groupKey = this.sectionTranslator(query.GROUP[gk]);
                 //     Log.info('QueryController::apply() - gk = ' + query.GROUP[gk]);
@@ -369,14 +369,6 @@ export default class QueryController {
                 //     Log.info('QueryController::apply() - groupValue = ' + groupValue);
                 //     groupResult[groupKey] = groupValue;
                 // }
-
-                var keys: string[] = this.getKeys(query);
-
-                var key: any = this.getValues(keys, groups[g]);
-
-                var groupValue = groups[g][0][key];
-
-                groupResult[key] = groupValue;
 
                 //Loop through each applyToken
                 for (var i in query.APPLY) {
@@ -408,7 +400,6 @@ export default class QueryController {
                 //add dictionary to result[current group]
                 result[g] = groupResult;
             }
-
 
         return result;
     }
