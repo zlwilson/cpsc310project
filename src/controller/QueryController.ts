@@ -881,20 +881,19 @@ export default class QueryController {
                     }
                 }
                 break;
-            // Todo: delete this because can't compare id with number
-            // case 'courses_id':
-            //     comparedVal = query.EQ.courses_id;
-            //     compareField = "id";
-            //     for (let section in sections)
-            //     {
-            //         var s:Section = sections[section];
-            //         if (s.Course == comparedVal)
-            //         {
-            //             filteredDs.push(s);
-            //             //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", equal to " + comparedVal);
-            //         }
-            //     }
-            //     break;
+            case 'courses_id':
+                comparedVal = query.EQ.courses_id;
+                compareField = "id";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+                    if (s.Course == comparedVal)
+                    {
+                        filteredDs.push(s);
+                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", equal to " + comparedVal);
+                    }
+                }
+                break;
             default:
                 Log.error("Unexpected compare value");
                 throw new Error('Invalid Query');
@@ -1005,7 +1004,7 @@ export default class QueryController {
         }
 
         var negatedDs: Section[] =  sections.filter(function (el) {
-            return filteredId.indexOf(el.id) > -1;
+            return filteredId.indexOf(el.id) === -1;
         })
 
         return negatedDs;
