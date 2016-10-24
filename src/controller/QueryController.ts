@@ -329,7 +329,8 @@ export default class QueryController {
 
         for (let i in array) {
 
-            var key: string = this.getValues(keys, array[i]);
+            var key: any = this.getValues(keys, array[i]);
+            Log.info('QueryController::groupBy() - key = ' + key);
             // Log.info('QueryController::groupBy() - key = ' + key + ', # of elements in key = ' + key.length);
             // Log.info('QueryController::groupBy() - key[] = ' + key[0] + ' & key[1] = ' + key[1]);
             if (key in groups) {
@@ -421,42 +422,45 @@ export default class QueryController {
         return result;
     }
 
-    public getValues(preamble: string[], section: Section): string {
-        var result: string = "";
+    public getValues(preamble: string[], section: Section): any {
+        var result: string[] = [];
+
+        Log.info('QueryController::getValues() - preamble = ' + preamble[0]);
 
         for (let p in preamble) {
             switch (preamble[p]) {
                 case 'courses_dept':
-                    result.concat(section.Subject);
+                    result.push(section.Subject);
                     break;
                 case 'courses_id':
-                    result.concat(section.Course);
+                    result.push(section.Course);
                     break;
                 case 'courses_avg':
-                    result.concat(section.Avg.toString());
+                    result.push(section.Avg.toString());
                     break;
                 case 'courses_instructor':
-                    result.concat(section.Professor);
+                    result.push(section.Professor);
                     break;
                 case 'courses_title':
-                    result.concat(section.Title);
+                    result.push(section.Title);
                     break;
                 case 'courses_pass':
-                    result.concat(section.Pass.toString());
+                    result.push(section.Pass.toString());
                     break;
                 case 'courses_fail':
-                    result.concat(section.Fail.toString());
+                    result.push(section.Fail.toString());
                     break;
                 case 'courses_audit':
-                    result.concat(section.Audit.toString());
+                    result.push(section.Audit.toString());
                     break;
                 case 'courses_uuid':
-                    result.concat(section.id);
+                    result.push(section.id);
                 default:
                     Log.error("Unexpected GET input");
                     throw new Error("Invalid Query");
             }
         }
+        Log.info('QueryController::getValues() - result = ' + result);
         return result;
     }
 
