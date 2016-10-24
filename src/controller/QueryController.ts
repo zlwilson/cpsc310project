@@ -362,13 +362,13 @@ export default class QueryController {
                 var groupResult:any = {};
 
                 // Add group key information to groupResult
-                // for(var gk in query.GROUP) {
-                //     var groupKey = this.sectionTranslator(query.GROUP[gk]);
-                //     Log.info('QueryController::apply() - gk = ' + query.GROUP[gk]);
-                //     var groupValue = groups[g][0][groupKey];
-                //     Log.info('QueryController::apply() - groupValue = ' + groupValue);
-                //     groupResult[groupKey] = groupValue;
-                // }
+                for(var gk in query.GROUP) {
+                    var groupKey = this.sectionTranslator(query.GROUP[gk]);
+                    // Log.info('QueryController::apply() - gk = ' + query.GROUP[gk]);
+                    var groupValue = groups[g][0][groupKey];
+                    // Log.info('QueryController::apply() - groupValue = ' + groupValue);
+                    groupResult[groupKey] = groupValue;
+                }
 
                 //Loop through each applyToken
                 for (var i in query.APPLY) {
