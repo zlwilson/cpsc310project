@@ -362,11 +362,21 @@ export default class QueryController {
                 var groupResult:any = {};
 
                 //Add group key information to groupResult
-                for(var gk in query.GROUP) {
-                    var groupKey = this.sectionTranslator(query.GROUP[gk]);
-                    var groupValue = groups[g][0][groupKey];
-                    groupResult[groupKey] = groupValue;
-                }
+                // for(var gk in query.GROUP) {
+                //     var groupKey = this.sectionTranslator(query.GROUP[gk]);
+                //     Log.info('QueryController::apply() - gk = ' + query.GROUP[gk]);
+                //     var groupValue = groups[g][0][groupKey];
+                //     Log.info('QueryController::apply() - groupValue = ' + groupValue);
+                //     groupResult[groupKey] = groupValue;
+                // }
+
+                var keys: string[] = this.getKeys(query);
+
+                var key: any = this.getValues(keys, groups[g]);
+
+                var groupValue = groups[g][0][key];
+
+                groupResult[key] = groupValue;
 
                 //Loop through each applyToken
                 for (var i in query.APPLY) {
@@ -458,8 +468,6 @@ export default class QueryController {
         }
         return result;
     }
-
-
 
     //return the filtered dataset , section should be Section[]
     public filter(query: QueryBody, sections: Section[]): Section[]
