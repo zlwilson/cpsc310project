@@ -329,7 +329,7 @@ export default class QueryController {
 
         for (let i in array) {
 
-            var key: any = this.getValues(keys, array[i]);
+            var key: string = this.getValues(keys, array[i]);
             // Log.info('QueryController::groupBy() - key = ' + key + ', # of elements in key = ' + key.length);
             // Log.info('QueryController::groupBy() - key[] = ' + key[0] + ' & key[1] = ' + key[1]);
             if (key in groups) {
@@ -421,37 +421,37 @@ export default class QueryController {
         return result;
     }
 
-    public getValues(preamble: string[], section: Section): Array<any> {
-        var result: any = [];
+    public getValues(preamble: string[], section: Section): string {
+        var result: string = "";
 
         for (let p in preamble) {
             switch (preamble[p]) {
                 case 'courses_dept':
-                    result.push(section.Subject);
+                    result.concat(section.Subject);
                     break;
                 case 'courses_id':
-                    result.push(section.Course);
+                    result.concat(section.Course);
                     break;
                 case 'courses_avg':
-                    result.push(section.Avg);
+                    result.concat(section.Avg.toString());
                     break;
                 case 'courses_instructor':
-                    result.push(section.Professor);
+                    result.concat(section.Professor);
                     break;
                 case 'courses_title':
-                    result.push(section.Title);
+                    result.concat(section.Title);
                     break;
                 case 'courses_pass':
-                    result.push(section.Pass);
+                    result.concat(section.Pass.toString());
                     break;
                 case 'courses_fail':
-                    result.push(section.Fail);
+                    result.concat(section.Fail.toString());
                     break;
                 case 'courses_audit':
-                    result.push(section.Audit);
+                    result.concat(section.Audit.toString());
                     break;
                 case 'courses_uuid':
-                    result.push(section.id);
+                    result.concat(section.id);
                 default:
                     Log.error("Unexpected GET input");
                     throw new Error("Invalid Query");
