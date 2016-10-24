@@ -15,18 +15,14 @@ export interface QueryRequest {
     GROUP?: string[];
     APPLY?:QueryToken[];
     //SORT?:{
-    ORDER?: string;
-
-            // Comment out for testing
-        //     {
-        //     dir: string;
-        //     keys: string[];
-        // }
-    //}
+    ORDER?: string|NewOrder;
     AS: string;
 }
 
-
+export interface NewOrder {
+    dir: 'UP'|'DOWN';
+    keys: string[];
+}
 
 export interface QueryToken {
     [name: string]: {
@@ -298,11 +294,10 @@ export default class QueryController {
         // }
 
         //ORDER
-
         var orderedDs = selectedDs;
 
         if (typeof query.ORDER !== "undefined") {
-            orderedDs = this.orderResult(query, selectedDs);
+            orderedDs = this.order(query, selectedDs, applyTerms);
         }
 
         //AS
@@ -552,19 +547,43 @@ export default class QueryController {
         return selectedDs;
     }
 
-    public orderResult (query: QueryRequest, selectedDs: QueryResponse): QueryResponse
+    public order(query:QueryRequest, selectedDs: QueryResponse, applyTerms: string[]): QueryResponse {
+
+        var result: QueryResponse;
+
+        if (typeof query.ORDER === 'string') {
+            var orderKey = query.ORDER as string;
+            result = this.basicOrder(orderKey, selectedDs, 'UP', applyTerms);
+        } else {
+
+            var order = query.ORDER as NewOrder;
+            result = this.basicOrder(order.keys[0], selectedDs, order.dir,applyTerms);
+        }
+        return result;
+    }
+
+
+    public basicOrder (orderKey: string, selectedDs: QueryResponse, direction:string, applyTerms:string[]): QueryResponse
     {
-        switch (query.ORDER)
+        var position:number;
+
+        if (direction === 'UP') {
+            position = -1;
+        } else {
+            position = 1;
+        }
+
+        switch (orderKey)
         {
             case 'courses_dept':
                 selectedDs.result.sort(function (a,b) {
                     if (a.courses_dept < b.courses_dept)
                     {
-                        return -1;
+                        return position;
                     }
                     if (a.courses_dept > b.courses_dept)
                     {
-                        return 1;
+                        return position * -1;
                     }
                     return 0;
                 });
@@ -573,11 +592,11 @@ export default class QueryController {
                 selectedDs.result.sort(function (a,b) {
                     if (a.courses_id < b.courses_id)
                     {
-                        return -1;
+                        return position;
                     }
                     if (a.courses_id > b.courses_id)
                     {
-                        return 1;
+                        return position * -1;
                     }
                     return 0;
                 });
@@ -586,11 +605,11 @@ export default class QueryController {
                 selectedDs.result.sort(function (a,b) {
                     if (a.courses_instructor < b.courses_instructor)
                     {
-                        return -1;
+                        return position;
                     }
                     if (a.courses_instructor > b.courses_instructor)
                     {
-                        return 1;
+                        return position * -1;
                     }
                     return 0;
                 });
@@ -599,35 +618,55 @@ export default class QueryController {
                 selectedDs.result.sort(function (a,b) {
                     if (a.courses_title < b.courses_title)
                     {
-                        return -1;
+                        return position;
                     }
                     if (a.courses_title > b.courses_title)
                     {
-                        return 1;
+                        return position * -1;
                     }
                     return 0;
                 });
                 break;
             case 'courses_avg':
                 selectedDs.result.sort(function (a,b) {
-                    return a.courses_avg-b.courses_avg;
-                })
+                    var sort = (direction === 'UP')? a.courses_avg-b.courses_avg : b.courses_avg-a.courses_avg;
+                    return sort;
+                });
                 break;
             case 'courses_pass':
                 selectedDs.result.sort(function (a,b) {
-                    return a.courses_pass-b.courses_pass;
-                })
+                    var sort = (direction === 'UP')? a.courses_pass-b.courses_pass : b.courses_pass-a.courses_pass;
+                    return sort;
+                });
                 break;
             case 'courses_fail':
                 selectedDs.result.sort(function (a,b) {
-                    return a.courses_fail-b.courses_fail;
-                })
+                    var sort = (direction === 'UP')? a.courses_fail-b.courses_fail : b.courses_fail-a.courses_fail;
+                    return sort;
+                });
                 break;
             case 'courses_audit':
                 selectedDs.result.sort(function (a,b) {
-                    return a.courses_audit-b.courses_audit;
-                })
+                    var sort = (direction === 'UP')? a.courses_audit-b.courses_audit : b.courses_audit-a.courses_audit;
+                    return sort;
+                });
                 break;
+            default:
+                if(applyTerms.indexOf(orderKey) > -1) {
+                    selectedDs.result.sort(function (a,b) {
+                        if (a[orderKey] < b[orderKey])
+                        {
+                            return position;
+                        }
+                        if (a[orderKey] > b[orderKey])
+                        {
+                            return position * -1;
+                        }
+                        return 0;
+                    });
+                } else {
+                    throw new Error('QueryController::Invalid OrderKey');
+                }
         }
         return selectedDs;
     }
@@ -1035,25 +1074,36 @@ export default class QueryController {
             return true;
         }
 
-        if (query.GET instanceof Array)
-        {
-            for (var k = 0; k<query.GET.length; k++)
-                {
-                    if (query.GET[k] === query.ORDER)
-                    {
-                        return true;
-                    }
-                }
+        var orderKeys:string[] = [];
+
+        if (typeof query.ORDER === 'string'
+            || query.GET instanceof String) {
+            orderKeys.push(query.ORDER.toString());
+        } else if (typeof query.ORDER === 'NewOrder') {
+            var order = query.ORDER as NewOrder;
+
+            if (order.dir !== 'UP' && order.dir !== 'DOWN') {
+                return false;
             }
-        else if (typeof query.GET === "string" || query.GET instanceof String)
-        {
-            if (query.GET.toString() === query.ORDER)
-            {
-                    return true;
-            }
+
+            orderKeys = order.keys;
         }
 
-        return false;
+        for (var o in orderKeys) {
+            if (query.GET instanceof Array) {
+                var preamble = query.GET as string[];
+                if (preamble.indexOf(orderKeys[o]) === -1) {
+                    return false;
+                }
+
+            } else if (typeof query.GET === "string"
+                || query.GET instanceof String) {
+                if (query.GET.toString() !== orderKeys[o]) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public compareStringHelper(string: string, comparedVal: string): Boolean
@@ -1150,7 +1200,8 @@ export default class QueryController {
         }
 
         var sectionNum = sections.length;
-        return sum/sectionNum;
+        var avg:number = sum/sectionNum;
+        return Math.round(avg * 1e2) / 1e2;
     }
 
     private count(sections: Section[], key:string):number {
