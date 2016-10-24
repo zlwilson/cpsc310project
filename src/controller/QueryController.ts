@@ -330,9 +330,9 @@ export default class QueryController {
             // Log.info('QueryController::groupBy() - key = ' + key + ', # of elements in key = ' + key.length);
             // Log.info('QueryController::groupBy() - key[] = ' + key[0] + ' & key[1] = ' + key[1]);
             if (key in groups) {
-                groups[key].push(array[i])
+                groups[key].push(array[i]);
             } else {
-                groups[key] = [array[i]]
+                groups[key] = [array[i]];
             }
         }
 
