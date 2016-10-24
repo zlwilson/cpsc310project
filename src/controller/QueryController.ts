@@ -572,7 +572,13 @@ export default class QueryController {
 
         var that = this;
         selectedDs.result.sort(function (a,b){
-            return that.basicOrder(orderKeys, a, b, direction, applyTerms);
+            for (var i = 0; i < orderKeys.length; i++){
+                var res = that.basicOrder(orderKeys[i], a, b, direction, applyTerms);
+                if (res === 0 ){
+                    continue;
+                }
+                return res;
+            }
         });
 
         result = selectedDs;
@@ -580,10 +586,8 @@ export default class QueryController {
     }
 
 
-    public basicOrder (order: string[], resultA:any, resultB:any, direction:string, applyTerms:string[]): number
+    public basicOrder (order: string, resultA:any, resultB:any, direction:string, applyTerms:string[]): number
     {
-        Log.trace('Comparing ' + resultA[order[0]] + " and " + resultB[order[0]]);
-
         var result: number;
 
         var position:number;
@@ -594,78 +598,33 @@ export default class QueryController {
             position = 1;
         }
 
-        switch (order[0])
+        switch (order)
         {
             case 'courses_dept':
             case 'courses_id':
             case 'courses_instructor':
             case 'courses_title':
             case 'courses_uuid':
-                    if (resultA[order[0]] < resultB[order[0]])
+                    if (resultA[order] < resultB[order])
                     {
                         result = position;
                     }
-                    if (resultA[order[0]] > resultB[order[0]])
+                    if (resultA[order] > resultB[order])
                     {
                         result = position * -1;
                     }
-                    if (resultA[order[0]] === resultB[order[0]]) {
-                        if (order.length > 1) {
-                            var subOrder = order;
-                            subOrder.splice(0, 1);
-                            if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) > 0) {
-                                result = 1;
-                            }
-                            if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) < 0) {
-                                result = -1;
-                            }
-                            if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) === 0){
-                                result = 0;
-                            }
-                        } else {
                             result = 0;
-                        }
-                    }
                 break;
             case 'courses_avg':
             case 'courses_pass':
             case 'courses_fail':
             case 'courses_audit':
-                result = (direction === 'UP')? resultA[order[0]]-resultB[order[0]]
-                                                : resultB[order[0]]-resultA[order[0]];
-
-                if (result === 0 && order.length > 1) {
-                    var subOrder = order;
-                    subOrder.splice(0,1);
-                    if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) > 0){
-                        result = 1;
-                    }
-                    if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) < 0){
-                        result = -1
-                    }
-                    if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) === 0){
-                        result = 0;
-                    }
-                }
+                result = (direction === 'UP')? resultA[order]-resultB[order]
+                                                : resultB[order]-resultA[order];
                 break;
             default:
-                if(applyTerms.indexOf(order[0]) > -1) {
-                    result = (direction === 'UP')? resultA[order[0]]-resultB[order[0]] : resultB[order[0]]-resultA[order[0]];
-
-                    if (result === 0 && order.length > 1) {
-                        var subOrder = order;
-                        subOrder.splice(0,1)
-                        if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) > 0){
-                            result = 1;
-                        }
-                        if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) < 0){
-                            result = -1
-                        }
-                        if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) === 0){
-                            result = 0;
-                        }
-                    }
-
+                if(applyTerms.indexOf(order) > -1) {
+                    result = (direction === 'UP')? resultA[order]-resultB[order] : resultB[order]-resultA[order];
                 } else {
                     throw new Error('QueryController::Invalid OrderKey');
                 }
