@@ -146,12 +146,12 @@ export default class QueryController {
             && (this.validOrder(query))
             && (
                 ((typeof query.GROUP === 'undefined') && (typeof query.APPLY === 'undefined'))
-             ||((typeof query.GROUP !== 'undefined') && (typeof query.APPLY !== 'undefined'))
+                ||((typeof query.GROUP !== 'undefined') && (typeof query.APPLY !== 'undefined'))
             )
         ) {
-                return true;
-            }
-            //Todo: check if Group and Apply go together
+            return true;
+        }
+        //Todo: check if Group and Apply go together
 
         return false;
     }
@@ -310,20 +310,22 @@ export default class QueryController {
     }
 
     /*
-        citation: http://codereview.stackexchange.com/questions/37028/grouping-elements-in-array-by-multiple-properties
-        groupBy() returns a dictionary where:
-            key: an array of strings (the group by queries)
-            body: array of results
-        eg: the key ['CPSC','310'] maps to [ all the sections of CPSC 310 ... ]
+     citation: http://codereview.stackexchange.com/questions/37028/grouping-elements-in-array-by-multiple-properties
+     groupBy() returns a dictionary where:
+     key: an array of strings (the group by queries)
+     body: array of results
+     eg: the key ['CPSC','310'] maps to [ all the sections of CPSC 310 ... ]
      */
     public groupBy(query: QueryRequest, array: Section[]): {} {
         var groups: any = {};
 
-        // Log.info('QueryController::groupBy()...');
-        //
-        // Log.info('QueryController::groupBy() - array size = ' + array.length);
+        Log.info('QueryController::groupBy()...');
+
+        Log.info('QueryController::groupBy() - array size = ' + array.length);
 
         var keys: string[] = this.getKeys(query);
+        Log.info('QueryController::groupBy() - keys = ' + keys);
+
 
         for (let i in array) {
 
@@ -355,50 +357,50 @@ export default class QueryController {
     public apply(query: QueryRequest, groups:any):{} {
         var result:any = {};
 
-            //Loop through each group
-            for (var g in groups) {
-                //Create dictionary for each group to store the result of calculations
-                var groupResult:any = {};
+        //Loop through each group
+        for (var g in groups) {
 
-                // Add group key information to groupResult
-                for(var gk in query.GROUP) {
-                    var groupKey = this.sectionTranslator(query.GROUP[gk]);
-                    // Log.info('QueryController::apply() - gk = ' + query.GROUP[gk]);
-                    var groupValue = groups[g][0][groupKey];
-                    // Log.info('QueryController::apply() - groupValue = ' + groupValue);
-                    groupResult[groupKey] = groupValue;
-                }
+            //Create dictionary for each group to store the result of calculations
+            var groupResult:any = {};
 
-                //Loop through each applyToken
-                for (var i in query.APPLY) {
-                    var term: string = Object.keys(query.APPLY[i])[0];
-                    var calculation: any = query.APPLY[i][term];
-
-                    var token = Object.keys(calculation)[0];
-
-                    //Switch to different calculations according to applyToken
-                    switch (token) {
-                        case 'MAX':
-                            groupResult[term] = this.max(groups[g], calculation[token]);
-                            break;
-                        case 'MIN':
-                            groupResult[term] = this.min(groups[g], calculation[token]);
-                            break;
-                        case 'AVG':
-                            groupResult[term] = this.avg(groups[g], calculation[token]);
-                            break;
-                        case 'COUNT':
-                            groupResult[term] = this.count(groups[g], calculation[token]);
-                            break;
-                        default:
-                            Log.error("Unexpected Apply Token");
-                            throw  new Error("Invalid Apply Token");
-                    }
-                }
-
-                //add dictionary to result[current group]
-                result[g] = groupResult;
+            //Add group key information to groupResult
+            for(var gk in query.GROUP) {
+                var groupKey = this.sectionTranslator(query.GROUP[gk]);
+                var groupValue = groups[g][0][groupKey];
+                groupResult[groupKey] = groupValue;
             }
+
+            //Loop through each applyToken
+            for (var i in query.APPLY) {
+                var term: string = Object.keys(query.APPLY[i])[0];
+                var calculation: any = query.APPLY[i][term];
+
+                var token = Object.keys(calculation)[0];
+
+                //Switch to different calculations according to applyToken
+                switch (token) {
+                    case 'MAX':
+                        groupResult[term] = this.max(groups[g], calculation[token]);
+                        break;
+                    case 'MIN':
+                        groupResult[term] = this.min(groups[g], calculation[token]);
+                        break;
+                    case 'AVG':
+                        groupResult[term] = this.avg(groups[g], calculation[token]);
+                        break;
+                    case 'COUNT':
+                        groupResult[term] = this.count(groups[g], calculation[token]);
+                        break;
+                    default:
+                        Log.error("Unexpected Apply Token");
+                        throw  new Error("Invalid Apply Token");
+                }
+            }
+
+            //add dictionary to result[current group]
+            result[g] = groupResult;
+        }
+
 
         return result;
     }
@@ -419,9 +421,8 @@ export default class QueryController {
         return result;
     }
 
-    public getValues(preamble: string[], section: Section): any {
-        var result: string[] = [];
-
+    public getValues(preamble: string[], section: Section): Array<any> {
+        var result: any = [];
 
         for (let p in preamble) {
             switch (preamble[p]) {
@@ -432,7 +433,7 @@ export default class QueryController {
                     result.push(section.Course);
                     break;
                 case 'courses_avg':
-                    result.push(section.Avg.toString());
+                    result.push(section.Avg);
                     break;
                 case 'courses_instructor':
                     result.push(section.Professor);
@@ -441,13 +442,13 @@ export default class QueryController {
                     result.push(section.Title);
                     break;
                 case 'courses_pass':
-                    result.push(section.Pass.toString());
+                    result.push(section.Pass);
                     break;
                 case 'courses_fail':
-                    result.push(section.Fail.toString());
+                    result.push(section.Fail);
                     break;
                 case 'courses_audit':
-                    result.push(section.Audit.toString());
+                    result.push(section.Audit);
                     break;
                 case 'courses_uuid':
                     result.push(section.id);
@@ -459,14 +460,16 @@ export default class QueryController {
         return result;
     }
 
+
+
     //return the filtered dataset , section should be Section[]
     public filter(query: QueryBody, sections: Section[]): Section[]
     {
         var filteredDs: Section[]=[];
         //var index = 0;
-       if (Object.keys(query).length === 0) {
-           return sections;
-       }
+        if (Object.keys(query).length === 0) {
+            return sections;
+        }
 
         for (let q in query)
         {
@@ -538,12 +541,12 @@ export default class QueryController {
                         result[preamble[p]] = sections[section][this.sectionTranslator(preamble[p])];
                         break;
                     default:
-                         if(applyTerms.indexOf(preamble[p]) > -1) {
+                        if(applyTerms.indexOf(preamble[p]) > -1) {
                             result[preamble[p]] = sections[section][preamble[p]];
                         } else {
-                             Log.error("Unexpected GET input");
-                             throw new Error("Invalid Query");
-                         }
+                            Log.error("Unexpected GET input");
+                            throw new Error("Invalid Query");
+                        }
                 }
             }
             selectedDs.result.push(result);
@@ -569,13 +572,7 @@ export default class QueryController {
 
         var that = this;
         selectedDs.result.sort(function (a,b){
-            for (var i = 0; i < orderKeys.length; i++){
-                var res = that.basicOrder(orderKeys[i], a, b, direction, applyTerms);
-                if (res === 0 ){
-                    continue;
-                }
-                return res;
-            }
+            return that.basicOrder(orderKeys, a, b, direction, applyTerms);
         });
 
         result = selectedDs;
@@ -583,8 +580,10 @@ export default class QueryController {
     }
 
 
-    public basicOrder (order: string, resultA:any, resultB:any, direction:string, applyTerms:string[]): number
+    public basicOrder (order: string[], resultA:any, resultB:any, direction:string, applyTerms:string[]): number
     {
+        Log.trace('Comparing ' + resultA[order[0]] + " and " + resultB[order[0]]);
+
         var result: number;
 
         var position:number;
@@ -595,33 +594,78 @@ export default class QueryController {
             position = 1;
         }
 
-        switch (order)
+        switch (order[0])
         {
             case 'courses_dept':
             case 'courses_id':
             case 'courses_instructor':
             case 'courses_title':
             case 'courses_uuid':
-                    if (resultA[order] < resultB[order])
-                    {
-                        result = position;
-                    }
-                    if (resultA[order] > resultB[order])
-                    {
-                        result = position * -1;
-                    }
+                if (resultA[order[0]] < resultB[order[0]])
+                {
+                    result = position;
+                }
+                if (resultA[order[0]] > resultB[order[0]])
+                {
+                    result = position * -1;
+                }
+                if (resultA[order[0]] === resultB[order[0]]) {
+                    if (order.length > 1) {
+                        var subOrder = order;
+                        subOrder.splice(0, 1);
+                        if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) > 0) {
+                            result = 1;
+                        }
+                        if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) < 0) {
+                            result = -1;
+                        }
+                        if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) === 0){
                             result = 0;
+                        }
+                    } else {
+                        result = 0;
+                    }
+                }
                 break;
             case 'courses_avg':
             case 'courses_pass':
             case 'courses_fail':
             case 'courses_audit':
-                result = (direction === 'UP')? resultA[order]-resultB[order]
-                                                : resultB[order]-resultA[order];
+                result = (direction === 'UP')? resultA[order[0]]-resultB[order[0]]
+                    : resultB[order[0]]-resultA[order[0]];
+
+                if (result === 0 && order.length > 1) {
+                    var subOrder = order;
+                    subOrder.splice(0,1);
+                    if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) > 0){
+                        result = 1;
+                    }
+                    if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) < 0){
+                        result = -1
+                    }
+                    if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) === 0){
+                        result = 0;
+                    }
+                }
                 break;
             default:
-                if(applyTerms.indexOf(order) > -1) {
-                    result = (direction === 'UP')? resultA[order]-resultB[order] : resultB[order]-resultA[order];
+                if(applyTerms.indexOf(order[0]) > -1) {
+                    result = (direction === 'UP')? resultA[order[0]]-resultB[order[0]] : resultB[order[0]]-resultA[order[0]];
+
+                    if (result === 0 && order.length > 1) {
+                        var subOrder = order;
+                        subOrder.splice(0,1)
+                        if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) > 0){
+                            result = 1;
+                        }
+                        if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) < 0){
+                            result = -1
+                        }
+                        if (this.basicOrder(subOrder, resultA, resultB, direction, applyTerms) === 0){
+                            result = 0;
+                        }
+                    }
+
                 } else {
                     throw new Error('QueryController::Invalid OrderKey');
                 }
@@ -880,19 +924,20 @@ export default class QueryController {
                     }
                 }
                 break;
-            case 'courses_id':
-                comparedVal = query.EQ.courses_id;
-                compareField = "id";
-                for (let section in sections)
-                {
-                    var s:Section = sections[section];
-                    if (s.Course == comparedVal)
-                    {
-                        filteredDs.push(s);
-                        //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", equal to " + comparedVal);
-                    }
-                }
-                break;
+            // Todo: delete this because can't compare id with number
+            // case 'courses_id':
+            //     comparedVal = query.EQ.courses_id;
+            //     compareField = "id";
+            //     for (let section in sections)
+            //     {
+            //         var s:Section = sections[section];
+            //         if (s.Course == comparedVal)
+            //         {
+            //             filteredDs.push(s);
+            //             //Log.trace(compareField + " of " + s.Subject + s.Course + " is " + s.Audit + ", equal to " + comparedVal);
+            //         }
+            //     }
+            //     break;
             default:
                 Log.error("Unexpected compare value");
                 throw new Error('Invalid Query');
@@ -1003,7 +1048,7 @@ export default class QueryController {
         }
 
         var negatedDs: Section[] =  sections.filter(function (el) {
-            return filteredId.indexOf(el.id) === -1;
+            return filteredId.indexOf(el.id) > -1;
         })
 
         return negatedDs;
