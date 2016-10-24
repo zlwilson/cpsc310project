@@ -69,6 +69,7 @@ export interface QueryBody
         courses_instructor?: string;
         courses_title?: string;
         courses_fail?: number;
+        courses_uuid?: string;
     }
 
     OR?:QueryBody[];
@@ -109,6 +110,7 @@ export interface Result
     courses_id?: string;
     courses_instructor?: string;
     courses_title?: string;
+    courses_uuid?: string;
 
     courses_avg?: number;
     courses_pass?: number;
@@ -354,7 +356,6 @@ export default class QueryController {
     public apply(query: QueryRequest, groups:any):{} {
         var result:any = {};
 
-        try {
             //Loop through each group
             for (var g in groups) {
 
@@ -398,9 +399,7 @@ export default class QueryController {
                 //add dictionary to result[current group]
                 result[g] = groupResult;
             }
-        } catch (err) {
-            Log.error("QueryController::Apply() + Error: " + err);
-        }
+
 
         return result;
     }
@@ -450,6 +449,8 @@ export default class QueryController {
                 case 'courses_audit':
                     result.push(section.Audit);
                     break;
+                case 'courses_uuid':
+                    result.push(section.id);
                 default:
                     Log.error("Unexpected GET input");
                     throw new Error("Invalid Query");
@@ -465,39 +466,43 @@ export default class QueryController {
     {
         var filteredDs: Section[]=[];
         //var index = 0;
+       if (Object.keys(query).length === 0) {
+           return sections;
+       }
+
         for (let q in query)
         {
             //if(index === 0)
             //{
-                Log.trace(q);
-                switch (q)
-                {
-                    case 'IS':
-                        filteredDs = this.compareString(query, sections);
-                        break;
-                    case 'OR':
-                        filteredDs = this.logicOr(query, sections);
-                        break;
-                    case 'AND':
-                        filteredDs = this.logicAnd(query, sections);
-                        break;
-                    case 'GT':
-                        filteredDs = this.greaterThan(query, sections);
-                        break;
-                    case 'LT':
-                        filteredDs = this.lessThan(query, sections);
-                        break;
-                    case 'EQ':
-                        filteredDs = this.equalTo(query, sections);
-                        break;
-                    case 'NOT':
-                        filteredDs = this.negation(query, sections);
-                        break;
-                    default:
-                        // throw error
-                        Log.trace("Undefined EBNF in WHERE");
-                        throw new Error('Invalid Query');
-                }
+            Log.trace(q);
+            switch (q)
+            {
+                case 'IS':
+                    filteredDs = this.compareString(query, sections);
+                    break;
+                case 'OR':
+                    filteredDs = this.logicOr(query, sections);
+                    break;
+                case 'AND':
+                    filteredDs = this.logicAnd(query, sections);
+                    break;
+                case 'GT':
+                    filteredDs = this.greaterThan(query, sections);
+                    break;
+                case 'LT':
+                    filteredDs = this.lessThan(query, sections);
+                    break;
+                case 'EQ':
+                    filteredDs = this.equalTo(query, sections);
+                    break;
+                case 'NOT':
+                    filteredDs = this.negation(query, sections);
+                    break;
+                default:
+                    // throw error
+                    Log.trace("Undefined EBNF in WHERE");
+                    throw new Error('Invalid Query');
+            }
             //}
             //index++;
         }
@@ -531,6 +536,7 @@ export default class QueryController {
                     case 'courses_pass':
                     case 'courses_fail':
                     case 'courses_audit':
+                    case 'courses_uuid':
                         result[preamble[p]] = sections[section][this.sectionTranslator(preamble[p])];
                         break;
                     default:
@@ -550,21 +556,35 @@ export default class QueryController {
     public order(query:QueryRequest, selectedDs: QueryResponse, applyTerms: string[]): QueryResponse {
 
         var result: QueryResponse;
+        var orderKeys: string[] = [];
+        var direction: string = '';
 
         if (typeof query.ORDER === 'string') {
             var orderKey = query.ORDER as string;
-            result = this.basicOrder(orderKey, selectedDs, 'UP', applyTerms);
+            orderKeys.push(orderKey);
+            direction = 'UP'
         } else {
-
             var order = query.ORDER as NewOrder;
-            result = this.basicOrder(order.keys[0], selectedDs, order.dir,applyTerms);
+            orderKeys = order.keys;
+            direction = order.dir;
         }
+
+        var that = this;
+        selectedDs.result.sort(function (a,b){
+            return that.basicOrder(orderKeys, a, b, direction, applyTerms);
+        });
+
+        result = selectedDs;
         return result;
     }
 
 
-    public basicOrder (orderKey: string, selectedDs: QueryResponse, direction:string, applyTerms:string[]): QueryResponse
+    public basicOrder (order: string[], resultA:any, resultB:any, direction:string, applyTerms:string[]): number
     {
+        Log.trace('Comparing ' + resultA[order[0]] + " and " + resultB[order[0]]);
+
+        var result: number;
+
         var position:number;
 
         if (direction === 'UP') {
@@ -573,102 +593,60 @@ export default class QueryController {
             position = 1;
         }
 
-        switch (orderKey)
+        switch (order[0])
         {
             case 'courses_dept':
-                selectedDs.result.sort(function (a,b) {
-                    if (a.courses_dept < b.courses_dept)
-                    {
-                        return position;
-                    }
-                    if (a.courses_dept > b.courses_dept)
-                    {
-                        return position * -1;
-                    }
-                    return 0;
-                });
-                break;
             case 'courses_id':
-                selectedDs.result.sort(function (a,b) {
-                    if (a.courses_id < b.courses_id)
-                    {
-                        return position;
-                    }
-                    if (a.courses_id > b.courses_id)
-                    {
-                        return position * -1;
-                    }
-                    return 0;
-                });
-                break;
             case 'courses_instructor':
-                selectedDs.result.sort(function (a,b) {
-                    if (a.courses_instructor < b.courses_instructor)
-                    {
-                        return position;
-                    }
-                    if (a.courses_instructor > b.courses_instructor)
-                    {
-                        return position * -1;
-                    }
-                    return 0;
-                });
-                break;
             case 'courses_title':
-                selectedDs.result.sort(function (a,b) {
-                    if (a.courses_title < b.courses_title)
+            case 'courses_uuid':
+                    if (resultA[order[0]] < resultB[order[0]])
                     {
-                        return position;
+                        result = position;
                     }
-                    if (a.courses_title > b.courses_title)
+                    if (resultA[order[0]] > resultB[order[0]])
                     {
-                        return position * -1;
+                        result = position * -1;
                     }
-                    return 0;
-                });
+                    if (resultA[order[0]] === resultB[order[0]]) {
+                        if (order.length > 1) {
+                            var subOrder = order;
+                            subOrder.splice(0, 1);
+                            result = this.basicOrder(subOrder, resultA, resultB, direction, applyTerms);
+                        } else {
+                            result = 0;
+                        }
+                    }
                 break;
             case 'courses_avg':
-                selectedDs.result.sort(function (a,b) {
-                    var sort = (direction === 'UP')? a.courses_avg-b.courses_avg : b.courses_avg-a.courses_avg;
-                    return sort;
-                });
-                break;
             case 'courses_pass':
-                selectedDs.result.sort(function (a,b) {
-                    var sort = (direction === 'UP')? a.courses_pass-b.courses_pass : b.courses_pass-a.courses_pass;
-                    return sort;
-                });
-                break;
             case 'courses_fail':
-                selectedDs.result.sort(function (a,b) {
-                    var sort = (direction === 'UP')? a.courses_fail-b.courses_fail : b.courses_fail-a.courses_fail;
-                    return sort;
-                });
-                break;
             case 'courses_audit':
-                selectedDs.result.sort(function (a,b) {
-                    var sort = (direction === 'UP')? a.courses_audit-b.courses_audit : b.courses_audit-a.courses_audit;
-                    return sort;
-                });
+                result = (direction === 'UP')? resultA[order[0]]-resultB[order[0]]
+                                                : resultB[order[0]]-resultA[order[0]];
+
+                if (result === 0 && order.length > 1) {
+                    var subOrder = order;
+                    subOrder.splice(0,1);
+                    result = this.basicOrder(subOrder, resultA, resultB, direction, applyTerms);
+                }
                 break;
             default:
-                if(applyTerms.indexOf(orderKey) > -1) {
-                    selectedDs.result.sort(function (a,b) {
-                        if (a[orderKey] < b[orderKey])
-                        {
-                            return position;
-                        }
-                        if (a[orderKey] > b[orderKey])
-                        {
-                            return position * -1;
-                        }
-                        return 0;
-                    });
+                if(applyTerms.indexOf(order[0]) > -1) {
+                    result = (direction === 'UP')? resultA[order[0]]-resultB[order[0]] : resultB[order[0]]-resultA[order[0]];
+
+                    if (result === 0 && order.length > 1) {
+                        var subOrder = order;
+                        subOrder.splice(0,1)
+                        result = this.basicOrder(subOrder, resultA, resultB, direction, applyTerms);
+                    }
+
                 } else {
                     throw new Error('QueryController::Invalid OrderKey');
                 }
         }
-        return selectedDs;
+
+        return result;
     }
 
     public logicOr (query: QueryBody, sections: Section[]): Section[]
@@ -1012,21 +990,20 @@ export default class QueryController {
                     }
                 }
                 break;
-            // Todo: delete this because can't compare fail to string
-            // case 'courses_fail':
-            //     comparedVal = query.IS.courses_fail.toLocaleString();
-            //     compareField = "fail";
-            //     for (let section in sections)
-            //     {
-            //         var s:Section = sections[section];
-            //
-            //         var ifContains: Boolean = this.compareStringHelper(s.Fail.toLocaleString(), comparedVal);
-            //         if (ifContains)
-            //         {
-            //             filteredDs.push(s);
-            //         }
-            //     }
-            //     break;
+            case   'courses_uuid':
+                comparedVal = query.IS.courses_uuid;
+                compareField = "uuid";
+                for (let section in sections)
+                {
+                    var s:Section = sections[section];
+
+                    var ifContains: Boolean = this.compareStringHelper(s.id, comparedVal);
+                    if (ifContains)
+                    {
+                        filteredDs.push(s);
+                    }
+                }
+                break;
             default:
                 Log.error("Unexpected compare value");
                 throw new Error('Invalid Query');
@@ -1248,8 +1225,11 @@ export default class QueryController {
             case 'courses_audit':
                 translated = "Audit";
                 break;
+            case 'courses_uuid':
+                translated = "id";
+                break;
             default:
-
+                throw new Error('QueryController:: Invalid Query Key');
         }
 
         return translated;
