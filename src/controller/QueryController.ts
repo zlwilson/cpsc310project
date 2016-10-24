@@ -1265,7 +1265,7 @@ export default class QueryController {
             return true;
         }
 
-        var keys = Object.keys(query.GROUP);
+        var keys = query.GROUP;
         if (keys.length === 0) {
             return false;
         }
