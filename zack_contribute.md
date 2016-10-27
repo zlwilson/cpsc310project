@@ -1,6 +1,11 @@
 Zack Wilson - 29738127
 
 D2: 31 passing, 4 failing, 0 skipped (88.6%)
+Coverage:
+ - 87.07% Statements
+ - 79.43% Branches
+ - 92.21% Functions
+ - 87.07% Lines
 
 Contributions:
 
