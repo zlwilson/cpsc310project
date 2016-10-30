@@ -43,33 +43,6 @@ export default class DatasetController {
 
     // return a promise of an array of all the missing id's
 
-    // Todo: delete this because don't think it ever runs
-    // public getDatasetArray(ids: string[]): Promise<Array<string>> {
-    //
-    //     return new Promise (function (fulfill, reject) {
-    //         try {
-    //             var promisedArray: string[] = [];
-    //
-    //             for (var i in ids) {
-    //                 fs.readFile('data/' + ids[i] + '.json', 'utf8', function (err, data) {
-    //                     if (err) {
-    //                         console.log('Z - in getDatasetArray(id), no such file: ' + ids[i] + '.json in ./data');
-    //                         promisedArray.push(ids[i]);
-    //                     } else {
-    //                         console.log('Z - ' + ids[i] + '.json exists in ./data');
-    //                     }
-    //                 });
-    //             }
-    //
-    //             fulfill(promisedArray);
-    //
-    //         } catch (err) {
-    //             console.log('Z - error in getDatasets(id): ' + err)
-    //             fulfill(false);
-    //         }
-    //     });
-    // }
-
     public getDataset(id: string): Promise<boolean> { 
         // TODO: this should check if the dataset is on disk in ./data if it is not already in memory. 
         return new Promise (function (fulfill, reject) {
@@ -92,9 +65,6 @@ export default class DatasetController {
 
     public getDatasets(): Datasets {
         // TODO: if datasets is empty, load all dataset files in ./data from disk
-
-        // console.log('Z - in getDatasets()...');
-
         let that = this;
 
         try {
@@ -140,6 +110,59 @@ export default class DatasetController {
         return that.datasets;
     }
 
+    public processZip(id: string, data: any): Promise<any> {
+        // unzip and retun file
+        return new Promise(function (fulfill, reject) {
+            try {
+                if (id == '') {
+                    throw 400;
+                }
+                let myZip = new JSZip;
+                myZip.loadAsync(data, {base64: true}).then(function (zip: JSZip) {
+
+                });
+            } catch (err) {
+                reject(400);
+            }
+        })
+    }
+
+    public processHTML(zip: JSZip): Section[] {
+        // I think we should take
+        let sectionArray: Section[] = [];
+        let buildingArray: string[] = [];
+        let promisesArray: Promise<any>[] = [];
+
+
+        // create array of buildings from index.html
+        let indexFile = zip.file('index.html');
+
+        // Parse5 indexFile
+        // add each building to the buildingArray
+        // for (let i in indexFile) {
+        //     buildingArray.push(indexFile[i].Parse5);
+        // }
+
+        // iterate through zip
+        // get each file corresponding to file mentioned in indexFile
+        // (i.e. a promise of the content of each item in buildingArray)
+        for (let b in buildingArray) {
+            let promisedContent = zip.files[buildingArray[b]].async('string');
+            promisesArray.push(promisedContent);
+        }
+
+        // now have all the data of all building files in zip
+        Promise.all(promisesArray).then(function (data) {
+            // data is an array of buildings
+            for (let r = 0; r < data.length; r++) {
+                // parse html from each entry in data[] into sections(?)
+
+            }
+        });
+
+        return sectionArray;
+    }
+
     /**
      * Process the dataset; save it to disk when complete.
      *
@@ -165,76 +188,77 @@ export default class DatasetController {
                 myZip.loadAsync(data, {base64: true}).then(function (zip: JSZip) {
                     Log.trace('DatasetController::process(..) - unzipped');
 
-                    let processedDataset: Section[] = [];
                     // TODO: iterate through files in zip (zip.files)
                     // The contents of the file will depend on the id provided. e.g.,
                     // some zips will contain .html files, some will contain .json files.
                     // You can depend on 'id' to differentiate how the zip should be handled,
                     // although you should still be tolerant to errors.
 
+                    let processedDataset: Section[] = [];
                     var promisesArray: Promise<any>[] = [];
 
-                    // console.log('Z - reading ZIP...');
+                    // check if it's an html file
+                    if (1 == 0) {
+                        //do the stuff here
+                        processedDataset = that.processHTML(zip);
+                    } else {
+                        for (var file in myZip.files) {
+                            // console.log('Z - In ZIP-reading for loop...');
+                            var promisedContent = myZip.files[file].async('string');
+                            promisesArray.push(promisedContent);
+                            // console.log('Z - added promise to array');
+                        }
 
-                    for (var file in myZip.files) {
-                        // console.log('Z - In ZIP-reading for loop...');
-                        var promisedContent = myZip.files[file].async('string');
-                        promisesArray.push(promisedContent);
-                        // console.log('Z - added promise to array');
-                    }
+                        Promise.all(promisesArray).then(function (data) {
+                            // console.log('Z - iterating through all Promises...');
 
-                    //console.log('Z - ' + promisesArray);
+                            for (let r = 0; r < data.length; r++) {
 
+                                var jsonString:string = JSON.stringify(data[r]);
+                                // Log.trace(jsonString);
 
-                    Promise.all(promisesArray).then(function (data) {
-                        // console.log('Z - iterating through all Promises...');
+                                // Parse out file.rank here, if needed
 
-                        for (let r = 0; r < data.length; r++) {
+                                if( jsonString.indexOf("result") !== -1) {
+                                    var dataParsed = JSON.parse(JSON.parse(jsonString));
 
-                            var jsonString:string = JSON.stringify(data[r]);
-                            // Log.trace(jsonString);
+                                    if (dataParsed.result.length > 0) {
+                                        var sectionArray = dataParsed.result;
 
-                            // Parse out file.rank here, if needed
-
-                            if( jsonString.indexOf("result") !== -1) {
-                                var dataParsed = JSON.parse(JSON.parse(jsonString));
-
-                                if (dataParsed.result.length > 0) {
-                                    var sectionArray = dataParsed.result;
-
-                                    for (var s in sectionArray) {
-                                        var instanceSection: Section = sectionArray[s];
-                                        processedDataset.push(instanceSection);
-                                        // console.log('Z - this should be a section object: ' + instanceSection);
+                                        for (var s in sectionArray) {
+                                            var instanceSection: Section = sectionArray[s];
+                                            processedDataset.push(instanceSection);
+                                            // console.log('Z - this should be a section object: ' + instanceSection);
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        if (processedDataset.length === 0)
-                        {
-                            throw 400;
-                        }
+                            if (processedDataset.length === 0)
+                            {
+                                throw 400;
+                            }
 
-                        // console.log('Z - heading to save sections[], id = ' + id);
+                            // console.log('Z - heading to save sections[], id = ' + id);
 
-                        var p = that.save(id, processedDataset);
+                            var p = that.save(id, processedDataset);
 
-                        p.then(function (result) {
-                            // console.log('Z - save() result: ' + result);
-                            Log.trace('DatasetController::process(..) - saved with code: ' + result);
-                            fulfill(result);
-                        }).catch(function (result) {
-                            // console.log('Z - error in this.save()');
-                            throw 400;
+                            p.then(function (result) {
+                                // console.log('Z - save() result: ' + result);
+                                Log.trace('DatasetController::process(..) - saved with code: ' + result);
+                                fulfill(result);
+                            }).catch(function (result) {
+                                // console.log('Z - error in this.save()');
+                                throw 400;
+                            });
+
+                            // console.log('Z - save ID = ' + p);
+
+                        }).catch(function (err) {
+                            // console.log('Z - Error in Promise.all() ' + err);
+                            reject(400);
                         });
-
-                        // console.log('Z - save ID = ' + p);
-
-                    }).catch(function (err) {
-                        // console.log('Z - Error in Promise.all() ' + err);
-                        reject(400);
-                    });
+                    }
                 }).catch(function (err) {
                     Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);
                     reject(400);
@@ -254,7 +278,7 @@ export default class DatasetController {
      * @param processedDataset
      */
 
-     private save(id: string, processedDataset: Section[]): Promise<Number> {
+    private save(id: string, processedDataset: Section[]): Promise<Number> {
         // add it to the memory model
 
 
