@@ -5,7 +5,9 @@
 import Log from '../Util';
 import JSZip = require('jszip');
 import Section from '../model/Section';
+import Building from '../model/Building';
 import fs = require('fs');
+// import parse5 = require('parse5');
 import {stringify} from "querystring";
 import {error} from "util";
 
@@ -17,8 +19,7 @@ export interface Datasets {
     [id: string]: Section[];
 }
 
-export interface File
-{
+export interface File {
     result: Array<any>;
     rank: any;
 }
@@ -110,31 +111,39 @@ export default class DatasetController {
         return that.datasets;
     }
 
-    public processZip(id: string, data: any): Promise<any> {
-        // unzip and retun file
+    // return T if html, F if not (ie JSON)
+    // public checkifHTML(): boolean {
+    //     return if fs.exists index.html
+    // }
+
+    public processZip(id: string, data: any): Promise<string> {
+        // check if html or json file
+        // return ...?
         return new Promise(function (fulfill, reject) {
             try {
                 if (id == '') {
-                    throw 400;
+                    throw 'err';
+                } else {
+                    let myZip = new JSZip;
+                    myZip.loadAsync(data, {base64: true}).then(function (zip:JSZip) {
+                        if (zip.file('index.html')) {
+                            fulfill('html')
+                        } else {
+                            fulfill('json');
+                        }
+                    });
                 }
-                let myZip = new JSZip;
-                myZip.loadAsync(data, {base64: true}).then(function (zip: JSZip) {
-
-                });
             } catch (err) {
-                reject(400);
+                reject(err);
             }
         })
     }
 
-    public processHTML(zip: JSZip): Section[] {
+    public processHTML(zip: JSZip): Building[] {
         // I think we should take
-        let sectionArray: Section[] = [];
-        let buildingArray: string[] = [];
+        let buildingArray: Building[] = [];
         let promisesArray: Promise<any>[] = [];
 
-
-        // create array of buildings from index.html
         let indexFile = zip.file('index.html');
 
         // Parse5 indexFile
@@ -142,14 +151,18 @@ export default class DatasetController {
         // for (let i in indexFile) {
         //     buildingArray.push(indexFile[i].Parse5);
         // }
+        // var parse5 = require('parse5');
+        //
+        // var docFrag = parse5.parse(indexFile);
+
 
         // iterate through zip
         // get each file corresponding to file mentioned in indexFile
         // (i.e. a promise of the content of each item in buildingArray)
-        for (let b in buildingArray) {
-            let promisedContent = zip.files[buildingArray[b]].async('string');
-            promisesArray.push(promisedContent);
-        }
+        // for (let b in buildingArray) {
+        //     let promisedContent = zip.files[buildingArray[b]].async('string');
+        //     promisesArray.push(promisedContent);
+        // }
 
         // now have all the data of all building files in zip
         Promise.all(promisesArray).then(function (data) {
@@ -160,7 +173,7 @@ export default class DatasetController {
             }
         });
 
-        return sectionArray;
+        return buildingArray;
     }
 
     /**
@@ -197,12 +210,7 @@ export default class DatasetController {
                     let processedDataset: Section[] = [];
                     var promisesArray: Promise<any>[] = [];
 
-                    // check if it's an html file
-                    if (1 == 0) {
-                        //do the stuff here
-                        processedDataset = that.processHTML(zip);
-                    } else {
-                        for (var file in myZip.files) {
+                    for (var file in myZip.files) {
                             // console.log('Z - In ZIP-reading for loop...');
                             var promisedContent = myZip.files[file].async('string');
                             promisesArray.push(promisedContent);
@@ -258,7 +266,6 @@ export default class DatasetController {
                             // console.log('Z - Error in Promise.all() ' + err);
                             reject(400);
                         });
-                    }
                 }).catch(function (err) {
                     Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);
                     reject(400);
@@ -279,16 +286,11 @@ export default class DatasetController {
      */
 
     private save(id: string, processedDataset: Section[]): Promise<Number> {
-        // add it to the memory model
-
-
         // console.log('Z - in save()...');
-
         this.datasets[id] = processedDataset;
 
         // TODO: actually write to disk in the ./data directory
         // use fs to write JSON string to  disk dir
-
         // console.log('Z - fs.write() now!');
 
         return new Promise(function (fulfill, reject) {
@@ -349,8 +351,20 @@ export default class DatasetController {
                     }
                 });
             } catch (err) {
-                console.log('Z - unsuccessful delete' + err);
-                reject(400);
+                try {
+                    fs.unlink('data/' + id + '.html', function (err) {
+                        if (err) {
+                            // console.log('Z - no such file ' + id + '.json in ./data');
+                            reject(404);
+                        } else {
+                            // console.log('Z - successfully deleted data/' + id + '.json');
+                            fulfill(204);
+                        }
+                    });
+                } catch (err) {
+                    console.log('Z - unsuccessful delete' + err);
+                    reject(400);
+                }
             }
         });
     }

@@ -25,10 +25,16 @@ export default class InsightFacade implements IInsightFacade {
             try {
 
                 let controller = InsightFacade.datasetController;
-                controller.process(id, content).then(function (result) {
-                    // Log.trace('InsightFacade::addDataset(..) - processed');
-                    response.code = result;
-                    fullfill(response);
+                controller.processZip(id, content).then(function (result) {
+                    if (result == 'html') {
+
+                    } else {
+                        controller.process(id, content).then(function (result) {
+                            // Log.trace('InsightFacade::addDataset(..) - processed');
+                            response.code = result;
+                            fullfill(response);
+                        });
+                    }
                 }).catch(function (err: Error) {
                     // Log.trace('InsightFacad::addDataset(..) - ERROR: ' + err.message);
                     response.body = {error:err.message};
