@@ -7,10 +7,10 @@ import JSZip = require('jszip');
 import Section from '../model/Section';
 import Room from '../model/Room';
 import fs = require('fs');
-import parse5 = require('parse5');
 import {stringify} from "querystring";
 import {error} from "util";
-
+import parse5 = require('parse5');
+import forEach = require("core-js/fn/array/for-each");
 
 /**
  * In memory representation of all datasets.
@@ -111,24 +111,20 @@ export default class DatasetController {
         return that.datasets;
     }
 
-    // return T if html, F if not (ie JSON)
-    // public checkifHTML(): boolean {
-    //     return if fs.exists index.html
-    // }
-
-    public processZip(id: string, data: any): Promise<string> {
+    public processZip(id: string, data: any): Promise<any> {
         // check if html or json file
-        // return ...?
         return new Promise(function (fulfill, reject) {
             try {
                 if (id == '') {
-                    throw 'err';
+                    throw 400;
                 } else {
                     let myZip = new JSZip;
                     myZip.loadAsync(data, {base64: true}).then(function (zip:JSZip) {
-                        if (zip.file('index.html')) {
-                            fulfill('html')
+                        if (zip.file('index.html').name != null) {
+                            console.log('Z - processedZip = html');
+                            fulfill('html');
                         } else {
+                            console.log('Z - processedZip = json');
                             fulfill('json');
                         }
                     });
@@ -139,25 +135,29 @@ export default class DatasetController {
         })
     }
 
-    private traverse(node: ASTFragment, rooms: []) {
-        
+    private traverse(tree: parse5.ASTNode, arg: string, rooms: Room[]): any {
+        let that = this;
+        if (tree.nodeName == arg) {
+            // rooms.push(that.node2room(tree));
+        } else {
+            for (let child in tree.childNodes) {
+                that.traverse(tree.childNodes[child], arg, rooms);
+            }
+        }
     }
 
+    // create a Room from an ASTNode
+    // private node2room(node: parse5.ASTNode): Room {
+    //     let room: Room = {};
+    //     return room;
+    // }
+
     public processHTML(zip: JSZip): Room[] {
-        // I think we should take
+
         let roomArray: Room[] = [];
         let promisesArray: Promise<any>[] = [];
 
-        let indexFile = zip.file('index.html');
-
-        // Parse5 indexFile
-        // add each building to the buildingArray
-        // for (let i in indexFile) {
-        //     buildingArray.push(indexFile[i].Parse5);
-        // }
-        var parse5 = require('parse5');
-
-        var docFrag = parse5.parse(indexFile);
+        let indexLoc = zip.file('index.html');
 
 
         // iterate through zip
@@ -177,7 +177,7 @@ export default class DatasetController {
             }
         });
 
-        return buildingArray;
+        return roomArray;
     }
 
     /**
@@ -221,55 +221,44 @@ export default class DatasetController {
                             // console.log('Z - added promise to array');
                         }
 
-                        Promise.all(promisesArray).then(function (data) {
-                            // console.log('Z - iterating through all Promises...');
+                    Promise.all(promisesArray).then(function (data) {
+                        // console.log('Z - iterating through all Promises...');
+                        for (let r = 0; r < data.length; r++) {
+                            var jsonString:string = JSON.stringify(data[r]);
 
-                            for (let r = 0; r < data.length; r++) {
-
-                                var jsonString:string = JSON.stringify(data[r]);
-                                // Log.trace(jsonString);
-
-                                // Parse out file.rank here, if needed
-
-                                if( jsonString.indexOf("result") !== -1) {
-                                    var dataParsed = JSON.parse(JSON.parse(jsonString));
-
-                                    if (dataParsed.result.length > 0) {
-                                        var sectionArray = dataParsed.result;
-
-                                        for (var s in sectionArray) {
-                                            var instanceSection: Section = sectionArray[s];
-                                            processedDataset.push(instanceSection);
-                                            // console.log('Z - this should be a section object: ' + instanceSection);
-                                        }
+                            // Parse out file.rank here, if needed
+                            if( jsonString.indexOf("result") !== -1) {
+                                var dataParsed = JSON.parse(JSON.parse(jsonString));
+                                if (dataParsed.result.length > 0) {
+                                    var sectionArray = dataParsed.result;
+                                    for (var s in sectionArray) {
+                                        var instanceSection: Section = sectionArray[s];
+                                        processedDataset.push(instanceSection);
+                                        // console.log('Z - this should be a section object: ' + instanceSection);
                                     }
                                 }
                             }
+                        }
 
-                            if (processedDataset.length === 0)
-                            {
-                                throw 400;
-                            }
+                        if (processedDataset.length === 0) {
+                            throw 400;
+                        }
+                        // console.log('Z - heading to save sections[], id = ' + id);
 
-                            // console.log('Z - heading to save sections[], id = ' + id);
+                        var p = that.save(id, processedDataset);
 
-                            var p = that.save(id, processedDataset);
-
-                            p.then(function (result) {
-                                // console.log('Z - save() result: ' + result);
-                                Log.trace('DatasetController::process(..) - saved with code: ' + result);
-                                fulfill(result);
-                            }).catch(function (result) {
-                                // console.log('Z - error in this.save()');
-                                throw 400;
-                            });
-
-                            // console.log('Z - save ID = ' + p);
-
-                        }).catch(function (err) {
-                            // console.log('Z - Error in Promise.all() ' + err);
-                            reject(400);
+                        p.then(function (result) {
+                            // console.log('Z - save() result: ' + result);
+                            Log.trace('DatasetController::process(..) - saved with code: ' + result);
+                            fulfill(result);
+                        }).catch(function (result) {
+                            // console.log('Z - error in this.save()');
+                            throw 400;
                         });
+                    }).catch(function (err) {
+                        // console.log('Z - Error in Promise.all() ' + err);
+                        reject(400);
+                    });
                 }).catch(function (err) {
                     Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);
                     reject(400);

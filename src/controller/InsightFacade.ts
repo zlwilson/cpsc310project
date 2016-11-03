@@ -27,7 +27,7 @@ export default class InsightFacade implements IInsightFacade {
                 let controller = InsightFacade.datasetController;
                 controller.processZip(id, content).then(function (result) {
                     if (result == 'html') {
-
+                        // process html
                     } else {
                         controller.process(id, content).then(function (result) {
                             // Log.trace('InsightFacade::addDataset(..) - processed');
