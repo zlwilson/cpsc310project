@@ -14,17 +14,21 @@ export default class Room {
     Furniture:string;   // room type and amenities (eg: "Classroom-Movable Tables & Chairs")
     href:string;        // link to full details online
 
-    constructor(fullname:string, shortname:string, number:string, name:string, address:string, lat:number, lon:number, seats:number, type:string, furniture:string, href:string) {
-        this.FullName = fullname;
-        this.ShortName = shortname;
-        this.Number = number;
-        this.Name = name;
-        this.Address = address;
-        this.Latitude = lat;
-        this.Longitude = lon;
-        this.Seats = seats;
-        this.Type = type;
-        this.Furniture = furniture;
-        this.href = href;
-    };
+    // constructor(fullname:string, shortname:string, number:string, name:string, address:string, lat:number, lon:number, seats:number, type:string, furniture:string, href:string) {
+    //     this.FullName = fullname;
+    //     this.ShortName = shortname;
+    //     this.Number = number;
+    //     this.Name = name;
+    //     this.Address = address;
+    //     this.Latitude = lat;
+    //     this.Longitude = lon;
+    //     this.Seats = seats;
+    //     this.Type = type;
+    //     this.Furniture = furniture;
+    //     this.href = href;
+    // };
+
+    constructor() {
+        
+    }
 }

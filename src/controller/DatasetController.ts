@@ -138,7 +138,7 @@ export default class DatasetController {
     private traverse(tree: parse5.ASTNode, arg: string, rooms: Room[]): any {
         let that = this;
         if (tree.nodeName == arg) {
-            // rooms.push(that.node2room(tree));
+            rooms.concat(that.table2rooms(tree));
         } else {
             for (let child in tree.childNodes) {
                 that.traverse(tree.childNodes[child], arg, rooms);
@@ -146,37 +146,73 @@ export default class DatasetController {
         }
     }
 
-    // create a Room from an ASTNode
-    // private node2room(node: parse5.ASTNode): Room {
-    //     let room: Room = {};
-    //     return room;
-    // }
+    // create an array of all the Rooms from a building html file
+    // all the Rooms are contained in one div so this iterates through that
+    private table2rooms(node: parse5.ASTNode): Room[] {
+        let that = this;
+        var rooms: Room[] = [];
+
+        if (node.nodeName == 'even' ||
+            node.nodeName == 'odd' ||
+            node.nodeName == 'odd views-row-first' ||
+            node.nodeName == 'odd views-row-last' ||
+            node.nodeName == 'even views-row-last') {
+
+            // create a new Room
+            let room = new Room();
+
+            for (let c in node.childNodes) {
+                let name = node.childNodes[c].nodeName;
+
+                // fill all the fields of the new Room
+                switch (name) {
+                    case 'views-field views-field-field-room-capacity':
+                        room.Seats = parseInt(node.childNodes[c].data);
+                        break;
+                    case 'views-field views-field-field-room-furniture':
+                        room.Furniture = node.childNodes[c].data;
+                        break;
+                    case 'views-field views-field-field-room-type':
+                        room.Type = node.childNodes[c].data;
+                        break;
+                    case 'views-field views-field-nothing':
+                        room.href = node.childNodes[c].data;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            // add the room that was just created to the array of rooms
+            rooms.push(room);
+        } else {
+            for (let i in node.childNodes) {
+                that.table2rooms(node.childNodes[i]);
+            }
+        }
+
+        return rooms;
+    }
+
+    private getRooms(root: parse5.ASTNode, rooms: Room[]): any {
+        this.traverse(root, 'views-table cols-5 table', rooms);
+    }
 
     public processHTML(zip: JSZip): Room[] {
-
+        let that = this;
         let roomArray: Room[] = [];
+
         let promisesArray: Promise<any>[] = [];
 
-        let indexLoc = zip.file('index.html');
-
-
-        // iterate through zip
-        // get each file corresponding to file mentioned in indexFile
-        // (i.e. a promise of the content of each item in buildingArray)
-        // for (let b in buildingArray) {
-        //     let promisedContent = zip.files[buildingArray[b]].async('string');
-        //     promisesArray.push(promisedContent);
-        // }
-
-        // now have all the data of all building files in zip
-        Promise.all(promisesArray).then(function (data) {
-            // data is an array of buildings
-            for (let r = 0; r < data.length; r++) {
-                // parse html from each entry in data[] into sections(?)
-
-            }
+        zip.folder('contents').forEach(function (relativePath, file) {
+            console.log('Z - iterating over ' + relativePath);
+            fs.readFile(relativePath, function (err, data) {
+                // parse into Room object here
+                // var buildingTree = parse5.parse(data);
+                // add each room in the tree of ASTNodes defined by buildingTree
+                // that.getRooms(buildingTree, roomArray);
+            })
         });
-
         return roomArray;
     }
 

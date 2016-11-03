@@ -7,6 +7,8 @@ import Log from "../src/Util";
 import JSZip = require('jszip');
 import {expect} from 'chai';
 import fs = require('fs');
+import {Route} from "restify";
+import Room from "../src/model/Room";
 
 describe("DatasetController", function () {
 
@@ -239,8 +241,9 @@ describe("DatasetController", function () {
                 }
             }
         });
-        console.log('Z - zip created, size = ' + zip.file('DMP').name)
+        console.log('Z - zip created, successfully if DMP = ' + zip.file('DMP').name);
         let controller = new DatasetController;
-        return controller.processHTML
+        var rooms = controller.processHTML(zip);
+        expect(rooms).to.be.an('array');
     })
 });
