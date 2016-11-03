@@ -4,9 +4,9 @@
 
 import DatasetController from "../src/controller/DatasetController";
 import Log from "../src/Util";
-
 import JSZip = require('jszip');
 import {expect} from 'chai';
+import fs = require('fs');
 
 describe("DatasetController", function () {
 
@@ -226,4 +226,21 @@ describe("DatasetController", function () {
             expect((result == 201 || result == 204)).to.equal(true);
         });
     });
+
+    it('Should be able to process HTML', function () {
+        Log.test('Creating dataset - rooms');
+        var zip = new JSZip;
+        fs.readdir('html', function (err, files) {
+            if (err) {
+                console.log('OH NO AN ERROR!');
+            } else {
+                for (let f in files) {
+                    zip.file(files[f], fs.readFileSync(files[f]));
+                }
+            }
+        });
+        console.log('Z - zip created, size = ' + zip.file('DMP').name)
+        let controller = new DatasetController;
+        return controller.processHTML
+    })
 });
