@@ -5,9 +5,9 @@
 import Log from '../Util';
 import JSZip = require('jszip');
 import Section from '../model/Section';
-import Building from '../model/Building';
+import Room from '../model/Room';
 import fs = require('fs');
-// import parse5 = require('parse5');
+import parse5 = require('parse5');
 import {stringify} from "querystring";
 import {error} from "util";
 
@@ -139,9 +139,13 @@ export default class DatasetController {
         })
     }
 
-    public processHTML(zip: JSZip): Building[] {
+    private traverse(node: ASTFragment, rooms: []) {
+        
+    }
+
+    public processHTML(zip: JSZip): Room[] {
         // I think we should take
-        let buildingArray: Building[] = [];
+        let roomArray: Room[] = [];
         let promisesArray: Promise<any>[] = [];
 
         let indexFile = zip.file('index.html');
@@ -151,9 +155,9 @@ export default class DatasetController {
         // for (let i in indexFile) {
         //     buildingArray.push(indexFile[i].Parse5);
         // }
-        // var parse5 = require('parse5');
-        //
-        // var docFrag = parse5.parse(indexFile);
+        var parse5 = require('parse5');
+
+        var docFrag = parse5.parse(indexFile);
 
 
         // iterate through zip

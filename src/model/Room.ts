@@ -1,7 +1,7 @@
 /**
  * Created by pablo on 11/2/16.
  */
-export default class Building {
+export default class Room {
     FullName:string;    // eg: Hugh Dempster Pavilion
     ShortName:string;   // eg: DMP
     Number:string;      // room number
