@@ -3,6 +3,7 @@
  */
 
 import DatasetController from "../src/controller/DatasetController";
+import HTMLController from '../src/controller/HTMLController';
 import Log from "../src/Util";
 import JSZip = require('jszip');
 import {expect} from 'chai';
@@ -242,7 +243,7 @@ describe("DatasetController", function () {
             }
         });
         console.log('Z - zip created, successfully if DMP = ' + zip.file('DMP').name);
-        let controller = new DatasetController;
+        let controller = new HTMLController();
         var rooms = controller.processHTML(zip);
         expect(rooms).to.be.an('array');
     })
