@@ -206,11 +206,12 @@ export default class DatasetController {
 
         zip.folder('contents').forEach(function (relativePath, file) {
             console.log('Z - iterating over ' + relativePath);
-            fs.readFile(relativePath, function (err, data) {
-                // parse into Room object here
-                // var buildingTree = parse5.parse(data);
-                // add each room in the tree of ASTNodes defined by buildingTree
-                // that.getRooms(buildingTree, roomArray);
+            fs.readFile(relativePath, 'utf-8', function (err, data) {
+                var buildingTree = parse5.parse(data);
+
+                // create a Room from each one specified in buildingTree
+                // add each Room to the array
+                that.getRooms(buildingTree, roomArray);
             })
         });
         return roomArray;
