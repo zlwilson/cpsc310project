@@ -194,8 +194,11 @@ export default class DatasetController {
         return rooms;
     }
 
+    // use traverse to get the table of
     private getRooms(root: parse5.ASTNode, rooms: Room[]): any {
         this.traverse(root, 'views-table cols-5 table', rooms);
+
+        this.traverse(root, 'building-info', rooms);
     }
 
     public processHTML(zip: JSZip): Room[] {
@@ -211,6 +214,7 @@ export default class DatasetController {
 
                 // create a Room from each one specified in buildingTree
                 // add each Room to the array
+                // pass fullname and address to getrooms
                 that.getRooms(buildingTree, roomArray);
             })
         });
