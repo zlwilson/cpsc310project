@@ -232,18 +232,24 @@ describe("DatasetController", function () {
     it('Should be able to process HTML', function () {
         Log.test('Creating dataset - rooms');
         var zip = new JSZip;
-        fs.readdir('html', function (err, files) {
-            if (err) {
-                console.log('OH NO AN ERROR!');
-            } else {
-                for (let f in files) {
-                    zip.file(files[f], fs.readFileSync(files[f]));
+        try {
+            let html = fs.readdirSync('html/');
+            zip.folder("campus");
+            html.forEach(function (name, index) {
+                if (name !== '.DS_Store') {
+                    zip.folder("campus").file(name, fs.readFileSync("html/" + name).toString('utf8'), 'utf8');
                 }
-            }
-        });
-        console.log('Z - zip created, successfully if DMP = ' + zip.file('DMP').name);
+
+            });
+
+        }catch (err) {
+            console.log('OH NO AN ERROR!');
+        }
+        console.log('Z - zip created, successfully if DMP = ' + zip.file('campus/DMP').name);
         let controller = new DatasetController;
-        var rooms = controller.processHTML(zip);
-        expect(rooms).to.be.an('array');
+        return controller.processHTML(zip).then (function (data) {
+            var rooms = data;
+            expect(rooms).to.be.an('array');
+        });
     })
 });

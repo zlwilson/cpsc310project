@@ -195,30 +195,59 @@ export default class DatasetController {
     }
 
     // use traverse to get the table of
-    private getRooms(root: parse5.ASTNode, rooms: Room[]): any {
+    private getRooms(html:string, rooms: Room[]): any {
+        var root = parse5.parse(html);
+
         this.traverse(root, 'views-table cols-5 table', rooms);
 
         this.traverse(root, 'building-info', rooms);
     }
 
-    public processHTML(zip: JSZip): Room[] {
+    public processHTML(zip: JSZip): Promise<Room[]> {
+
         let that = this;
-        let roomArray: Room[] = [];
 
-        let promisesArray: Promise<any>[] = [];
+       try {
+           return new Promise(function (fulfill, reject) {
 
-        zip.folder('contents').forEach(function (relativePath, file) {
-            console.log('Z - iterating over ' + relativePath);
-            fs.readFile(relativePath, 'utf-8', function (err, data) {
-                var buildingTree = parse5.parse(data);
+               let roomArray: Room[] = [];
 
-                // create a Room from each one specified in buildingTree
-                // add each Room to the array
-                // pass fullname and address to getrooms
-                that.getRooms(buildingTree, roomArray);
-            })
-        });
-        return roomArray;
+               let promisesArray: any = [];
+               var htmlArray : any = [];
+
+               zip.folder('campus/').forEach(function (relativePath, file) {
+                   console.log('Z - iterating over ' + relativePath);
+                   console.log(file);
+
+                   var promiseContent = file.async('string');
+                   promisesArray.push(promiseContent);
+
+               });
+
+               Promise.all(promisesArray).then(function (data) {
+                   console.log('There is some data');
+                   for (var i = 0; i < data.length; i++) {
+                       console.log(i);
+                       var html = data[i] as string;
+                       htmlArray.push(html);
+
+                   }
+               }).then(function () {
+                   for (var h in htmlArray){
+                        that.getRooms(htmlArray[h], roomArray);
+                   }
+                   fulfill(roomArray);
+
+               }).catch(function (e) {
+                   console.log(e);
+                   reject(e);
+               })
+
+
+           });
+       } catch (e){
+           console.log(e);
+       }
     }
 
     /**
@@ -246,32 +275,43 @@ export default class DatasetController {
                 myZip.loadAsync(data, {base64: true}).then(function (zip: JSZip) {
                     Log.trace('DatasetController::process(..) - unzipped');
 
+                    let processedDataset: Section[] = [];
                     // TODO: iterate through files in zip (zip.files)
                     // The contents of the file will depend on the id provided. e.g.,
                     // some zips will contain .html files, some will contain .json files.
                     // You can depend on 'id' to differentiate how the zip should be handled,
                     // although you should still be tolerant to errors.
 
-                    let processedDataset: Section[] = [];
                     var promisesArray: Promise<any>[] = [];
 
+                    // console.log('Z - reading ZIP...');
+
                     for (var file in myZip.files) {
-                            // console.log('Z - In ZIP-reading for loop...');
-                            var promisedContent = myZip.files[file].async('string');
-                            promisesArray.push(promisedContent);
-                            // console.log('Z - added promise to array');
-                        }
+                        // console.log('Z - In ZIP-reading for loop...');
+                        var promisedContent = myZip.files[file].async('string');
+                        promisesArray.push(promisedContent);
+                        // console.log('Z - added promise to array');
+                    }
+
+                    //console.log('Z - ' + promisesArray);
+
 
                     Promise.all(promisesArray).then(function (data) {
                         // console.log('Z - iterating through all Promises...');
+
                         for (let r = 0; r < data.length; r++) {
+
                             var jsonString:string = JSON.stringify(data[r]);
+                            // Log.trace(jsonString);
 
                             // Parse out file.rank here, if needed
+
                             if( jsonString.indexOf("result") !== -1) {
                                 var dataParsed = JSON.parse(JSON.parse(jsonString));
+
                                 if (dataParsed.result.length > 0) {
                                     var sectionArray = dataParsed.result;
+
                                     for (var s in sectionArray) {
                                         var instanceSection: Section = sectionArray[s];
                                         processedDataset.push(instanceSection);
@@ -281,9 +321,11 @@ export default class DatasetController {
                             }
                         }
 
-                        if (processedDataset.length === 0) {
+                        if (processedDataset.length === 0)
+                        {
                             throw 400;
                         }
+
                         // console.log('Z - heading to save sections[], id = ' + id);
 
                         var p = that.save(id, processedDataset);
@@ -296,6 +338,9 @@ export default class DatasetController {
                             // console.log('Z - error in this.save()');
                             throw 400;
                         });
+
+                        // console.log('Z - save ID = ' + p);
+
                     }).catch(function (err) {
                         // console.log('Z - Error in Promise.all() ' + err);
                         reject(400);
@@ -310,6 +355,7 @@ export default class DatasetController {
             }
         });
     }
+
 
     /**
      * Writes the processed dataset to disk as 'id.json'. The function should overwrite
