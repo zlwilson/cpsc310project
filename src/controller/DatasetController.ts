@@ -11,7 +11,6 @@ import {stringify} from "querystring";
 import {error} from "util";
 import parse5 = require('parse5');
 import forEach = require("core-js/fn/array/for-each");
-import {TreeAdapter} from "parse5";
 
 /**
  * In memory representation of all datasets.
@@ -191,19 +190,8 @@ export default class DatasetController {
             // TODO: iterate through nodeArray - create a room for each entry, and populate it with theinfo in the node
             let room = new Room();
 
-            // switch on case name
-            // TODO: not sure this works yet, might need to iterate through children of the node before checking class names
-            if (this.getClassName(nodeArray[c]) == 'views-field views-field-field-room-capacity') {
-                room.Seats = parseInt(node.childNodes[c].data);
-            } else if (this.getClassName(nodeArray[c]) == 'views-field views-field-field-room-furniture') {
-                room.Furniture = node.childNodes[c].data;
-            } else if (this.getClassName(nodeArray[c]) == 'views-field views-field-field-room-type') {
-                room.Type = node.childNodes[c].data;
-            } else if (this.getClassName(nodeArray[c]) == 'views-field views-field-nothing') {
-                room.href = node.childNodes[c].data;
-            } else {
-
-            }
+            // make a room from a node
+            room = this.makeRoom(nodeArray[c]);
 
             // add new room to rooms[]
             rooms.push(room);
@@ -211,6 +199,27 @@ export default class DatasetController {
         console.log('Z = in table2rooms() - rooms[] = ' + rooms.length);
         console.log('Z = in table2rooms() - rooms[] = ' + rooms[0].Furniture);
         return rooms;
+    }
+
+    // make a room from a node
+    // TODO: this doesn't seem to work yet
+    private makeRoom(node: parse5.ASTNode): Room {
+        let that = this;
+        let room = new Room();
+        if (this.getClassName(node) == 'views-field views-field-field-room-capacity') {
+            room.Seats = parseInt(node.data);
+        } else if (this.getClassName(node) == 'views-field views-field-field-room-furniture') {
+            room.Furniture = node.data;
+        } else if (this.getClassName(node) == 'views-field views-field-field-room-type') {
+            room.Type = node.data;
+        } else if (this.getClassName(node) == 'views-field views-field-nothing') {
+            room.href = node.data;
+        } else {
+            for (let i in node.childNodes) {
+                that.makeRoom(node.childNodes[i]);
+            }
+        }
+        return room;
     }
     
     private parseHTML(html: string): Promise<parse5.ASTNode> {
