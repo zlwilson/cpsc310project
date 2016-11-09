@@ -143,7 +143,6 @@ export default class DatasetController {
         // the class name we need to check is stored in the attrs[] of the node
         // so we need to compare arg to the values in that array
         // I traversed the tree by hand in the debugger and the item we want is the first entry in attrs[]
-        // TODO: this doesn't work quite right yet - the node array that is returned is empty everytime
 
         if (tree.attrs != undefined) {
             for (let i in tree.attrs) {
@@ -158,52 +157,62 @@ export default class DatasetController {
         return nodeArray;
     }
 
+    private getClassName(node: parse5.ASTNode): string {
+        for (let i in node.attrs) {
+            if (node.attrs[i].name == 'class') {
+                return node.attrs[i].value;
+            }
+        }
+    }
+
     // create an array of all the Rooms from a building html file
     // all the Rooms are contained in one div so this iterates through that
     private table2rooms(node: parse5.ASTNode): Room[] {
         let that = this;
         var rooms: Room[] = [];
+        var nodeArray: parse5.ASTNode[] = [];
         console.log('Z - in table2rooms()');
         console.log('Z - node: ' + node.nodeName);
         // console.log('Z - node: ' + node.childNodes.length);
 
-        if (node.nodeName == 'even' ||
-            node.nodeName == 'odd' ||
-            node.nodeName == 'odd views-row-first' ||
-            node.nodeName == 'odd views-row-last' ||
-            node.nodeName == 'even views-row-last') {
+        // node is the root of the tree corresponding to the table with room info
+        // traverse the tree to add all nodes that correspond to rooms in the table
+        // the arguments here are all the possible class names for table elements
+        nodeArray = that.traverse(node, 'even', nodeArray);
+        nodeArray = that.traverse(node, 'odd', nodeArray);
+        nodeArray = that.traverse(node, 'odd views-row-first', nodeArray);
+        nodeArray = that.traverse(node, 'odd views-row-last', nodeArray);
+        nodeArray = that.traverse(node, 'even views-row-last', nodeArray);
 
-            // create a new Room
+        // nodeArray contains a node for each row in the table
+
+        for (let c in nodeArray) {
+            // TODO: iterate through nodeArray - create a room for each entry
             let room = new Room();
-
-            for (let c in node.childNodes) {
-                let name = node.childNodes[c].nodeName;
-
-                // fill all the fields of the new Room
-                switch (name) {
-                    case 'views-field views-field-field-room-capacity':
-                        room.Seats = parseInt(node.childNodes[c].data);
-                        break;
-                    case 'views-field views-field-field-room-furniture':
-                        room.Furniture = node.childNodes[c].data;
-                        break;
-                    case 'views-field views-field-field-room-type':
-                        room.Type = node.childNodes[c].data;
-                        break;
-                    case 'views-field views-field-nothing':
-                        room.href = node.childNodes[c].data;
-                        break;
-                    default:
-                        break;
-                }
+            if (this.getClassName(nodeArray[c]) == '') {
+                // switch on case name
             }
 
-            // add the room that was just created to the array of rooms
+            // TODO: populate the fields of the new Room with the info from the node
+            switch (name) {
+                case 'views-field views-field-field-room-capacity':
+                    room.Seats = parseInt(node.childNodes[c].data);
+                    break;
+                case 'views-field views-field-field-room-furniture':
+                    room.Furniture = node.childNodes[c].data;
+                    break;
+                case 'views-field views-field-field-room-type':
+                    room.Type = node.childNodes[c].data;
+                    break;
+                case 'views-field views-field-nothing':
+                    room.href = node.childNodes[c].data;
+                    break;
+                default:
+                    break;
+            }
+
+            // add new room to rooms[]
             rooms.push(room);
-        } else {
-            for (let i in node.childNodes) {
-                that.table2rooms(node.childNodes[i]);
-            }
         }
 
         return rooms;
