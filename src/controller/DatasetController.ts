@@ -137,9 +137,8 @@ export default class DatasetController {
     }
 
     // return an array of nodes who's class attribute matches arg
-    private traverse(tree: parse5.ASTNode, arg: string, nodes: parse5.ASTNode[]): parse5.ASTNode[] {
+    private traverse(tree: parse5.ASTNode, arg: string, nodeArray: parse5.ASTNode[]): parse5.ASTNode[] {
         let that = this;
-        var nodeArray: parse5.ASTNode[] = [];
 
         // the class name we need to check is stored in the attrs[] of the node
         // so we need to compare arg to the values in that array
@@ -147,8 +146,8 @@ export default class DatasetController {
         // TODO: this doesn't work quite right yet - the node array that is returned is empty everytime
 
         if (tree.attrs != undefined) {
-            for (let entry of tree.attrs) {
-                if (entry.name == 'class' && entry.value == arg) {
+            for (let i in tree.attrs) {
+                if (tree.attrs[i].name == 'class' && tree.attrs[i].value == arg) {
                     nodeArray.push(tree);
                 }
             }
@@ -166,7 +165,7 @@ export default class DatasetController {
         var rooms: Room[] = [];
         console.log('Z - in table2rooms()');
         console.log('Z - node: ' + node.nodeName);
-        console.log('Z - node: ' + node.childNodes.length);
+        // console.log('Z - node: ' + node.childNodes.length);
 
         if (node.nodeName == 'even' ||
             node.nodeName == 'odd' ||
