@@ -1,0 +1,15 @@
+This is the path to navigate to the table that contains the individual room info in a building html file:
+
+root >
+child 6 >
+child 3 >
+child 31 >
+child 10 >
+child 1 >
+child 3 >
+child 1 >
+child 5 >
+child 1 >
+child 3 >
+child 1 'views-table cols-5 table' in attrs[0] >
+child 1

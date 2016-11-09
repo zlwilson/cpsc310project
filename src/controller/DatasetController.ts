@@ -11,6 +11,7 @@ import {stringify} from "querystring";
 import {error} from "util";
 import parse5 = require('parse5');
 import forEach = require("core-js/fn/array/for-each");
+import {TreeAdapter} from "parse5";
 
 /**
  * In memory representation of all datasets.
@@ -135,15 +136,27 @@ export default class DatasetController {
         })
     }
 
-    private traverse(tree: parse5.ASTNode, arg: string, rooms: Room[]): any {
+    // return an array of nodes who's class attribute matches arg
+    private traverse(tree: parse5.ASTNode, arg: string, nodes: parse5.ASTNode[]): parse5.ASTNode[] {
         let that = this;
-        if (tree.nodeName == arg) {
-            rooms.concat(that.table2rooms(tree));
-        } else {
-            for (let child in tree.childNodes) {
-                that.traverse(tree.childNodes[child], arg, rooms);
+        var nodeArray: parse5.ASTNode[] = [];
+
+        // the class name we need to check is stored in the attrs[] of the node
+        // so we need to compare arg to the values in that array
+        // I traversed the tree by hand in the debugger and the item we want is the first entry in attrs[]
+        // TODO: this doesn't work quite right yet - the node array that is returned is empty everytime
+
+        if (tree.attrs != undefined) {
+            for (let entry of tree.attrs) {
+                if (entry.name == 'class' && entry.value == arg) {
+                    nodeArray.push(tree);
+                }
             }
         }
+        for (let child in tree.childNodes) {
+            that.traverse(tree.childNodes[child], arg, nodeArray);
+        }
+        return nodeArray;
     }
 
     // create an array of all the Rooms from a building html file
@@ -151,6 +164,9 @@ export default class DatasetController {
     private table2rooms(node: parse5.ASTNode): Room[] {
         let that = this;
         var rooms: Room[] = [];
+        console.log('Z - in table2rooms()');
+        console.log('Z - node: ' + node.nodeName);
+        console.log('Z - node: ' + node.childNodes.length);
 
         if (node.nodeName == 'even' ||
             node.nodeName == 'odd' ||
@@ -193,21 +209,36 @@ export default class DatasetController {
 
         return rooms;
     }
-
-    // use traverse to get the table of
+    
+    private parseHTML(html: string): Promise<parse5.ASTNode> {
+        return new Promise(function () {
+            var root = parse5.parse
+        })
+    }
+    
+    // use traverse to get the table of rooms
     private getRooms(html:string, rooms: Room[]): any {
         var root = parse5.parse(html);
+        console.log('Z - root is a ' + root.nodeName);
+        console.log('Z - in getRooms');
 
-        this.traverse(root, 'views-table cols-5 table', rooms);
+        var nodearray = this.traverse(root, 'views-table cols-5 table', []);
 
-        this.traverse(root, 'building-info', rooms);
+        console.log('Z - nodearray length = ' + nodearray.length);
+
+        for (let node of nodearray) {
+            console.log('Z - in for, nodeArray[i] = ' + node.nodeName);
+            rooms.concat(this.table2rooms(node));
+        }
+
+        console.log('Z - rooms[] length = ' + rooms.length);
     }
 
     public processHTML(zip: JSZip): Promise<Room[]> {
-
         let that = this;
 
-       try {
+
+        try {
            return new Promise(function (fulfill, reject) {
 
                let roomArray: Room[] = [];
@@ -230,14 +261,14 @@ export default class DatasetController {
                        console.log(i);
                        var html = data[i] as string;
                        htmlArray.push(html);
-
                    }
                }).then(function () {
                    for (var h in htmlArray){
-                        that.getRooms(htmlArray[h], roomArray);
+                       console.log('Z - htmlArray item ' + h);
+                       that.getRooms(htmlArray[h], roomArray);
                    }
+               }).then(function () {
                    fulfill(roomArray);
-
                }).catch(function (e) {
                    console.log(e);
                    reject(e);
@@ -245,9 +276,9 @@ export default class DatasetController {
 
 
            });
-       } catch (e){
+        } catch (e){
            console.log(e);
-       }
+        }
     }
 
     /**
@@ -355,7 +386,6 @@ export default class DatasetController {
             }
         });
     }
-
 
     /**
      * Writes the processed dataset to disk as 'id.json'. The function should overwrite
