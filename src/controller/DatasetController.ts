@@ -173,7 +173,6 @@ export default class DatasetController {
         var nodeArray: parse5.ASTNode[] = [];
         console.log('Z - in table2rooms()');
         console.log('Z - node: ' + node.nodeName);
-        // console.log('Z - node: ' + node.childNodes.length);
 
         // node is the root of the tree corresponding to the table with room info
         // traverse the tree to add all nodes that correspond to rooms in the table
@@ -186,35 +185,31 @@ export default class DatasetController {
 
         // nodeArray contains a node for each row in the table
 
-        for (let c in nodeArray) {
-            // TODO: iterate through nodeArray - create a room for each entry
-            let room = new Room();
-            if (this.getClassName(nodeArray[c]) == '') {
-                // switch on case name
-            }
+        console.log('Z - in table2rooms() - nodeArray = ' + nodeArray.length);
 
-            // TODO: populate the fields of the new Room with the info from the node
-            switch (name) {
-                case 'views-field views-field-field-room-capacity':
-                    room.Seats = parseInt(node.childNodes[c].data);
-                    break;
-                case 'views-field views-field-field-room-furniture':
-                    room.Furniture = node.childNodes[c].data;
-                    break;
-                case 'views-field views-field-field-room-type':
-                    room.Type = node.childNodes[c].data;
-                    break;
-                case 'views-field views-field-nothing':
-                    room.href = node.childNodes[c].data;
-                    break;
-                default:
-                    break;
+        for (let c in nodeArray) {
+            // TODO: iterate through nodeArray - create a room for each entry, and populate it with theinfo in the node
+            let room = new Room();
+
+            // switch on case name
+            // TODO: not sure this works yet, might need to iterate through children of the node before checking class names
+            if (this.getClassName(nodeArray[c]) == 'views-field views-field-field-room-capacity') {
+                room.Seats = parseInt(node.childNodes[c].data);
+            } else if (this.getClassName(nodeArray[c]) == 'views-field views-field-field-room-furniture') {
+                room.Furniture = node.childNodes[c].data;
+            } else if (this.getClassName(nodeArray[c]) == 'views-field views-field-field-room-type') {
+                room.Type = node.childNodes[c].data;
+            } else if (this.getClassName(nodeArray[c]) == 'views-field views-field-nothing') {
+                room.href = node.childNodes[c].data;
+            } else {
+
             }
 
             // add new room to rooms[]
             rooms.push(room);
         }
-
+        console.log('Z = in table2rooms() - rooms[] = ' + rooms.length);
+        console.log('Z = in table2rooms() - rooms[] = ' + rooms[0].Furniture);
         return rooms;
     }
     
