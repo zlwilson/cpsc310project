@@ -211,21 +211,21 @@ export default class DatasetController {
         room.Number = number;
 
         let capacity = node.childNodes[3].childNodes[0].value;
-        capacity = capacity.substr(2, capacity.length);
-        capacity = capacity.replace(' ', '');
+        // capacity = capacity.substr(2, capacity.length);
+        // capacity = capacity.replace(' ', '');
         room.Seats = parseInt(capacity);
 
         let furniture = node.childNodes[5].childNodes[0].value;
-        furniture = furniture.substr(2, furniture.length);
+        // furniture = furniture.substr(2, furniture.length);
         room.Furniture = furniture;
 
         let type = node.childNodes[7].value;
-        type = type.substr(2, type.length);
+        // type = type.substr(2, type.length);
         room.Type = type;
 
         let url = node.childNodes[9].childNodes[1].attrs[0].value;
         room.href = url;
-        
+
         console.log(this.printRoom(room));
         return room;
     }

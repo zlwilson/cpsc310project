@@ -14,7 +14,6 @@ child 3 >
 child 1 'views-table cols-5 table' in attrs[0] >
 child 3 >
 child 1 ‘odd views-row-first’
-child 
 
 child 1 : ‘view-field views-field-field-room-number
 child 3 : capacity
