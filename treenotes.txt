@@ -12,4 +12,12 @@ child 5 >
 child 1 >
 child 3 >
 child 1 'views-table cols-5 table' in attrs[0] >
-child 1
+child 3 >
+child 1 ‘odd views-row-first’
+child 
+
+child 1 : ‘view-field views-field-field-room-number
+child 3 : capacity
+child 5 : furniture
+child 7 : type
+child 9 : nothing (url)

@@ -176,11 +176,11 @@ export default class DatasetController {
         // node is the root of the tree corresponding to the table with room info
         // traverse the tree to add all nodes that correspond to rooms in the table
         // the arguments here are all the possible class names for table elements
-        nodeArray = that.traverse(node, 'even', nodeArray);
-        nodeArray = that.traverse(node, 'odd', nodeArray);
-        nodeArray = that.traverse(node, 'odd views-row-first', nodeArray);
-        nodeArray = that.traverse(node, 'odd views-row-last', nodeArray);
-        nodeArray = that.traverse(node, 'even views-row-last', nodeArray);
+        that.traverse(node, 'even', nodeArray);
+        that.traverse(node, 'odd', nodeArray);
+        that.traverse(node, 'odd views-row-first', nodeArray);
+        that.traverse(node, 'odd views-row-last', nodeArray);
+        that.traverse(node, 'even views-row-last', nodeArray);
 
         // nodeArray contains a node for each row in the table
 
@@ -206,26 +206,55 @@ export default class DatasetController {
     private makeRoom(node: parse5.ASTNode): Room {
         let that = this;
         let room = new Room();
-        if (this.getClassName(node) == 'views-field views-field-field-room-capacity') {
-            room.Seats = parseInt(node.data);
-        } else if (this.getClassName(node) == 'views-field views-field-field-room-furniture') {
-            room.Furniture = node.data;
-        } else if (this.getClassName(node) == 'views-field views-field-field-room-type') {
-            room.Type = node.data;
-        } else if (this.getClassName(node) == 'views-field views-field-nothing') {
-            room.href = node.data;
-        } else {
-            for (let i in node.childNodes) {
-                that.makeRoom(node.childNodes[i]);
+
+        for (let i in node.childNodes) {
+            if (this.getClassName(node) == 'views-field views-field-field-room-number') {
+
+                let number = node.childNodes[1].childNodes[0].value;
+                room.Number = number;
+
+            } else if (this.getClassName(node) == 'views-field views-field-field-room-capacity') {
+
+                let capacity = node.childNodes[0].value;
+                capacity = capacity.substr(2, capacity.length);
+                capacity = capacity.replace(' ', '');
+                room.Seats = parseInt(capacity);
+
+            } else if (this.getClassName(node) == 'views-field views-field-field-room-furniture') {
+
+                let furniture = node.childNodes[0].value;
+                furniture = furniture.substr(2, furniture.length);
+                room.Furniture = furniture;
+
+            } else if (this.getClassName(node) == 'views-field views-field-field-room-type') {
+
+                let type = node.childNodes[0].value;
+                type = type.substr(2, type.length);
+                room.Type = type;
+
+            } else if (this.getClassName(node) == 'views-field views-field-nothing') {
+
+                let url = node.childNodes[1].attrs[0].value;
+                room.href = url;
+
+            }
+
+            for (let j in node.childNodes[i].childNodes) {
+                that.makeRoom(node.childNodes[j]);
             }
         }
+
+        console.log(this.printRoom(room));
         return room;
     }
-    
-    private parseHTML(html: string): Promise<parse5.ASTNode> {
-        return new Promise(function () {
-            var root = parse5.parse
-        })
+
+    private printRoom(room: Room) {
+        console.log('Room- Number, Capacity, Furniture, Type, href');
+        console.log(room.Number);
+        console.log(room.Seats);
+        console.log(room.Furniture);
+        console.log(room.Type);
+        console.log(room.href);
     }
     
     // use traverse to get the table of rooms
