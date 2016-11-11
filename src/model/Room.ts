@@ -14,41 +14,31 @@ export default class Room {
     Furniture:string;   // room type and amenities (eg: "Classroom-Movable Tables & Chairs")
     href:string;        // link to full details online
 
-    // constructor(fullname:string, shortname:string, number:string, name:string, address:string, lat:number, lon:number, seats:number, type:string, furniture:string, href:string) {
-    //     this.FullName = fullname;
-    //     this.ShortName = shortname;
-    //     this.Number = number;
-    //     this.Name = name;
-    //     this.Address = address;
-    //     this.Latitude = lat;
-    //     this.Longitude = lon;
-    //     this.Seats = seats;
-    //     this.Type = type;
-    //     this.Furniture = furniture;
-    //     this.href = href;
-    // };
-
     constructor() {
         
     }
 
     // print out a room
-    public printRoom(room: Room) {
-        console.log('Room - ' + room.Name);
-        console.log('   Number: ' + room.Number);
-        console.log('   Capacity:' + room.Seats);
-        console.log('   Furniture:' + room.Furniture);
-        console.log('   Type:' + room.Type);
-        console.log('   href:' + room.href);
-        console.log('   Full name:' + room.FullName);
-        console.log('   Address:' + room.Address);
-        console.log('   Short name:' + room.ShortName);
-        console.log('   Lat:' + room.Latitude);
-        console.log('   Lon:' + room.Longitude);
+    public printRoom() {
+        console.log('Room - ' + this.Name);
+        console.log('   Number: ' + this.Number);
+        console.log('   Capacity:' + this.Seats);
+        console.log('   Furniture:' + this.Furniture);
+        console.log('   Type:' + this.Type);
+        console.log('   href:' + this.href);
+        console.log('   Full name:' + this.FullName);
+        console.log('   Address:' + this.Address);
+        console.log('   Short name:' + this.ShortName);
+        console.log('   Lat:' + this.Latitude);
+        console.log('   Lon:' + this.Longitude);
     }
 
     // clean up the format of a Room (remove spaces etc)
-    public cleanRoom(room: Room) {
+    public formatRoom() {
         // TODO: format the values of each entry in the Room (remove spaces and things)
+        this.ShortName = this.ShortName.replace(' ', '');
+        this.Number = this.Number.replace(' ', '');
+        this.Type = this.Type.substr(11); // subtract \n and leading 9 spaces
+
     }
 }

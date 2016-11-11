@@ -186,13 +186,10 @@ export default class DatasetController {
         console.log('Z - in table2rooms() - nodeArray = ' + nodeArray.length);
 
         for (let c in nodeArray) {
-            // TODO: iterate through nodeArray - create a room for each entry, and populate it with theinfo in the node
             let room = new Room();
 
-            // make a room from a node
             room = this.makeRoom(nodeArray[c]);
 
-            // add new room to rooms[]
             rooms.push(room);
         }
         console.log('Z = in table2rooms() - rooms[] = ' + rooms.length);
@@ -209,22 +206,19 @@ export default class DatasetController {
         room.Number = number;
 
         let capacity = node.childNodes[3].childNodes[0].value;
-        // capacity = capacity.substr(2, capacity.length);
-        // capacity = capacity.replace(' ', '');
         room.Seats = parseInt(capacity);
 
         let furniture = node.childNodes[5].childNodes[0].value;
-        // furniture = furniture.substr(2, furniture.length);
         room.Furniture = furniture;
 
         let type = node.childNodes[7].value;
-        // type = type.substr(2, type.length);
         room.Type = type;
 
         let url = node.childNodes[9].childNodes[1].attrs[0].value;
         room.href = url;
 
-        room.printRoom(room);
+        // room.formatRoom();
+        room.printRoom();
         return room;
     }
     
