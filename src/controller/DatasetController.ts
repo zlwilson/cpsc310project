@@ -135,7 +135,7 @@ export default class DatasetController {
         })
     }
 
-    // return an array of nodes who's class attribute matches arg
+    // return an array of nodes who's 'class' attribute matches arg
     private traverse(tree: parse5.ASTNode, arg: string, nodeArray: parse5.ASTNode[]): parse5.ASTNode[] {
         let that = this;
 
@@ -164,8 +164,7 @@ export default class DatasetController {
         }
     }
 
-    // create an array of all the Rooms from a building html file
-    // all the Rooms are contained in one div so this iterates through that
+    // create an array of all the Rooms from the 'table' in a building html file
     private table2rooms(node: parse5.ASTNode): Room[] {
         let that = this;
         var rooms: Room[] = [];
@@ -201,8 +200,7 @@ export default class DatasetController {
         return rooms;
     }
 
-    // make a room from a node
-    // TODO: this doesn't seem to work yet
+    // make a room from a 'table row' node
     private makeRoom(node: parse5.ASTNode): Room {
         let that = this;
         let room = new Room();
@@ -231,19 +229,30 @@ export default class DatasetController {
     }
 
     private printRoom(room: Room) {
-        console.log('Room- Number, Capacity, Furniture, Type, href');
-        console.log(room.Number);
-        console.log(room.Seats);
-        console.log(room.Furniture);
-        console.log(room.Type);
-        console.log(room.href);
+        console.log('Room - ' + room.Name);
+        console.log('   Number: ' + room.Number);
+        console.log('   Capacity:' + room.Seats);
+        console.log('   Furniture:' + room.Furniture);
+        console.log('   Type:' + room.Type);
+        console.log('   href:' + room.href);
+        console.log('   Full name:' + room.FullName);
+        console.log('   Address:' + room.Address);
+        console.log('   Short name:' + room.ShortName);
+        console.log('   Lat:' + room.Latitude);
+        console.log('   Lon:' + room.Longitude);
     }
     
     // use traverse to get the table of rooms
-    private getRooms(html:string, rooms: Room[]): any {
+    private getRooms(html: string, rooms: Room[]): any {
         var root = parse5.parse(html);
         console.log('Z - root is a ' + root.nodeName);
         console.log('Z - in getRooms');
+
+        var shortName: string = '';
+        var fullName: string = '';
+        var address: string = '';
+        var latitude: number = 0;
+        var longitude: number = 0;
 
         var nodearray = this.traverse(root, 'views-table cols-5 table', []);
 
@@ -252,6 +261,15 @@ export default class DatasetController {
         for (let node of nodearray) {
             console.log('Z - in for, nodeArray[i] = ' + node.nodeName);
             rooms.concat(this.table2rooms(node));
+        }
+
+        for (let x in rooms) {
+            // TODO: add a building's name and address to each room here
+            rooms[x].FullName = fullName;
+            rooms[x].ShortName = shortName;
+            rooms[x].Address = address;
+            rooms[x].Latitude = latitude;
+            rooms[x].Longitude = longitude;
         }
 
         console.log('Z - rooms[] length = ' + rooms.length);
