@@ -241,6 +241,11 @@ export default class DatasetController {
         console.log('   Lat:' + room.Latitude);
         console.log('   Lon:' + room.Longitude);
     }
+
+    // clean up the format of a Room (remove spaces etc)
+    private cleanRoom(room: Room) {
+        // TODO: format the values of each entry in the Room (remove spaces and things)
+    }
     
     // use traverse to get the table of rooms
     private getRooms(html: string, rooms: Room[]): any {
