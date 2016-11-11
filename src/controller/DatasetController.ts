@@ -224,27 +224,8 @@ export default class DatasetController {
         let url = node.childNodes[9].childNodes[1].attrs[0].value;
         room.href = url;
 
-        console.log(this.printRoom(room));
+        room.printRoom(room);
         return room;
-    }
-
-    private printRoom(room: Room) {
-        console.log('Room - ' + room.Name);
-        console.log('   Number: ' + room.Number);
-        console.log('   Capacity:' + room.Seats);
-        console.log('   Furniture:' + room.Furniture);
-        console.log('   Type:' + room.Type);
-        console.log('   href:' + room.href);
-        console.log('   Full name:' + room.FullName);
-        console.log('   Address:' + room.Address);
-        console.log('   Short name:' + room.ShortName);
-        console.log('   Lat:' + room.Latitude);
-        console.log('   Lon:' + room.Longitude);
-    }
-
-    // clean up the format of a Room (remove spaces etc)
-    private cleanRoom(room: Room) {
-        // TODO: format the values of each entry in the Room (remove spaces and things)
     }
     
     // use traverse to get the table of rooms
