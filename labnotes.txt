@@ -35,3 +35,18 @@ node --harmony node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_
 	- MCOMPARISON		Lotus
 	- SCOMPARISON		Zack
 
+
+
+======== Milestone 3 ========
+Hi Lotus! So the problem with parsing html is a little control flow bug,
+the async calls seem to work but they're a nightmare to debug...
+
+So if we don't need to do that that would be awesome,
+I'm gonna try to just force the program to wait a couple milliseconds
+It's a dirty hack but probably will work, then we can figure out the queries etc.
+
+Other thing to do is modify the save method to accept a Room[] (from processHTML)
+This could be called inside processHTML() or,
+We could write a new method that just calls processHTML() on the data and calls save
+(This might be nice because then we can handle the response codes in this new method and not change processHTML() at all)
+

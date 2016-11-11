@@ -156,6 +156,32 @@ export default class DatasetController {
         return nodeArray;
     }
 
+    private traverseASYNC(tree: parse5.ASTNode, arg: string, nodeArray: parse5.ASTNode[]): Promise<parse5.ASTNode[]> {
+        let that = this;
+
+        return new Promise(function (fulfill, reject) {
+           try {
+               // the class name we need to check is stored in the attrs[] of the node
+               // so we need to compare arg to the values in that array
+               // I traversed the tree by hand in the debugger and the item we want is the first entry in attrs[]
+
+               if (tree.attrs != undefined) {
+                   for (let i in tree.attrs) {
+                       if (tree.attrs[i].name == 'class' && tree.attrs[i].value == arg) {
+                           nodeArray.push(tree);
+                       }
+                   }
+               }
+               for (let child in tree.childNodes) {
+                   that.traverse(tree.childNodes[child], arg, nodeArray);
+               }
+               fulfill(nodeArray);
+           } catch (err) {
+               reject(err);
+           }
+        });
+    }
+
     private getClassName(node: parse5.ASTNode): string {
         for (let i in node.attrs) {
             if (node.attrs[i].name == 'class') {
@@ -167,7 +193,7 @@ export default class DatasetController {
     // create an array of all the Rooms from the 'table' in a building html file
     private table2rooms(node: parse5.ASTNode): Room[] {
         let that = this;
-        var rooms: Room[] = [];
+        var roomsT2R: Room[] = [];
         var nodeArray: parse5.ASTNode[] = [];
         console.log('Z - in table2rooms()');
         console.log('Z - node: ' + node.nodeName);
@@ -190,11 +216,54 @@ export default class DatasetController {
 
             room = this.makeRoom(nodeArray[c]);
 
-            rooms.push(room);
+            roomsT2R.push(room);
         }
-        console.log('Z = in table2rooms() - rooms[] = ' + rooms.length);
-        console.log('Z = in table2rooms() - rooms[] = ' + rooms[0].Furniture);
-        return rooms;
+        console.log('Z = in table2rooms() - rooms[] = ' + roomsT2R.length);
+        return roomsT2R;
+    }
+
+    private table2roomsASYNC(node: parse5.ASTNode): Promise<Room[]> {
+        let that = this;
+        return new Promise(function (fulfill, reject) {
+            try {
+                var rooms: Room[] = [];
+                var nodeArray: parse5.ASTNode[] = [];
+                console.log('Z - in table2roomsASYNC()');
+                console.log('Z - node: ' + node.nodeName);
+
+                // node is the root of the tree corresponding to the table with room info
+                // traverse the tree to add all nodes that correspond to rooms in the table
+                // the arguments here are all the possible class names for table elements
+                that.traverseASYNC(node, 'even', nodeArray).then(function (result) {
+                    that.traverseASYNC(node, 'odd', result).then(function (result) {
+                        that.traverseASYNC(node, 'odd views-row-first', result).then(function (result) {
+                            that.traverseASYNC(node , 'odd views-row-last', result).then(function (result) {
+                                that.traverseASYNC(node, 'even views-row-last', result);
+                            })
+                        })
+                    })
+                }).catch(function (err) {
+                    console.log('Error in t2rASYNC - ' + err);
+                });
+
+                // nodeArray contains a node for each row in the table
+
+                console.log('Z - in table2roomsASYNC() - nodeArray = ' + nodeArray.length);
+
+                for (let c in nodeArray) {
+                    let room = new Room();
+
+                    room = that.makeRoom(nodeArray[c]);
+
+                    rooms.push(room);
+                }
+                console.log('Z = in table2roomsASYNC() - rooms[] = ' + rooms.length);
+                console.log('Z = in table2roomsASYNC() - rooms[] = ' + rooms[0].Furniture);
+                fulfill(rooms);
+            } catch (err) {
+                reject(err);
+            }
+        })
     }
 
     // make a room from a 'table row' node
@@ -211,7 +280,7 @@ export default class DatasetController {
         let furniture = node.childNodes[5].childNodes[0].value;
         room.Furniture = furniture;
 
-        let type = node.childNodes[7].value;
+        let type = node.childNodes[7].childNodes[0].value;
         room.Type = type;
 
         let url = node.childNodes[9].childNodes[1].attrs[0].value;
@@ -224,27 +293,42 @@ export default class DatasetController {
     
     // use traverse to get the table of rooms
     private getRooms(html: string, rooms: Room[]): any {
+        let that = this;
         var root = parse5.parse(html);
         console.log('Z - root is a ' + root.nodeName);
         console.log('Z - in getRooms');
 
+        // get div where all info about building is
+        var buildingInfoTable = this.traverse(root, 'views-row views-row-1 views-row-odd views-row-first views-row-last', []);
+
+        // get address, hours (will be first 2 elements in buildingInfo[])
+        var buildingInfo = this.traverse(root, 'field-content', []);
+
         var shortName: string = '';
-        var fullName: string = '';
-        var address: string = '';
-        var latitude: number = 0;
-        var longitude: number = 0;
 
         var nodearray = this.traverse(root, 'views-table cols-5 table', []);
 
         console.log('Z - nodearray length = ' + nodearray.length);
 
+        var fullName: string = buildingInfo[0].childNodes[0].value;
+        var address: string = buildingInfo[1].childNodes[0].value;
+        // var hours: string = buildingInfo[2].childNodes[0].value;
+        var latitude: number = 0;
+        var longitude: number = 0;
+
+        /* TODO: rooms[] is empty when the for loop runs to populate it, need to fix control flow
+            solution 1: would be to change everything to async calls, but those methods aren't working too well right now
+            solution 2: force the program to wait a couple milliseconds for rooms[] to get elements
+        */
+
         for (let node of nodearray) {
             console.log('Z - in for, nodeArray[i] = ' + node.nodeName);
-            rooms.concat(this.table2rooms(node));
+            rooms.concat(that.table2rooms(node));
         }
 
+        // TODO solution 2: wait a couple milliseconds here, ugly but probably works
+
         for (let x in rooms) {
-            // TODO: add a building's name and address to each room here
             rooms[x].FullName = fullName;
             rooms[x].ShortName = shortName;
             rooms[x].Address = address;
@@ -255,9 +339,53 @@ export default class DatasetController {
         console.log('Z - rooms[] length = ' + rooms.length);
     }
 
+    private getRoomsASYNC(html: string, rooms: Room[]): any {
+        let that = this;
+        var root = parse5.parse(html);
+        console.log('Z - root is a ' + root.nodeName);
+        console.log('Z - in getRoomsASYNC()');
+
+        var fullName: string = '';
+        var shortName: string = '';
+        var address: string = '';
+        var hours: string = '';
+        var latitude: number = 0;
+        var longitude: number = 0;
+
+        // get div where all info about building is
+        // var buildingInfoTable = this.traverse(root, 'views-row views-row-1 views-row-odd views-row-first views-row-last', []);
+
+        // get address, hours (will be first 2 elements in buildingInfo[])
+        that.traverseASYNC(root, 'field-content', []).then(function (buildingInfo) {
+            fullName = buildingInfo[0].childNodes[0].value;
+            address = buildingInfo[1].childNodes[0].value;
+            hours = buildingInfo[2].childNodes[0].value;
+            latitude = 0;
+            longitude = 0;
+        }).catch(function (err) {
+            console.log('error in getrooms - ' + err)
+        });
+
+        that.traverseASYNC(root, 'views-table cols-5 table', []).then(function (result) {
+            console.log('Z - nodearray length = ' + result.length);
+            for (let node of result) {
+                that.table2roomsASYNC(node).then(function (result) {
+                    console.log('Z - rooms[] length = ' + result.length);
+                    for (let x in result) {
+                        result[x].FullName = fullName;
+                        result[x].ShortName = shortName;
+                        result[x].Address = address;
+                        result[x].Latitude = latitude;
+                        result[x].Longitude = longitude;
+                    }
+                })
+            }
+        });
+    }
+
+    // Process the dataset if it contains HTML files
     public processHTML(zip: JSZip): Promise<Room[]> {
         let that = this;
-
 
         try {
            return new Promise(function (fulfill, reject) {
@@ -285,10 +413,12 @@ export default class DatasetController {
                    }
                }).then(function () {
                    for (var h in htmlArray){
-                       console.log('Z - htmlArray item ' + h);
-                       that.getRooms(htmlArray[h], roomArray);
+                       console.log('Z - NEW HTML FILE - htmlArray item ' + h);
+                       // change this method to regular or ASYNC version
+                       that.getRoomsASYNC(htmlArray[h], roomArray);
                    }
                }).then(function () {
+                   // TODO: call save() here
                    fulfill(roomArray);
                }).catch(function (e) {
                    console.log(e);
@@ -380,7 +510,7 @@ export default class DatasetController {
 
                         // console.log('Z - heading to save sections[], id = ' + id);
 
-                        var p = that.save(id, processedDataset);
+                        var p = that.save(id, processedDataset, '.json');
 
                         p.then(function (result) {
                             // console.log('Z - save() result: ' + result);
@@ -416,7 +546,7 @@ export default class DatasetController {
      * @param processedDataset
      */
 
-    private save(id: string, processedDataset: Section[]): Promise<Number> {
+    private save(id: string, processedDataset: Section[], filetype: string): Promise<Number> {
         // console.log('Z - in save()...');
         this.datasets[id] = processedDataset;
 
@@ -432,7 +562,7 @@ export default class DatasetController {
                     // console.log('Z - ./ data already exists');
                 }
 
-                fs.open('data/' + id + '.json', 'wx', function (err, fileDestination) {
+                fs.open('data/' + id + filetype, 'wx', function (err, fileDestination) {
                     if (err) {
                         if (err.code === "EEXIST") {
                             // console.error(id + '.json already exists');
