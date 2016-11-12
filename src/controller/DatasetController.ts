@@ -5,12 +5,12 @@
 import Log from '../Util';
 import JSZip = require('jszip');
 import Section from '../model/Section';
-import Room from '../model/Room';
 import fs = require('fs');
 import {stringify} from "querystring";
 import {error} from "util";
 import parse5 = require('parse5');
 import forEach = require("core-js/fn/array/for-each");
+import Room from "../model/Room";
 
 /**
  * In memory representation of all datasets.
@@ -222,49 +222,7 @@ export default class DatasetController {
         return roomsT2R;
     }
 
-    private table2roomsASYNC(node: parse5.ASTNode): Promise<Room[]> {
-        let that = this;
-        return new Promise(function (fulfill, reject) {
-            try {
-                var rooms: Room[] = [];
-                var nodeArray: parse5.ASTNode[] = [];
-                console.log('Z - in table2roomsASYNC()');
-                console.log('Z - node: ' + node.nodeName);
 
-                // node is the root of the tree corresponding to the table with room info
-                // traverse the tree to add all nodes that correspond to rooms in the table
-                // the arguments here are all the possible class names for table elements
-                that.traverseASYNC(node, 'even', nodeArray).then(function (result) {
-                    that.traverseASYNC(node, 'odd', result).then(function (result) {
-                        that.traverseASYNC(node, 'odd views-row-first', result).then(function (result) {
-                            that.traverseASYNC(node , 'odd views-row-last', result).then(function (result) {
-                                that.traverseASYNC(node, 'even views-row-last', result);
-                            })
-                        })
-                    })
-                }).catch(function (err) {
-                    console.log('Error in t2rASYNC - ' + err);
-                });
-
-                // nodeArray contains a node for each row in the table
-
-                console.log('Z - in table2roomsASYNC() - nodeArray = ' + nodeArray.length);
-
-                for (let c in nodeArray) {
-                    let room = new Room();
-
-                    room = that.makeRoom(nodeArray[c]);
-
-                    rooms.push(room);
-                }
-                console.log('Z = in table2roomsASYNC() - rooms[] = ' + rooms.length);
-                console.log('Z = in table2roomsASYNC() - rooms[] = ' + rooms[0].Furniture);
-                fulfill(rooms);
-            } catch (err) {
-                reject(err);
-            }
-        })
-    }
 
     // make a room from a 'table row' node
     private makeRoom(node: parse5.ASTNode): Room {
@@ -290,7 +248,58 @@ export default class DatasetController {
         room.printRoom();
         return room;
     }
-    
+
+    private table2roomsASYNC(node: parse5.ASTNode, rooms: Array<any>): Promise<Room[]> {
+        let that = this;
+        return new Promise(function (fulfill, reject) {
+            try {
+                var nodeArray: parse5.ASTNode[] = [];
+                console.log('Z - in table2roomsASYNC()');
+                console.log('Z - node: ' + node.nodeName);
+
+                // node is the root of the tree corresponding to the table with room info
+                // traverse the tree to add all nodes that correspond to rooms in the table
+                // the arguments here are all the possible class names for table elements
+                that.traverseASYNC(node, 'even', nodeArray).then(function () {
+                    console.log(nodeArray);
+                    that.traverseASYNC(node, 'odd', nodeArray);
+                }).then(function () {
+                    console.log(nodeArray);
+                    that.traverseASYNC(node, 'odd views-row-first', nodeArray);
+                }).then(function () {
+                    console.log(nodeArray);
+                    that.traverseASYNC(node , 'odd views-row-last', nodeArray);
+                }).then(function () {
+                    console.log(nodeArray);
+                    that.traverseASYNC(node, 'even views-row-last', nodeArray);
+                }).then(function () {
+                    // nodeArray contains a node for each row in the table
+
+                    console.log('Z - in table2roomsASYNC() - nodeArray = ' + nodeArray.length);
+
+                    for (let c in nodeArray) {
+                        let room = new Room();
+
+                        room = that.makeRoom(nodeArray[c]);
+
+                        rooms.push(room);
+                    }
+
+                }).then(function () {
+                    console.log('Z = in table2roomsASYNC() - rooms[] = ' + rooms.length);
+                    console.log('Z = in table2roomsASYNC() - rooms[] = ' + rooms[0].Furniture);
+                    fulfill(rooms);
+                }).catch(function (err) {
+                    console.log('Error in t2rASYNC - ' + err);
+                });
+
+
+            } catch (err) {
+                reject(err);
+            }
+        })
+    }
+
     // use traverse to get the table of rooms
     private getRooms(html: string, rooms: Room[]): any {
         let that = this;
@@ -336,51 +345,75 @@ export default class DatasetController {
             rooms[x].Longitude = longitude;
         }
 
-        console.log('Z - rooms[] length = ' + rooms.length);
+
     }
 
-    private getRoomsASYNC(html: string, rooms: Room[]): any {
+    private getRoomsASYNC(html: string, rooms: Room[]): Promise<Room[]> {
         let that = this;
-        var root = parse5.parse(html);
-        console.log('Z - root is a ' + root.nodeName);
-        console.log('Z - in getRoomsASYNC()');
 
-        var fullName: string = '';
-        var shortName: string = '';
-        var address: string = '';
-        var hours: string = '';
-        var latitude: number = 0;
-        var longitude: number = 0;
+        try {
+            return new Promise(function (fulfill, reject) {
+                var root = parse5.parse(html);
+                var table: any;
+                var localRooms: any = [];
+                var promiseArray: any = [];
+                console.log('Z - root is a ' + root.nodeName);
+                console.log('Z - in getRoomsASYNC()');
 
-        // get div where all info about building is
-        // var buildingInfoTable = this.traverse(root, 'views-row views-row-1 views-row-odd views-row-first views-row-last', []);
+                var fullName: string = '';
+                var shortName: string = '';
+                var address: string = '';
+                var hours: string = '';
+                var latitude: number = 0;
+                var longitude: number = 0;
 
-        // get address, hours (will be first 2 elements in buildingInfo[])
-        that.traverseASYNC(root, 'field-content', []).then(function (buildingInfo) {
-            fullName = buildingInfo[0].childNodes[0].value;
-            address = buildingInfo[1].childNodes[0].value;
-            hours = buildingInfo[2].childNodes[0].value;
-            latitude = 0;
-            longitude = 0;
-        }).catch(function (err) {
-            console.log('error in getrooms - ' + err)
-        });
+                // get div where all info about building is
+                // var buildingInfoTable = this.traverse(root, 'views-row views-row-1 views-row-odd views-row-first views-row-last', []);
 
-        that.traverseASYNC(root, 'views-table cols-5 table', []).then(function (result) {
-            console.log('Z - nodearray length = ' + result.length);
-            for (let node of result) {
-                that.table2roomsASYNC(node).then(function (result) {
-                    console.log('Z - rooms[] length = ' + result.length);
-                    for (let x in result) {
-                        result[x].FullName = fullName;
-                        result[x].ShortName = shortName;
-                        result[x].Address = address;
-                        result[x].Latitude = latitude;
-                        result[x].Longitude = longitude;
+                // get address, hours (will be first 2 elements in buildingInfo[])
+                that.traverseASYNC(root, 'field-content', []).then(function (buildingInfo) {
+                    fullName = buildingInfo[0].childNodes[0].value;
+                    address = buildingInfo[1].childNodes[0].value;
+                    hours = buildingInfo[2].childNodes[0].value;
+                    latitude = 0;
+                    longitude = 0;
+                }).catch(function (err) {
+                    console.log('error in getrooms - ' + err)
+                });
+
+                that.traverseASYNC(root, 'views-table cols-5 table', []).then(function (result) {
+                    console.log('Z - nodearray length = ' + result.length);
+                    table = result;
+                }).then(function () {
+                    for (let node of table) {
+                        that.table2roomsASYNC(node, rooms).then(function (result) {
+                            console.log('Z - rooms[] length = ' + result.length);
+                            for (let x in result) {
+                                result[x].FullName = fullName;
+                                result[x].ShortName = shortName;
+                                result[x].Address = address;
+                                result[x].Latitude = latitude;
+                                result[x].Longitude = longitude;
+
+                                localRooms.push(result[x]);
+                            }
+                        }).then(function () {
+                            console.log('Z - rooms[] length = ' + localRooms.length);
+                            console.log(localRooms);
+                            fulfill(localRooms);
+                        }).catch(function (err) {
+                            console.log('error in table2room' + err);
+                        });
                     }
+
+                }).catch(function (err) {
+                    reject(err);
                 })
-            }
-        });
+            });
+        }catch (err){
+            console.log(err);
+        }
+
     }
 
     // Process the dataset if it contains HTML files
@@ -415,11 +448,14 @@ export default class DatasetController {
                    for (var h in htmlArray){
                        console.log('Z - NEW HTML FILE - htmlArray item ' + h);
                        // change this method to regular or ASYNC version
-                       that.getRoomsASYNC(htmlArray[h], roomArray);
+                       that.getRoomsASYNC(htmlArray[h], roomArray).then(function (rooms) {
+                           roomArray = rooms;
+
+                       }).then(function () {
+                           console.log('Final roomArray length = ' + roomArray.length);
+                           fulfill(roomArray);
+                       })
                    }
-               }).then(function () {
-                   // TODO: call save() here
-                   fulfill(roomArray);
                }).catch(function (e) {
                    console.log(e);
                    reject(e);
