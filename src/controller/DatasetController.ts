@@ -111,29 +111,6 @@ export default class DatasetController {
         return that.datasets;
     }
 
-    public processZip(id: string, data: any): Promise<any> {
-        // check if html or json file
-        return new Promise(function (fulfill, reject) {
-            try {
-                if (id == '') {
-                    throw 400;
-                } else {
-                    let myZip = new JSZip;
-                    myZip.loadAsync(data, {base64: true}).then(function (zip:JSZip) {
-                        if (zip.file('index.html').name != null) {
-                            console.log('Z - processedZip = html');
-                            fulfill('html');
-                        } else {
-                            console.log('Z - processedZip = json');
-                            fulfill('json');
-                        }
-                    });
-                }
-            } catch (err) {
-                reject(err);
-            }
-        })
-    }
 
     // return an array of nodes who's 'class' attribute matches arg
     private traverse(tree: parse5.ASTNode, arg: string, nodeArray: parse5.ASTNode[]): parse5.ASTNode[] {
@@ -195,8 +172,8 @@ export default class DatasetController {
         let that = this;
         var roomsT2R: Room[] = [];
         var nodeArray: parse5.ASTNode[] = [];
-        console.log('Z - in table2rooms()');
-        console.log('Z - node: ' + node.nodeName);
+        //console.log('Z - in table2rooms()');
+        //console.log('Z - node: ' + node.nodeName);
 
         // node is the root of the tree corresponding to the table with room info
         // traverse the tree to add all nodes that correspond to rooms in the table
@@ -209,7 +186,7 @@ export default class DatasetController {
 
         // nodeArray contains a node for each row in the table
 
-        console.log('Z - in table2rooms() - nodeArray = ' + nodeArray.length);
+        //console.log('Z - in table2rooms() - nodeArray = ' + nodeArray.length);
 
         for (let c in nodeArray) {
             let room = new Room();
@@ -218,7 +195,7 @@ export default class DatasetController {
 
             roomsT2R.push(room);
         }
-        console.log('Z = in table2rooms() - rooms[] = ' + roomsT2R.length);
+        //console.log('Z = in table2rooms() - rooms[] = ' + roomsT2R.length);
         return roomsT2R;
     }
 
@@ -254,28 +231,28 @@ export default class DatasetController {
         return new Promise(function (fulfill, reject) {
             try {
                 var nodeArray: parse5.ASTNode[] = [];
-                console.log('Z - in table2roomsASYNC()');
-                console.log('Z - node: ' + node.nodeName);
+                //console.log('Z - in table2roomsASYNC()');
+                //console.log('Z - node: ' + node.nodeName);
 
                 // node is the root of the tree corresponding to the table with room info
                 // traverse the tree to add all nodes that correspond to rooms in the table
                 // the arguments here are all the possible class names for table elements
                 that.traverseASYNC(node, 'even', nodeArray).then(function () {
-                    console.log(nodeArray);
+                    //console.log(nodeArray);
                     that.traverseASYNC(node, 'odd', nodeArray);
                 }).then(function () {
-                    console.log(nodeArray);
+                    //console.log(nodeArray);
                     that.traverseASYNC(node, 'odd views-row-first', nodeArray);
                 }).then(function () {
-                    console.log(nodeArray);
+                    //console.log(nodeArray);
                     that.traverseASYNC(node , 'odd views-row-last', nodeArray);
                 }).then(function () {
-                    console.log(nodeArray);
+                    //console.log(nodeArray);
                     that.traverseASYNC(node, 'even views-row-last', nodeArray);
                 }).then(function () {
                     // nodeArray contains a node for each row in the table
 
-                    console.log('Z - in table2roomsASYNC() - nodeArray = ' + nodeArray.length);
+                    //console.log('Z - in table2roomsASYNC() - nodeArray = ' + nodeArray.length);
 
                     for (let c in nodeArray) {
                         let room = new Room();
@@ -286,8 +263,8 @@ export default class DatasetController {
                     }
 
                 }).then(function () {
-                    console.log('Z = in table2roomsASYNC() - rooms[] = ' + rooms.length);
-                    console.log('Z = in table2roomsASYNC() - rooms[] = ' + rooms[0].Furniture);
+                    //console.log('Z = in table2roomsASYNC() - rooms[] = ' + rooms.length);
+                    //console.log('Z = in table2roomsASYNC() - rooms[] = ' + rooms[0].Furniture);
                     fulfill(rooms);
                 }).catch(function (err) {
                     console.log('Error in t2rASYNC - ' + err);
@@ -399,7 +376,7 @@ export default class DatasetController {
                             }
                         }).then(function () {
                             console.log('Z - rooms[] length = ' + localRooms.length);
-                            console.log(localRooms);
+                            //console.log(localRooms);
                             fulfill(localRooms);
                         }).catch(function (err) {
                             console.log('error in table2room' + err);
@@ -416,6 +393,89 @@ export default class DatasetController {
 
     }
 
+    public processJSON(id: string, zip: JSZip): Promise<Room[]> {
+        let that = this;
+
+        try {
+            return new Promise(function (fulfill, reject) {
+
+                let processedDataset: Section[] = [];
+                // TODO: iterate through files in zip (zip.files)
+                // The contents of the file will depend on the id provided. e.g.,
+                // some zips will contain .html files, some will contain .json files.
+                // You can depend on 'id' to differentiate how the zip should be handled,
+                // although you should still be tolerant to errors.
+
+                var promisesArray: Promise<any>[] = [];
+
+                // console.log('Z - reading ZIP...');
+
+                for (var file in zip.files) {
+                    // console.log('Z - In ZIP-reading for loop...');
+                    var promisedContent = zip.files[file].async('string');
+                    promisesArray.push(promisedContent);
+                    // console.log('Z - added promise to array');
+                }
+
+                //console.log('Z - ' + promisesArray);
+
+
+                Promise.all(promisesArray).then(function (data) {
+                    // console.log('Z - iterating through all Promises...');
+
+                    for (let r = 0; r < data.length; r++) {
+
+                        var jsonString:string = JSON.stringify(data[r]);
+                        // Log.trace(jsonString);
+
+                        // Parse out file.rank here, if needed
+
+                        if( jsonString.indexOf("result") !== -1) {
+                            var dataParsed = JSON.parse(JSON.parse(jsonString));
+
+                            if (dataParsed.result.length > 0) {
+                                var sectionArray = dataParsed.result;
+
+                                for (var s in sectionArray) {
+                                    var instanceSection: Section = sectionArray[s];
+                                    processedDataset.push(instanceSection);
+                                    // console.log('Z - this should be a section object: ' + instanceSection);
+                                }
+                            }
+                        }
+                    }
+
+                    if (processedDataset.length === 0)
+                    {
+                        throw 400;
+                    }
+
+                    // console.log('Z - heading to save sections[], id = ' + id);
+
+                    var p = that.save(id, processedDataset, '.json');
+
+                    p.then(function (result) {
+                        // console.log('Z - save() result: ' + result);
+                        Log.trace('DatasetController::process(..) - saved with code: ' + result);
+                        fulfill(result);
+                    }).catch(function (result) {
+                        // console.log('Z - error in this.save()');
+                        throw 400;
+                    });
+
+                    // console.log('Z - save ID = ' + p);
+
+                }).catch(function (err) {
+                    // console.log('Z - Error in Promise.all() ' + err);
+                    reject(400);
+                });
+
+            });
+        } catch (e) {
+            throw 400;
+        }
+    }
+
     // Process the dataset if it contains HTML files
     public processHTML(zip: JSZip): Promise<Room[]> {
         let that = this;
@@ -429,8 +489,9 @@ export default class DatasetController {
                var htmlArray : any = [];
 
                zip.folder('campus/').forEach(function (relativePath, file) {
+
                    console.log('Z - iterating over ' + relativePath);
-                   console.log(file);
+                   //console.log(file);
 
                    var promiseContent = file.async('string');
                    promisesArray.push(promiseContent);
@@ -438,9 +499,8 @@ export default class DatasetController {
                });
 
                Promise.all(promisesArray).then(function (data) {
-                   console.log('There is some data');
+
                    for (var i = 0; i < data.length; i++) {
-                       console.log(i);
                        var html = data[i] as string;
                        htmlArray.push(html);
                    }
@@ -453,6 +513,7 @@ export default class DatasetController {
 
                        }).then(function () {
                            console.log('Final roomArray length = ' + roomArray.length);
+                           console.log('Suppose the first room has a valid name : ' + roomArray[0].FullName);
                            fulfill(roomArray);
                        })
                    }
@@ -467,6 +528,9 @@ export default class DatasetController {
            console.log(e);
         }
     }
+
+
+
 
     /**
      * Process the dataset; save it to disk when complete.
@@ -493,76 +557,28 @@ export default class DatasetController {
                 myZip.loadAsync(data, {base64: true}).then(function (zip: JSZip) {
                     Log.trace('DatasetController::process(..) - unzipped');
 
-                    let processedDataset: Section[] = [];
-                    // TODO: iterate through files in zip (zip.files)
-                    // The contents of the file will depend on the id provided. e.g.,
-                    // some zips will contain .html files, some will contain .json files.
-                    // You can depend on 'id' to differentiate how the zip should be handled,
-                    // although you should still be tolerant to errors.
+                    //check if it is a JSON file or HTML file here
+                    if (zip.file(/index/) instanceof Array && zip.file(/index/).length != 0) {
+                        console.log('It is a html file.');
+                        that.processHTML(zip).then(function (rooms) {
+                            console.log('HTML processed successfully, should be saved to disk/memory ' + rooms.length);
+                            fulfill(100);
+                        }).catch(function (err) {
+                            console.log('Problems when processing HTML');
+                            reject(400);
+                        })
 
-                    var promisesArray: Promise<any>[] = [];
-
-                    // console.log('Z - reading ZIP...');
-
-                    for (var file in myZip.files) {
-                        // console.log('Z - In ZIP-reading for loop...');
-                        var promisedContent = myZip.files[file].async('string');
-                        promisesArray.push(promisedContent);
-                        // console.log('Z - added promise to array');
+                    } else {
+                        console.log('It is a json file.');
+                        that.processJSON(id,zip).then(function (result) {
+                            fulfill(result);
+                        }).catch(function (err) {
+                            reject(err);
+                        })
                     }
 
-                    //console.log('Z - ' + promisesArray);
 
 
-                    Promise.all(promisesArray).then(function (data) {
-                        // console.log('Z - iterating through all Promises...');
-
-                        for (let r = 0; r < data.length; r++) {
-
-                            var jsonString:string = JSON.stringify(data[r]);
-                            // Log.trace(jsonString);
-
-                            // Parse out file.rank here, if needed
-
-                            if( jsonString.indexOf("result") !== -1) {
-                                var dataParsed = JSON.parse(JSON.parse(jsonString));
-
-                                if (dataParsed.result.length > 0) {
-                                    var sectionArray = dataParsed.result;
-
-                                    for (var s in sectionArray) {
-                                        var instanceSection: Section = sectionArray[s];
-                                        processedDataset.push(instanceSection);
-                                        // console.log('Z - this should be a section object: ' + instanceSection);
-                                    }
-                                }
-                            }
-                        }
-
-                        if (processedDataset.length === 0)
-                        {
-                            throw 400;
-                        }
-
-                        // console.log('Z - heading to save sections[], id = ' + id);
-
-                        var p = that.save(id, processedDataset, '.json');
-
-                        p.then(function (result) {
-                            // console.log('Z - save() result: ' + result);
-                            Log.trace('DatasetController::process(..) - saved with code: ' + result);
-                            fulfill(result);
-                        }).catch(function (result) {
-                            // console.log('Z - error in this.save()');
-                            throw 400;
-                        });
-
-                        // console.log('Z - save ID = ' + p);
-
-                    }).catch(function (err) {
-                        // console.log('Z - Error in Promise.all() ' + err);
-                        reject(400);
-                    });
                 }).catch(function (err) {
                     Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);
                     reject(400);
