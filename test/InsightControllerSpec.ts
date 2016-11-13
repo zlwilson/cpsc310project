@@ -49,7 +49,7 @@ describe("InsightController", function () {
         });
     });
 
-    it.only("Should be able to add a new dataset (204)", function () {
+    it("Should be able to add a new dataset (204)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         return facade.addDataset('courses', zipFileContents).then(function (response: InsightResponse) {
@@ -59,11 +59,11 @@ describe("InsightController", function () {
         });
     });
 
-    it("Should be able to add a new dataset with html content (100)", function () {
+    it.only("Should be able to add a new dataset with html content (204)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         return facade.addDataset('rooms', zipHtmlContents).then(function (response: InsightResponse) {
-            expect(response.code).to.equal(100);
+            expect(response.code).to.equal(204);
         }).catch(function (response: InsightFacade) {
             expect.fail('This should not happen');
         });

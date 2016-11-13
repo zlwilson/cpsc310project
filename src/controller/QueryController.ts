@@ -254,7 +254,7 @@ export default class QueryController {
         }
 
 
-        var sections: Section[] = this.datasets[id];
+        var sections: Section[] = this.datasets[id] as Section[];
 
         this.sections = sections;
 

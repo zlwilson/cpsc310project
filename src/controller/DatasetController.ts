@@ -16,7 +16,7 @@ import Room from "../model/Room";
  * In memory representation of all datasets.
  */
 export interface Datasets {
-    [id: string]: Section[];
+    [id: string]: Section[]|Room[];
 }
 
 export interface File {
@@ -281,8 +281,8 @@ export default class DatasetController {
     private getRooms(html: string, rooms: Room[]): any {
         let that = this;
         var root = parse5.parse(html);
-        console.log('Z - root is a ' + root.nodeName);
-        console.log('Z - in getRooms');
+        //console.log('Z - root is a ' + root.nodeName);
+        //console.log('Z - in getRooms');
 
         // get div where all info about building is
         var buildingInfoTable = this.traverse(root, 'views-row views-row-1 views-row-odd views-row-first views-row-last', []);
@@ -294,7 +294,7 @@ export default class DatasetController {
 
         var nodearray = this.traverse(root, 'views-table cols-5 table', []);
 
-        console.log('Z - nodearray length = ' + nodearray.length);
+        //console.log('Z - nodearray length = ' + nodearray.length);
 
         var fullName: string = buildingInfo[0].childNodes[0].value;
         var address: string = buildingInfo[1].childNodes[0].value;
@@ -308,7 +308,7 @@ export default class DatasetController {
         */
 
         for (let node of nodearray) {
-            console.log('Z - in for, nodeArray[i] = ' + node.nodeName);
+            //console.log('Z - in for, nodeArray[i] = ' + node.nodeName);
             rooms.concat(that.table2rooms(node));
         }
 
@@ -334,8 +334,8 @@ export default class DatasetController {
                 var table: any;
                 var localRooms: any = [];
                 var promiseArray: any = [];
-                console.log('Z - root is a ' + root.nodeName);
-                console.log('Z - in getRoomsASYNC()');
+                //console.log('Z - root is a ' + root.nodeName);
+                //console.log('Z - in getRoomsASYNC()');
 
                 var fullName: string = '';
                 var shortName: string = '';
@@ -359,12 +359,12 @@ export default class DatasetController {
                 });
 
                 that.traverseASYNC(root, 'views-table cols-5 table', []).then(function (result) {
-                    console.log('Z - nodearray length = ' + result.length);
+                    //console.log('Z - nodearray length = ' + result.length);
                     table = result;
                 }).then(function () {
-                    for (let node of table) {
-                        that.table2roomsASYNC(node, rooms).then(function (result) {
-                            console.log('Z - rooms[] length = ' + result.length);
+                    //for (let node of table) {
+                        that.table2roomsASYNC(table[0], rooms).then(function (result) {
+                            //console.log('Z - rooms[] length = ' + result.length);
                             for (let x in result) {
                                 result[x].FullName = fullName;
                                 result[x].ShortName = shortName;
@@ -375,13 +375,13 @@ export default class DatasetController {
                                 localRooms.push(result[x]);
                             }
                         }).then(function () {
-                            console.log('Z - rooms[] length = ' + localRooms.length);
+                            //console.log('Z - rooms[] length = ' + localRooms.length);
                             //console.log(localRooms);
                             fulfill(localRooms);
                         }).catch(function (err) {
                             console.log('error in table2room' + err);
                         });
-                    }
+                    //}
 
                 }).catch(function (err) {
                     reject(err);
@@ -477,7 +477,7 @@ export default class DatasetController {
     }
 
     // Process the dataset if it contains HTML files
-    public processHTML(zip: JSZip): Promise<Room[]> {
+    public processHTML(id: string, zip: JSZip): Promise<Room[]> {
         let that = this;
 
         try {
@@ -490,7 +490,7 @@ export default class DatasetController {
 
                zip.folder('campus/').forEach(function (relativePath, file) {
 
-                   console.log('Z - iterating over ' + relativePath);
+                   //console.log('Z - iterating over ' + relativePath);
                    //console.log(file);
 
                    var promiseContent = file.async('string');
@@ -506,15 +506,22 @@ export default class DatasetController {
                    }
                }).then(function () {
                    for (var h in htmlArray){
-                       console.log('Z - NEW HTML FILE - htmlArray item ' + h);
+                       //console.log('Z - NEW HTML FILE - htmlArray item ' + h);
                        // change this method to regular or ASYNC version
                        that.getRoomsASYNC(htmlArray[h], roomArray).then(function (rooms) {
                            roomArray = rooms;
 
                        }).then(function () {
-                           console.log('Final roomArray length = ' + roomArray.length);
-                           console.log('Suppose the first room has a valid name : ' + roomArray[0].FullName);
-                           fulfill(roomArray);
+                           var p = that.save(id, roomArray, '.html');
+
+                           p.then(function (result) {
+                               // console.log('Z - save() result: ' + result);
+                               Log.trace('DatasetController::process(..) - saved with code: ' + result);
+                               fulfill(result);
+                           }).catch(function (result) {
+                               // console.log('Z - error in this.save()');
+                               throw 400;
+                           });
                        })
                    }
                }).catch(function (e) {
@@ -560,7 +567,7 @@ export default class DatasetController {
                     //check if it is a JSON file or HTML file here
                     if (zip.file(/index/) instanceof Array && zip.file(/index/).length != 0) {
                         console.log('It is a html file.');
-                        that.processHTML(zip).then(function (rooms) {
+                        that.processHTML(id, zip).then(function (rooms) {
                             console.log('HTML processed successfully, should be saved to disk/memory ' + rooms.length);
                             fulfill(100);
                         }).catch(function (err) {
@@ -598,7 +605,7 @@ export default class DatasetController {
      * @param processedDataset
      */
 
-    private save(id: string, processedDataset: Section[], filetype: string): Promise<Number> {
+    private save(id: string, processedDataset: Section[]|Room[], filetype: string): Promise<Number> {
         // console.log('Z - in save()...');
         this.datasets[id] = processedDataset;
 
@@ -606,6 +613,7 @@ export default class DatasetController {
         // use fs to write JSON string to  disk dir
         // console.log('Z - fs.write() now!');
 
+        var that = this;
         return new Promise(function (fulfill, reject) {
             try {
                 try {
@@ -631,8 +639,9 @@ export default class DatasetController {
                                 console.log('Z - error in open().write()');
                                 throw err;
                             }
-                            // console.log('Z - file saved!!!!');
+                             console.log('Z - file saved!!!!');
                             // returnCode = 204;
+                            console.log(that.datasets['rooms'].length);
                             fulfill(204);
                         })
                     }

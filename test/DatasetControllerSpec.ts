@@ -247,7 +247,7 @@ describe("DatasetController", function () {
         }
         console.log('Z - zip created, successfully if DMP = ' + zip.file('campus/DMP').name);
         let controller = new DatasetController;
-        return controller.processHTML(zip).then (function (data) {
+        return controller.processHTML('rooms', zip).then (function (data) {
             var rooms = data;
             expect(rooms).to.be.an('array');
         });
