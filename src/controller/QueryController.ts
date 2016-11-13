@@ -8,6 +8,7 @@ import Section from "../model/Section";
 import {error} from "util";
 import {type} from "os";
 import sort = require("core-js/fn/array/sort");
+import Room from "../model/Room";
 
 export interface QueryRequest {
     GET: string|string[];
@@ -31,6 +32,10 @@ export interface QueryToken {
             courses_pass?: number;
             courses_fail?: number;
             courses_audit?: number;
+
+            rooms_lat?: number;
+            rooms_lon?: number;
+            rooms_seats?: number;
         }
 
         MIN?: {
@@ -38,6 +43,10 @@ export interface QueryToken {
             courses_pass?: number;
             courses_fail?: number;
             courses_audit?: number;
+
+            rooms_lat?: number;
+            rooms_lon?: number;
+            rooms_seats?: number;
         }
 
         AVG?: {
@@ -45,6 +54,10 @@ export interface QueryToken {
             courses_pass?: number;
             courses_fail?: number;
             courses_audit?: number;
+
+            rooms_lat?: number;
+            rooms_lon?: number;
+            rooms_seats?: number;
         }
 
         COUNT?: {
@@ -57,6 +70,18 @@ export interface QueryToken {
             courses_pass?: number;
             courses_fail?: number;
             courses_audit?: number;
+
+            rooms_fullname?: string;
+            rooms_shortname?: string;
+            rooms_number?: string;
+            rooms_name?: string;
+            rooms_address?: string;
+            rooms_lat?: number;
+            rooms_lon?: number;
+            rooms_seats?: number;
+            rooms_type?: string;
+            rooms_furniture?: string;
+            rooms_href?: string;
         }
     };
 }
@@ -70,6 +95,15 @@ export interface QueryBody
         courses_title?: string;
         courses_fail?: number;
         courses_uuid?: string;
+
+        rooms_fullname?: string;
+        rooms_shortname?: string;
+        rooms_number?: string;
+        rooms_name?: string;
+        rooms_address?: string;
+        rooms_type?: string;
+        rooms_furniture?: string;
+        rooms_href?: string;
     }
 
     OR?:QueryBody[];
@@ -80,12 +114,20 @@ export interface QueryBody
         courses_fail?: number;
         courses_audit?: number;
 
+        rooms_lat?: number;
+        rooms_lon?: number;
+        rooms_seats?: number;
+
     };
     LT?: {
         courses_avg?: number;
         courses_pass?: number;
         courses_fail?: number;
         courses_audit?: number;
+
+        rooms_lat?: number;
+        rooms_lon?: number;
+        rooms_seats?: number;
     };
     EQ?:{
         courses_avg?: number;
@@ -93,6 +135,10 @@ export interface QueryBody
         courses_fail?: number;
         courses_audit?: number;
         courses_id?: string;
+
+        rooms_lat?: number;
+        rooms_lon?: number;
+        rooms_seats?: number;
     }
 
     NOT?: QueryBody;
@@ -117,6 +163,14 @@ export interface Result
     courses_fail?: number;
     courses_audit?: number;
 
+    rooms_fullname?: string;
+    rooms_shortname?: string;
+    rooms_number?: string;
+    rooms_name?: string;
+    rooms_address?: string;
+    rooms_type?: string;
+    rooms_furniture?: string;
+    rooms_href?: string;
 }
 
 export interface GroupByDictionary {
@@ -126,7 +180,8 @@ export interface GroupByDictionary {
 export default class QueryController {
     private datasets: Datasets = null;
     private static datasetController = new DatasetController();
-    private sections: Section[] = [];
+    private queryData: Section[]|Room[] = [];
+    private datesetId: string;
 
     constructor(datasets: Datasets) {
         this.datasets = datasets;
@@ -253,14 +308,26 @@ export default class QueryController {
             preamble = temp;
         }
 
+        //Todo:
+        this.datesetId = id;
+        if (id === 'courses') {
+            var sections: Section[] = this.datasets[id] as Section[];
 
-        var sections: Section[] = this.datasets[id] as Section[];
+            this.queryData = sections;
 
-        this.sections = sections;
+        } else if (id === 'rooms') {
+            var rooms: Room[] = this.datasets[id] as Room[];
+
+            this.queryData = rooms;
+
+        } else {
+            console.log('QueryController - performing dataset is neither course sections nor building rooms');
+            throw 400;
+        }
 
         //WHERE
         var jsonwhere = query.WHERE;
-        var filteredDs: Section[]  = this.filter(jsonwhere, sections);
+        var filteredDs: Section[]|Room[]  = this.filter(jsonwhere, sections);
 
         var groupedDs:any;
         var applyTerms : string[] = [];
@@ -316,7 +383,7 @@ export default class QueryController {
      body: array of results
      eg: the key ['CPSC','310'] maps to [ all the sections of CPSC 310 ... ]
      */
-    public groupBy(query: QueryRequest, array: Section[]): {} {
+    public groupBy(query: QueryRequest, array: Section[]|Room[]): {} {
         var groups: any = {};
 
         Log.info('QueryController::groupBy()...');
@@ -365,7 +432,14 @@ export default class QueryController {
 
             //Add group key information to groupResult
             for(var gk in query.GROUP) {
-                var groupKey = this.sectionTranslator(query.GROUP[gk]);
+                var groupKey:string;
+                if (this.datesetId === 'courses') {
+                    groupKey = this.sectionTranslator(query.GROUP[gk]);
+                } else if (this.datesetId === 'rooms') {
+                    groupKey = this.roomTranslator(query.GROUP[gk]);
+                } else {
+                    throw 400;
+                }
                 var groupValue = groups[g][0][groupKey];
                 groupResult[groupKey] = groupValue;
             }
@@ -419,25 +493,43 @@ export default class QueryController {
         return result;
     }
 
-    public getValues(preamble: string[], section: any): Array<any> {
+    public getValues(preamble: string[], data: any): Array<any> {
         var result: any = [];
 
-        for (let p in preamble) {
-            var key = this.sectionTranslator(preamble[p]);
-            result.push(section[key]);
+        if (this.datesetId === 'courses') {
+            for (let p in preamble) {
+                var key = this.sectionTranslator(preamble[p]);
+                result.push(data[key]);
+            }
+        } else if (this.datesetId === 'rooms'){
+            for (let p in preamble) {
+                var key = this.roomTranslator(preamble[p]);
+                result.push(data[key]);
+            }
+        } else {
+            throw 400;
         }
         return result;
     }
 
 
-
+    //Todo:
     //return the filtered dataset , section should be Section[]
-    public filter(query: QueryBody, sections: Section[]): Section[]
+    public filter(query: QueryBody, queryData: Section[]|Room[]): any
     {
-        var filteredDs: Section[]=[];
+        var filteredDs: Section[]|Room[] = [];
+        var dataWithType:any;
+        if (this.datesetId === 'courses'){
+            dataWithType = queryData as Section[];
+        } else if (this.datesetId === 'rooms'){
+            dataWithType = queryData as Room[];
+        } else {
+            throw 400;
+        }
+
         //var index = 0;
         if (Object.keys(query).length === 0) {
-            return sections;
+            return queryData;
         }
 
         for (let q in query)
@@ -446,25 +538,25 @@ export default class QueryController {
             switch (q)
             {
                 case 'IS':
-                    filteredDs = this.compareString(query, sections);
+                    filteredDs = this.compareString(query, dataWithType);
                     break;
                 case 'OR':
-                    filteredDs = this.logicOr(query, sections);
+                    filteredDs = this.logicOr(query, dataWithType);
                     break;
                 case 'AND':
-                    filteredDs = this.logicAnd(query, sections);
+                    filteredDs = this.logicAnd(query, dataWithType);
                     break;
                 case 'GT':
-                    filteredDs = this.greaterThan(query, sections);
+                    filteredDs = this.greaterThan(query, dataWithType);
                     break;
                 case 'LT':
-                    filteredDs = this.lessThan(query, sections);
+                    filteredDs = this.lessThan(query, dataWithType);
                     break;
                 case 'EQ':
-                    filteredDs = this.equalTo(query, sections);
+                    filteredDs = this.equalTo(query, dataWithType);
                     break;
                 case 'NOT':
-                    filteredDs = this.negation(query, sections);
+                    filteredDs = this.negation(query, dataWithType);
                     break;
                 default:
                     Log.trace("Undefined EBNF in WHERE");
@@ -504,6 +596,18 @@ export default class QueryController {
                     case 'courses_uuid':
                         result[preamble[p]] = sections[section][this.sectionTranslator(preamble[p])];
                         break;
+                    case 'rooms_fullname':
+                    case 'rooms_shortname':
+                    case 'rooms_number':
+                    case 'rooms_name':
+                    case 'rooms_address':
+                    case 'rooms_type':
+                    case 'rooms_furniture':
+                    case 'rooms_href':
+                    case 'rooms_lat':
+                    case 'rooms_lon':
+                    case 'rooms_seats':
+                        result[preamble[p]] = sections[section][this.roomTranslator(preamble[p])];
                     default:
                         if(applyTerms.indexOf(preamble[p]) > -1) {
                             result[preamble[p]] = sections[section][preamble[p]];
@@ -543,7 +647,7 @@ export default class QueryController {
         return result;
     }
 
-
+    //Todo: Add valid keys
     public basicOrder (order: string[], resultA:any, resultB:any, direction:string, applyTerms:string[]): number
     {
         //Log.trace('Comparing ' + resultA[order[0]] + " and " + resultB[order[0]]);
@@ -565,6 +669,15 @@ export default class QueryController {
             case 'courses_instructor':
             case 'courses_title':
             case 'courses_uuid':
+            case 'rooms_fullname':
+            case 'rooms_shortname':
+            case 'rooms_number':
+            case 'rooms_name':
+            case 'rooms_address':
+            case 'rooms_type':
+            case 'rooms_furniture':
+            case 'rooms_href':
+
                 if (resultA[order[0]] < resultB[order[0]])
                 {
                     result = position;
@@ -595,6 +708,9 @@ export default class QueryController {
             case 'courses_pass':
             case 'courses_fail':
             case 'courses_audit':
+            case 'rooms_lat':
+            case 'rooms_lon':
+            case 'rooms_seats':
                 result = (direction === 'UP')? resultA[order[0]]-resultB[order[0]]
                     : resultB[order[0]]-resultA[order[0]];
 
@@ -638,9 +754,19 @@ export default class QueryController {
         return result;
     }
 
-    public logicOr (query: QueryBody, sections: Section[]): Section[]
+
+    //Todo: Change sections
+    public logicOr (query: QueryBody, sections: Section[]|Room[]): Section[]|Room[]
     {
-        var or: Section[] = [];
+        var or: any = [];
+        if (this.datesetId === 'courses') {
+            or = or as Section[];
+        } else if(this.datesetId === 'rooms') {
+            or = or as Room[];
+        } else {
+            throw 400;
+        }
+
         var subQueries = query.OR;
 
         if(subQueries.length > 0 &&(subQueries instanceof Array))
@@ -660,9 +786,9 @@ export default class QueryController {
         return or;
     }
 
-    public logicAnd (query: QueryBody, sections: Section[]): any
+    public logicAnd (query: QueryBody, sections: Section[]|Room[]): any
     {
-        var and: Section[] = sections;
+        var and: Section[]|Room[] = sections;
         var subQueries = query.AND;
 
         if (subQueries.length > 0 && (subQueries instanceof Array))
@@ -685,13 +811,13 @@ export default class QueryController {
     //get the object inseide GT, use key to iterate through sections to find targeted value and compare
     //if value is greater, add it to filteredData.
     //return filteredData
-    public greaterThan (query: QueryBody, sections:Section[]):any {
+    public greaterThan (query: QueryBody, sections:Section[]|Room[]):any {
 
         var gtToken : any = query.GT;
         var comparedKey = Object.keys(gtToken);
         var comparedVal: number;
 
-        var filteredDs:Section[] = [];
+        var filteredDs:any = [];
 
         switch (comparedKey[0]) {
             case 'courses_avg':
@@ -699,6 +825,20 @@ export default class QueryController {
             case 'courses_fail':
             case 'courses_audit':
                 var sectionKey = this.sectionTranslator(comparedKey[0]);
+
+                comparedVal = gtToken[comparedKey[0]];
+
+                for (var s in sections) {
+                    var section : any = sections[s];
+                    if (section[sectionKey] > comparedVal) {
+                        filteredDs.push(section);
+                    }
+                }
+                break;
+            case 'rooms_lat':
+            case 'rooms_lon':
+            case 'rooms_seats':
+                var sectionKey = this.roomTranslator(comparedKey[0]);
 
                 comparedVal = gtToken[comparedKey[0]];
 
@@ -717,13 +857,13 @@ export default class QueryController {
         return filteredDs;
     }
 
-    public lessThan (query: QueryBody, sections:Section[]):any
+    public lessThan (query: QueryBody, sections:Section[]|Room[]):any
     {
         var ltToken : any = query.LT;
         var comparedKey = Object.keys(ltToken);
         var comparedVal: number;
 
-        var filteredDs:Section[] = [];
+        var filteredDs:any = [];
 
         switch (comparedKey[0])
         {
@@ -742,6 +882,20 @@ export default class QueryController {
                     }
                 }
                 break;
+            case 'rooms_lat':
+            case 'rooms_lon':
+            case 'rooms_seats':
+                var sectionKey = this.roomTranslator(comparedKey[0]);
+
+                comparedVal = ltToken[comparedKey[0]];
+
+                for (var s in sections) {
+                    var section : any = sections[s];
+                    if (section[sectionKey] < comparedVal) {
+                        filteredDs.push(section);
+                    }
+                }
+                break;
             default:
                 Log.error("Unexpected compare value");
                 throw new Error('Invalid Query');
@@ -750,7 +904,7 @@ export default class QueryController {
         return filteredDs;
     }
 
-    public equalTo (query: QueryBody, sections:Section[]):any
+    public equalTo (query: QueryBody, sections:Section[]|Room[]):any
     {
         var eqToken : any = query.EQ;
         var comparedKey = Object.keys(eqToken);
@@ -764,6 +918,20 @@ export default class QueryController {
             case 'courses_fail':
             case  'courses_audit':
                 var sectionKey = this.sectionTranslator(comparedKey[0]);
+
+                comparedVal = eqToken[comparedKey[0]];
+
+                for (var s in sections) {
+                    var section : any = sections[s];
+                    if (section[sectionKey] == comparedVal) {
+                        filteredDs.push(section);
+                    }
+                }
+                break;
+            case 'rooms_lat':
+            case 'rooms_lon':
+            case 'rooms_seats':
+                var sectionKey = this.roomTranslator(comparedKey[0]);
 
                 comparedVal = eqToken[comparedKey[0]];
 
@@ -796,13 +964,13 @@ export default class QueryController {
         return filteredDs;
     }
 
-    public compareString(query: QueryBody, sections:Section[]): Section[]
+    public compareString(query: QueryBody, sections:Section[]|Room[]): Section[]|Room[]
     {
         var isToken : any = query.IS;
         var comparedKey = Object.keys(isToken);
         var comparedVal: string;
 
-        var filteredDs:Section[] = [];
+        var filteredDs:any = [];
 
         switch (comparedKey[0])
         {
@@ -824,6 +992,27 @@ export default class QueryController {
                     }
                 }
                 break;
+            case 'rooms_fullname':
+            case 'rooms_shortname':
+            case 'rooms_number':
+            case 'rooms_name':
+            case 'rooms_address':
+            case 'rooms_type':
+            case 'rooms_furniture':
+            case 'rooms_href':
+                var sectionKey = this.roomTranslator(comparedKey[0]);
+
+                comparedVal = isToken[comparedKey[0]];
+
+                for (var s in sections) {
+                    var section : any = sections[s];
+                    var ifContains: Boolean = this.compareStringHelper(section[sectionKey], comparedVal);
+
+                    if (ifContains) {
+                        filteredDs.push(section);
+                    }
+                }
+                break;
             default:
                 Log.error("Unexpected compare value");
                 throw new Error('Invalid Query');
@@ -832,22 +1021,42 @@ export default class QueryController {
         return filteredDs;
     }
 
-    public negation (query: QueryBody, sections:Section[]): Section[]
+    public negation (query: QueryBody, sections:Section[]|Room[]): Section[]|Room[]
     {
-        var filteredDs: Section[] = this.filter(query.NOT, sections);
+        var filteredDs = this.filter(query.NOT, sections);
         var filteredId: string[] = [];
-        for (var s in filteredDs) {
-            filteredId.push(filteredDs[s].id);
+        var result: any;
+
+        if (this.datesetId === 'courses'){
+            for (var s in filteredDs) {
+                var sectionType = filteredDs[s] as Section;
+                filteredId.push(sectionType.id);
+            }
+            var tempSection = sections as Section[];
+            var negatedSection =  tempSection.filter(function (el:any) {
+                return filteredId.indexOf(el['id']) > -1;
+            });
+            result = negatedSection;
+
+        } else if (this.datesetId === 'rooms') {
+            for (var s in filteredDs) {
+                var roomType = filteredDs[s] as Room;
+                filteredId.push(roomType.Number);
+            }
+            var tempRooms = sections as Room[];
+            var negatedRoom = tempRooms.filter(function (el:any) {
+                return filteredId.indexOf(el['Number']) > -1;
+            });
+
+            result = negatedRoom;
+        } else {
+                throw 400;
         }
 
-        var negatedDs: Section[] =  sections.filter(function (el) {
-            return filteredId.indexOf(el.id) > -1;
-        })
-
-        return negatedDs;
+        return result;
     }
 
-    public removeDuplicate (dupArray: Section[]):Section[]
+    public removeDuplicate (dupArray: Array<any>):Array<any>
     {
         for (var i = 0; i<dupArray.length; ++i)
         {
@@ -954,10 +1163,17 @@ export default class QueryController {
         return false;
     }
 
-    private max(sections: Section[], key:string):number {
+    //Todo: Change sections
+    private max(sections: Section[]|Room[], key:string):number {
         var numArray : number[] = [];
-
-        var transKey = this.sectionTranslator(key);
+        var transKey : string;
+        if (this.datesetId === 'courses') {
+            transKey = this.sectionTranslator(key);
+        } else if (this.datesetId === 'rooms') {
+            transKey = this.roomTranslator(key);
+        } else {
+            throw 400;
+        }
 
         for (var s in sections) {
             var section: any = sections[s];
@@ -969,10 +1185,17 @@ export default class QueryController {
         return maxNum;
     }
 
-    private min(sections: Section[], key:string):number {
+    private min(sections: Section[]|Room[], key:string):number {
         var numArray : number[] = [];
 
-        var transKey = this.sectionTranslator(key);
+        var transKey : string;
+        if (this.datesetId === 'courses') {
+            transKey = this.sectionTranslator(key);
+        } else if (this.datesetId === 'rooms') {
+            transKey = this.roomTranslator(key);
+        } else {
+            throw 400;
+        }
 
         for (var s in sections) {
             var section: any = sections[s];
@@ -984,10 +1207,17 @@ export default class QueryController {
         return mimNum;
     }
 
-    private avg(sections: Section[], key:string):number {
+    private avg(sections: Section[]|Room[], key:string):number {
         var sum: number = 0;
 
-        var transKey = this.sectionTranslator(key);
+        var transKey : string;
+        if (this.datesetId === 'courses') {
+            transKey = this.sectionTranslator(key);
+        } else if (this.datesetId === 'rooms') {
+            transKey = this.roomTranslator(key);
+        } else {
+            throw 400;
+        }
 
         for (var s in sections) {
             var section: any = sections[s];
@@ -999,10 +1229,17 @@ export default class QueryController {
         return avg;
     }
 
-    private count(sections: Section[], key:string):number {
+    private count(sections: Section[]|Room[], key:string):number {
         var array: Array<any> = [];
 
-        var transKey = this.sectionTranslator(key);
+        var transKey : string;
+        if (this.datesetId === 'courses') {
+            transKey = this.sectionTranslator(key);
+        } else if (this.datesetId === 'rooms') {
+            transKey = this.roomTranslator(key);
+        } else {
+            throw 400;
+        }
 
         for (var s in sections) {
             var section: any = sections[s];
@@ -1011,6 +1248,52 @@ export default class QueryController {
             }
         }
         return array.length;
+    }
+
+    //Translate query to what section can understand
+    private roomTranslator(key: string) : string {
+
+        var translated: string = key;
+
+        switch (key) {
+            case 'rooms_fullname':
+                translated = "FullName";
+                break;
+            case 'rooms_shortname':
+                translated = "ShortName";
+                break;
+            case 'rooms_number':
+                translated = "Number";
+                break;
+            case 'rooms_name':
+                translated = "Name";
+                break;
+            case 'rooms_address':
+                translated = "Address";
+                break;
+            case 'rooms_lat':
+                translated = "Latitude";
+                break;
+            case 'rooms_lon':
+                translated = "Longitude";
+                break;
+            case 'rooms_seats':
+                translated = "Seats";
+                break;
+            case 'rooms_type':
+                translated = "Type";
+                break;
+            case 'rooms_furniture':
+                translated = "Furniture";
+                break;
+            case 'rooms_href':
+                translated = "href";
+                break;
+            default:
+                throw new Error('QueryController:: Invalid Query Key');
+        }
+
+        return translated;
     }
 
     //Translate query to what section can understand

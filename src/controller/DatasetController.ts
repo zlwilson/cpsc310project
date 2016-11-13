@@ -641,7 +641,6 @@ export default class DatasetController {
                             }
                              console.log('Z - file saved!!!!');
                             // returnCode = 204;
-                            console.log(that.datasets['rooms'].length);
                             fulfill(204);
                         })
                     }
