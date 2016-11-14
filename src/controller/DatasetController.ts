@@ -331,6 +331,8 @@ export default class DatasetController {
 
         // room.formatRoom();
         // room.printRoom();
+
+        room.formatRoom();
         return room;
     }
 
@@ -560,7 +562,7 @@ export default class DatasetController {
 
                         let parsedData : GeoLocation = JSON.parse(JSON.parse(JSON.stringify(rawData.substr(15))));
 
-                        console.log(parsedData);
+                        // console.log(parsedData);
                         fulfill(parsedData);
                     } catch (e) {
                         console.log(e.message);
