@@ -170,7 +170,7 @@ export default class DatasetController {
 
 
 
-    public parseIndex(zip: JSZip): Promise<string[]> {
+    public parseIndexASYNC(zip: JSZip): Promise<string[]> {
         let that = this;
         // console.log('Z - in parseIndex()...');
         // console.log('Z - index.html exists = ' + zip.file('index.htm') != null);
@@ -182,6 +182,7 @@ export default class DatasetController {
             zip.file('index.htm').async('string').then(function (result) {
                 var html = parse5.parse(result);
 
+                // ASYNC version
                 that.traverseASYNC(html, 'odd views-row-first', buildingNodes).then(function (result) {
                     buildingNodes.concat(result);
                     that.traverseASYNC(html, 'even', buildingNodes).then(function (result) {
@@ -209,6 +210,9 @@ export default class DatasetController {
                         });
                     });
                 });
+
+                console.log('Z - parse Index(), about to fulfill...');
+
             }).catch(function (err) {
                 console.log('ERROR in parse Index()');
                 reject(err);
@@ -216,6 +220,40 @@ export default class DatasetController {
         });
     }
 
+    // public parseIndex(zip: JSZip): string[] {
+    //     let that = this;
+    //     // console.log('Z - in parseIndex()...');
+    //     // console.log('Z - index.html exists = ' + zip.file('index.htm') != null);
+    //
+    //     var indexRooms: string[] = [];
+    //     var buildingNodes: parse5.ASTNode[] = [];
+    //
+    //     zip.file('index.htm').async('string').then(function (result) {
+    //         var html = parse5.parse(result);
+    //
+    //         that.traverse(html, 'odd views-row-first', buildingNodes);
+    //         that.traverse(html, 'even', buildingNodes);
+    //         that.traverse(html, 'odd', buildingNodes);
+    //         that.traverse(html, 'even views-row-last', buildingNodes);
+    //         that.traverse(html, 'odd views-row-last', buildingNodes);
+    //         console.log('Z - parse Index(), bNodes length = ' + buildingNodes.length);
+    //         for (let i in buildingNodes) {
+    //             // add the short name of the building to the array of buildings in the index file
+    //             let name = buildingNodes[i].childNodes[3].childNodes[0].value;
+    //             indexRooms.push(name);
+    //         }
+    //         for (let j in indexRooms) {
+    //             indexRooms[j] = indexRooms[j].substr(2);
+    //             indexRooms[j] = indexRooms[j].replace(/\s+/g, '');
+    //         }
+    //         console.log('Z - parse Index(), about to fulfill...');
+    //     }).then(function () {
+    //         return indexRooms;
+    //     }).catch(function (err) {
+    //         console.log('ERROR in parse index');
+    //         return null;
+    //     });
+    // }
 
 
 
@@ -357,7 +395,7 @@ export default class DatasetController {
         var latitude: number = 0;
         var longitude: number = 0;
 
-        /* TODO: rooms[] is empty when the for loop runs to populate it, need to fix control flow
+        /*  rooms[] is empty when the for loop runs to populate it, need to fix control flow
             solution 1: would be to change everything to async calls, but those methods aren't working too well right now
             solution 2: force the program to wait a couple milliseconds for rooms[] to get elements
         */
@@ -367,7 +405,6 @@ export default class DatasetController {
             rooms.concat(that.table2rooms(node));
         }
 
-        // TODO solution 2: wait a couple milliseconds here, ugly but probably works
 
         for (let x in rooms) {
             rooms[x].FullName = fullName;
@@ -566,7 +603,7 @@ export default class DatasetController {
                 let promisesArray: any = [];
                 var htmlArray : any = [];
 
-                that.parseIndex(zip).then(function (result) {
+                that.parseIndexASYNC(zip).then(function (result) {
                     console.log('Z - processHTML(), before zip.folder...');
 
 
@@ -597,7 +634,7 @@ export default class DatasetController {
                     for (var h in htmlArray){
                         //console.log('Z - NEW HTML FILE - htmlArray item ' + h);
                         // change this method to regular or ASYNC version
-                         that.getRooms(htmlArray[h], roomArray);
+                        that.getRooms(htmlArray[h], roomArray);
                         var p = that.save(id, roomArray, '.html');
 
                         p.then(function (result) {
