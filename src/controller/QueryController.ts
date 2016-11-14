@@ -335,7 +335,7 @@ export default class QueryController {
 
         //WHERE
         var jsonwhere = query.WHERE;
-        var filteredDs: Section[]|Room[]  = this.filter(jsonwhere, sections);
+        var filteredDs: Section[]|Room[]  = this.filter(jsonwhere, this.queryData);
 
         var groupedDs:any;
         var applyTerms : string[] = [];
@@ -617,6 +617,7 @@ export default class QueryController {
                     case 'rooms_lon':
                     case 'rooms_seats':
                         result[preamble[p]] = sections[section][this.roomTranslator(preamble[p])];
+                        break;
                     default:
                         if(applyTerms.indexOf(preamble[p]) > -1) {
                             result[preamble[p]] = sections[section][preamble[p]];

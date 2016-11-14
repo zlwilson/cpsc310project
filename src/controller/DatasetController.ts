@@ -721,7 +721,7 @@ export default class DatasetController {
 
                             that.getRoomsASYNC(htmlArray, roomArray).then(function (result) {
 
-                                var p = that.save(id, roomArray, '.html');
+                                var p = that.save(id, roomArray, '.json');
 
                                 p.then(function (result) {
                                     // console.log('Z - save() result: ' + result);
