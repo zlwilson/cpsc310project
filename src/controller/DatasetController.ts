@@ -477,14 +477,15 @@ export default class DatasetController {
 
                     Promise.all(promissedArray2).then(function (tables: any) {
                         var promissedArray3: any = [];
+                        var selectedBuildnfos: any = [];
                         console.log('Lo - get table numbers: ' + tables.length);
 
                         for (var i = 0; i < tables.length; i++) {
                             console.log(tables[i]);
                             if (tables[i].length > 0) {
-                                promissedArray3.push(that.table2roomsASYNC(tables[i][0]))
+                                promissedArray3.push(that.table2roomsASYNC(tables[i][0]));
+                                selectedBuildnfos.push(buildingInfos[i]);
                             } else {
-                                buildingInfos.splice(i, 1);
                                 console.log('Lo - No rooms for building ' + i);
                             }
                         }
@@ -494,14 +495,14 @@ export default class DatasetController {
 
                             for (var j = 0; j < roomforBuildings.length; j++) {
 
-                                var address: string = buildingInfos[j][1].childNodes[0].value;
+                                var address: string = selectedBuildnfos[j][1].childNodes[0].value;
                                 promissedArray4.push(that.httpGetGeolocation(address));
                             }
 
                             Promise.all(promissedArray4).then(function (latlonForBuildings : any) {
 
                                 for (var k = 0; k < latlonForBuildings.length; k++) {
-                                    var buildingInfo = buildingInfos[k];
+                                    var buildingInfo = selectedBuildnfos[k];
                                     var fullName: string = buildingInfo[0].childNodes[0].value;
                                     var address: string = buildingInfo[1].childNodes[0].value;
                                     var latitude: number;
