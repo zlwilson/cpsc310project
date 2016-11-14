@@ -538,7 +538,7 @@ export default class DatasetController {
                 res.on('end', () => {
                     try {
                         let parsedData: GeoLocation = JSON.parse(JSON.stringify(rawData));
-                        console.log(parsedData.lat);
+                        console.log(parsedData);
                         fulfill(parsedData);
                     } catch (e) {
                         console.log(e.message);
