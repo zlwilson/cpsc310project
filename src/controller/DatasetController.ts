@@ -362,6 +362,9 @@ export default class DatasetController {
                     //console.log(nodeArray);
                     that.traverseASYNC(node, 'even views-row-last', nodeArray);
                 }).then(function () {
+                    //console.log(nodeArray);
+                    that.traverseASYNC(node, 'odd views-row-first views-row-last', nodeArray);
+                }).then(function () {
                     // nodeArray contains a node for each row in the table
 
                     //console.log('Z - in table2roomsASYNC() - nodeArray = ' + nodeArray.length);
