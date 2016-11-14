@@ -217,35 +217,37 @@ export default class DatasetController {
             zip.file('index.htm').async('string').then(function (result) {
                 var html = parse5.parse(result);
 
-                // ASYNC version
-                that.traverseASYNC(html, 'odd views-row-first', buildingNodes).then(function (result) {
-                    buildingNodes.concat(result);
-                    that.traverseASYNC(html, 'even', buildingNodes).then(function (result) {
+                that.traverseASYNC(html, 'view-content', []).then(function (result) {
+                    var root = result[0];
+                    that.traverseASYNC(html, 'odd views-row-first', buildingNodes).then(function (result) {
                         buildingNodes.concat(result);
-                        that.traverseASYNC(html, 'odd', buildingNodes).then(function (result) {
+                        that.traverseASYNC(html, 'even', buildingNodes).then(function (result) {
                             buildingNodes.concat(result);
-                            that.traverseASYNC(html, 'even views-row-last', buildingNodes).then(function (result) {
+                            that.traverseASYNC(html, 'odd', buildingNodes).then(function (result) {
                                 buildingNodes.concat(result);
-                                that.traverseASYNC(html, 'odd views-row-last', buildingNodes).then(function (result) {
+                                that.traverseASYNC(html, 'even views-row-last', buildingNodes).then(function (result) {
                                     buildingNodes.concat(result);
-                                    console.log('Z - parse Index(), bNodes length = ' + buildingNodes.length);
-                                    for (let i in buildingNodes) {
-                                        // add the short name of the building to the array of buildings in the index file
-                                        let name = buildingNodes[i].childNodes[3].childNodes[0].value;
-                                        indexRooms.push(name);
-                                    }
-                                    for (let j in indexRooms) {
-                                        indexRooms[j] = indexRooms[j].substr(2);
-                                        indexRooms[j] = indexRooms[j].replace(/\s+/g, '');
-                                    }
-                                    console.log('Z - parse Index(), about to fulfill...');
-                                    fulfill(indexRooms);
+                                    that.traverseASYNC(html, 'odd views-row-last', buildingNodes).then(function (result) {
+                                        buildingNodes.concat(result);
+                                        console.log('Z - parse Index(), bNodes length = ' + buildingNodes.length);
+                                        for (let i in buildingNodes) {
+                                            // add the short name of the building to the array of buildings in the index file
+                                            let name = buildingNodes[i].childNodes[3].childNodes[0].value;
+                                            indexRooms.push(name);
+                                        }
+                                        for (let j in indexRooms) {
+                                            indexRooms[j] = indexRooms[j].substr(2);
+                                            indexRooms[j] = indexRooms[j].replace(/\s+/g, '');
+                                        }
+                                        console.log('Z - parse Index(), about to fulfill...');
+                                        fulfill(indexRooms);
+                                    });
                                 });
                             });
                         });
                     });
-                });
-
+                })
+                
                 console.log('Z - parse Index(), about to fulfill...');
 
             }).catch(function (err) {
