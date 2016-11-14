@@ -87,6 +87,12 @@ export default class InsightFacade implements IInsightFacade {
 
                         var promisedArray: Promise<any>[] = [];
 
+                        if (idList.length > 1){
+                            response.code = 400;
+                            response.body = {error: 'Should not query on two datasets'};
+                            reject(response);
+                        }
+
                         for (var e in idList) {
                             let p = InsightFacade.datasetController.getDataset(idList[e]);
                             promisedArray.push(p);
@@ -101,11 +107,6 @@ export default class InsightFacade implements IInsightFacade {
                             }
                         }).then(function () {
                             if (typeof missedId === "undefined" || missedId.length == 0) {
-                                if (idList.length > 1){
-                                    response.code = 400;
-                                    response.body = {error: 'Should not query on two datasets'};
-                                    reject(response);
-                                }
 
                                 let result = controller.query(query, idList[0]);
                                 // Log.trace('InsightFacades::performQuery(..) - processedQuery');
