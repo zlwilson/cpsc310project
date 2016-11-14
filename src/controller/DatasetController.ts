@@ -217,10 +217,8 @@ export default class DatasetController {
             zip.file('index').async('string').then(function (result) {
                 var html = parse5.parse(result);
 
-                that.traverseASYNC(html, 'view-content', buildingNodes).then(function () {
-                    //var root = result[0];
-                    that.traverseASYNC(html, 'odd views-row-first', buildingNodes);
-                }).then(function () {
+
+                that.traverseASYNC(html, 'odd views-row-first', buildingNodes).then(function () {
                     that.traverseASYNC(html, 'even', buildingNodes);
                 }).then(function () {
                     that.traverseASYNC(html, 'odd', buildingNodes);
