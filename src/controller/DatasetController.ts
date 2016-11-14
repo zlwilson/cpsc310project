@@ -597,20 +597,19 @@ export default class DatasetController {
                     for (var h in htmlArray){
                         //console.log('Z - NEW HTML FILE - htmlArray item ' + h);
                         // change this method to regular or ASYNC version
-                         that.getRoomsASYNC(htmlArray[h], roomArray).then(function () {
-                             var p = that.save(id, roomArray, '.html');
+                         that.getRooms(htmlArray[h], roomArray);
+                        var p = that.save(id, roomArray, '.html');
 
-                             p.then(function (result) {
-                                 // console.log('Z - save() result: ' + result);
-                                 Log.trace('DatasetController::process(..) - saved with code: ' + result);
-                                 if (result === 204) {
-                                    fulfill(result);
-                                 }
-                             }).catch(function (result) {
-                                 // console.log('Z - error in this.save()');
-                                 throw 400;
-                             });
-                        })
+                        p.then(function (result) {
+                            // console.log('Z - save() result: ' + result);
+                            Log.trace('DatasetController::process(..) - saved with code: ' + result);
+                            if (result === 204) {
+                                fulfill(result);
+                            }
+                        }).catch(function (result) {
+                            // console.log('Z - error in this.save()');
+                            throw 400;
+                        });
                     }
                 }).catch(function (e) {
                     console.log(e);
