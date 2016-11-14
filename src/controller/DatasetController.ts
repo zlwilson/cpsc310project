@@ -455,17 +455,17 @@ export default class DatasetController {
         try {
             return new Promise(function (fulfill, reject) {
                 var root = parse5.parse(html);
-                var table: any;
-                var localRooms: any = [];
-                var promiseArray: any = [];
+                var table:any;
+                var localRooms:any = [];
+                var promiseArray:any = [];
                 //console.log('Z - root is a ' + root.nodeName);
                 //console.log('Z - in getRoomsASYNC()');
 
-                var fullName: string = '';
-                var address: string = '';
-                var hours: string = '';
-                var latitude: number = 0;
-                var longitude: number = 0;
+                var fullName:string = '';
+                var address:string = '';
+                var hours:string = '';
+                var latitude:number = 0;
+                var longitude:number = 0;
 
                 // get div where all info about building is
                 // var buildingInfoTable = this.traverse(root, 'views-row views-row-1 views-row-odd views-row-first views-row-last', []);
@@ -474,25 +474,21 @@ export default class DatasetController {
                 that.traverseASYNC(root, 'field-content', []).then(function (buildingInfo) {
                     fullName = buildingInfo[0].childNodes[0].value;
                     address = buildingInfo[1].childNodes[0].value;
-                    latitude = 0;
-                    longitude = 0;
+                    // latitude = 0;
+                    // longitude = 0;
                     that.httpGetGeolocation(address).then(function (result) {
-                        if (result.error != null){
+                        if (result.error != null) {
                             reject(result.error);
                         } else {
                             latitude = result.lat;
                             longitude = result.lon;
                         }
-                    });
-                }).catch(function (err) {
-                    console.log('error in getrooms - ' + err)
-                });
-
-                that.traverseASYNC(root, 'views-table cols-5 table', []).then(function (result) {
-                    //console.log('Z - nodearray length = ' + result.length);
-                    table = result;
-                }).then(function () {
-                    //for (let node of table) {
+                    }).then(function () {
+                        that.traverseASYNC(root, 'views-table cols-5 table', []).then(function (result) {
+                            //console.log('Z - nodearray length = ' + result.length);
+                            table = result;
+                        });
+                    }).then(function () {
                         that.table2roomsASYNC(table[0], rooms).then(function (result) {
                             //console.log('Z - rooms[] length = ' + result.length);
                             for (let x in result) {
@@ -510,13 +506,12 @@ export default class DatasetController {
                         }).catch(function (err) {
                             console.log('error in table2room' + err);
                         });
-                    //}
-
-                }).catch(function (err) {
-                    reject(err);
-                })
+                    }).catch(function (err) {
+                        reject(err);
+                    })
+                });
             });
-        }catch (err){
+        } catch (err){
             console.log(err);
         }
 
@@ -543,7 +538,7 @@ export default class DatasetController {
                 res.on('end', () => {
                     try {
                         let parsedData: GeoLocation = JSON.parse(JSON.stringify(rawData));
-                        //console.log(parsedData);
+                        console.log(parsedData.lat);
                         fulfill(parsedData);
                     } catch (e) {
                         console.log(e.message);
