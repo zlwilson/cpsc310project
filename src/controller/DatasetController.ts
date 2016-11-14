@@ -450,6 +450,14 @@ export default class DatasetController {
                     address = buildingInfo[1].childNodes[0].value;
                     latitude = 0;
                     longitude = 0;
+                    that.httpGetGeolocation(address).then(function (result) {
+                        if (result.error != null){
+                            reject(result.error);
+                        } else {
+                            latitude = result.lat;
+                            longitude = result.lon;
+                        }
+                    });
                 }).catch(function (err) {
                     console.log('error in getrooms - ' + err)
                 });
@@ -508,7 +516,7 @@ export default class DatasetController {
 
                 res.on('end', () => {
                     try {
-                        let parsedData = JSON.parse(JSON.stringify(rawData));
+                        let parsedData: GeoLocation = JSON.parse(JSON.stringify(rawData));
                         console.log(parsedData);
                         fulfill(parsedData);
                     } catch (e) {
@@ -624,53 +632,57 @@ export default class DatasetController {
                 that.parseIndexASYNC(zip).then(function (result) {
                     console.log('Z - processHTML(), before zip.folder...');
 
+                    console.log('Z - processHTML(), result = ' + result.length);
+
 
                    zip.folder('campus/').forEach(function (relativePath, file) {
-                       console.log('Z - processHTML(), in zip.folder...');
 
-                       //console.log('Z - iterating over ' + relativePath);
                        let name = relativePath.substr(34);
+                       console.log('Z - adding building: ' + name);
 
                        if (result.indexOf(name) > -1) {
                            console.log('Z - processHTML(), in push to promised array...');
                            // Building with 'name' is in the array (index.html)
-                           var promiseContent = file.async('string');
-                           promisesArray.push(promiseContent);
+                           var promisedContent = file.async('string');
+                           promisesArray.push(promisedContent);
                        }
-                   })
-                });
+                    });
 
-                Promise.all(promisesArray).then(function (data) {
+                    Promise.all(promisesArray).then(function (data) {
 
-                    console.log('Z - promises all pushed.');
+                        console.log('Z - promises all pushed, length = ' + promisesArray.length);
 
-                    for (var i = 0; i < data.length; i++) {
-                        var html = data[i] as string;
-                        htmlArray.push(html);
-                    }
-                }).then(function () {
-                    for (var h in htmlArray){
-                        //console.log('Z - NEW HTML FILE - htmlArray item ' + h);
-                        // change this method to regular or ASYNC version
-                        that.getRoomsASYNC(htmlArray[h], roomArray).then(function (result) {
-                            var p = that.save(id, roomArray, '.html');
+                        for (var i = 0; i < data.length; i++) {
+                            var html = data[i] as string;
+                            htmlArray.push(html);
+                        }
 
-                            p.then(function (result) {
-                                // console.log('Z - save() result: ' + result);
-                                Log.trace('DatasetController::process(..) - saved with code: ' + result);
-                                if (result === 204) {
-                                    fulfill(result);
-                                }
-                            }).catch(function (result) {
-                                // console.log('Z - error in this.save()');
-                                throw 400;
+                        console.log('Z - html array: ' + htmlArray.length);
+                    }).then(function () {
+                        for (var h in htmlArray){
+                            //console.log('Z - NEW HTML FILE - htmlArray item ' + h);
+                            // change this method to regular or ASYNC version
+                            that.getRoomsASYNC(htmlArray[h], roomArray).then(function (result) {
+                                var p = that.save(id, roomArray, '.html');
+
+                                p.then(function (result) {
+                                    // console.log('Z - save() result: ' + result);
+                                    Log.trace('DatasetController::process(..) - saved with code: ' + result);
+                                    if (result === 204) {
+                                        fulfill(result);
+                                    }
+                                }).catch(function (result) {
+                                    // console.log('Z - error in this.save()');
+                                    throw 400;
+                                });
                             });
-                        });
-                    }
-                }).catch(function (e) {
-                    console.log(e);
-                    reject(e);
-                })
+                        }
+                    }).catch(function (e) {
+                        console.log(e);
+                        reject(e);
+                    })
+
+                });
 
 
             });
