@@ -214,9 +214,9 @@ export default class DatasetController {
             var indexRooms: string[] = [];
             var buildingNodes: parse5.ASTNode[] = [];
 
-            zip.file('index').async('string').then(function (result) {
-                var html = parse5.parse(result);
 
+            zip.file('index.htm').async('string').then(function (result) {
+                var html = parse5.parse(result);
 
                 that.traverseASYNC(html, 'odd views-row-first', buildingNodes).then(function () {
                     that.traverseASYNC(html, 'even', buildingNodes);
@@ -517,7 +517,6 @@ export default class DatasetController {
                     console.log('error in getrooms - ' + err)
                 });
 
-
             });
         } catch (err){
             console.log(err);
@@ -660,7 +659,7 @@ export default class DatasetController {
                 let promisesArray: any = [];
                 var htmlArray : any = [];
 
-                //that.parseIndexASYNC(zip).then(function (result) {
+                that.parseIndexASYNC(zip).then(function (result) {
                     //console.log('Z - processHTML(), before zip.folder...');
 
                     //console.log('Z - processHTML(), result = ' + result.length);
@@ -718,7 +717,7 @@ export default class DatasetController {
                         reject(e);
                     })
 
-                //});
+                });
 
             });
         } catch (e){
