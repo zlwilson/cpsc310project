@@ -19,26 +19,26 @@ export default class Room {
     }
 
     // print out a room
-    public printRoom() {
-        console.log('Room - ' + this.Name);
-        console.log('   Number: ' + this.Number);
-        console.log('   Capacity:' + this.Seats);
-        console.log('   Furniture:' + this.Furniture);
-        console.log('   Type:' + this.Type);
-        console.log('   href:' + this.href);
-        console.log('   Full name:' + this.FullName);
-        console.log('   Address:' + this.Address);
-        console.log('   Short name:' + this.ShortName);
-        console.log('   Lat:' + this.Latitude);
-        console.log('   Lon:' + this.Longitude);
-    }
+    // public printRoom() {
+    //     console.log('Room - ' + this.Name);
+    //     console.log('   Number: ' + this.Number);
+    //     console.log('   Capacity:' + this.Seats);
+    //     console.log('   Furniture:' + this.Furniture);
+    //     console.log('   Type:' + this.Type);
+    //     console.log('   href:' + this.href);
+    //     console.log('   Full name:' + this.FullName);
+    //     console.log('   Address:' + this.Address);
+    //     console.log('   Short name:' + this.ShortName);
+    //     console.log('   Lat:' + this.Latitude);
+    //     console.log('   Lon:' + this.Longitude);
+    // }
 
     // clean up the format of a Room (remove spaces etc)
-    public formatRoom() {
-        // TODO: format the values of each entry in the Room (remove spaces and things)
-        this.ShortName = this.ShortName.replace(/\s+/g, '');
-        this.Number = this.Number.replace(/\s+/g, '');
-        this.Type = this.Type.substr(11); // subtract \n and leading 9 spaces
-
-    }
+    // public formatRoom() {
+    //     // TODO: format the values of each entry in the Room (remove spaces and things)
+    //     this.ShortName = this.ShortName.replace(/\s+/g, '');
+    //     this.Number = this.Number.replace(/\s+/g, '');
+    //     this.Type = this.Type.substr(11); // subtract \n and leading 9 spaces
+    //
+    // }
 }

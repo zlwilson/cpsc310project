@@ -55,19 +55,8 @@ export default class DatasetController {
             try {
                 fs.readFile('data/' + id + '.json', 'utf8', function (err, data) {
                     if (err) {
-                        try {
-                            fs.readFile('data/' + id + '.html', 'utf8', function (err, data) {
-                                if (err) {
-                                    fulfill(false)
-                                } else {
-                                    // console.log('Z - ' + id + '.html exists in ./data');
-                                    fulfill(true);
-                                }
-                            });
-                        } catch (err) {
-                            // console.log('Z - in getDatasets(id), no such file: ' + id + '.json in ./data');
-                            fulfill(false);
-                        }
+                        // console.log('Z - in getDatasets(id), no such file: ' + id + '.json in ./data');
+                        fulfill(false);
                     } else {
                         // console.log('Z - ' + id + '.json exists in ./data');
                         fulfill(true);
@@ -195,15 +184,13 @@ export default class DatasetController {
         });
     }
 
-    private getClassName(node: parse5.ASTNode): string {
-        for (let i in node.attrs) {
-            if (node.attrs[i].name == 'class') {
-                return node.attrs[i].value;
-            }
-        }
-    }
-
-
+    // private getClassName(node: parse5.ASTNode): string {
+    //     for (let i in node.attrs) {
+    //         if (node.attrs[i].name == 'class') {
+    //             return node.attrs[i].value;
+    //         }
+    //     }
+    // }
 
     public parseIndexASYNC(zip: JSZip): Promise<string[]> {
         let that = this;
@@ -286,39 +273,37 @@ export default class DatasetController {
     //     });
     // }
 
-
-
     // create an array of all the Rooms from the 'table' in a building html file
-    private table2rooms(node: parse5.ASTNode): Room[] {
-        let that = this;
-        var roomsT2R: Room[] = [];
-        var nodeArray: parse5.ASTNode[] = [];
-        //console.log('Z - in table2rooms()');
-        //console.log('Z - node: ' + node.nodeName);
-
-        // node is the root of the tree corresponding to the table with room info
-        // traverse the tree to add all nodes that correspond to rooms in the table
-        // the arguments here are all the possible class names for table elements
-        that.traverse(node, 'even', nodeArray);
-        that.traverse(node, 'odd', nodeArray);
-        that.traverse(node, 'odd views-row-first', nodeArray);
-        that.traverse(node, 'odd views-row-last', nodeArray);
-        that.traverse(node, 'even views-row-last', nodeArray);
-
-        // nodeArray contains a node for each row in the table
-
-        //console.log('Z - in table2rooms() - nodeArray = ' + nodeArray.length);
-
-        for (let c in nodeArray) {
-            let room = new Room();
-
-            room = this.makeRoom(nodeArray[c]);
-
-            roomsT2R.push(room);
-        }
-        //console.log('Z = in table2rooms() - rooms[] = ' + roomsT2R.length);
-        return roomsT2R;
-    }
+    // private table2rooms(node: parse5.ASTNode): Room[] {
+    //     let that = this;
+    //     var roomsT2R: Room[] = [];
+    //     var nodeArray: parse5.ASTNode[] = [];
+    //     //console.log('Z - in table2rooms()');
+    //     //console.log('Z - node: ' + node.nodeName);
+    //
+    //     // node is the root of the tree corresponding to the table with room info
+    //     // traverse the tree to add all nodes that correspond to rooms in the table
+    //     // the arguments here are all the possible class names for table elements
+    //     that.traverse(node, 'even', nodeArray);
+    //     that.traverse(node, 'odd', nodeArray);
+    //     that.traverse(node, 'odd views-row-first', nodeArray);
+    //     that.traverse(node, 'odd views-row-last', nodeArray);
+    //     that.traverse(node, 'even views-row-last', nodeArray);
+    //
+    //     // nodeArray contains a node for each row in the table
+    //
+    //     //console.log('Z - in table2rooms() - nodeArray = ' + nodeArray.length);
+    //
+    //     for (let c in nodeArray) {
+    //         let room = new Room();
+    //
+    //         room = this.makeRoom(nodeArray[c]);
+    //
+    //         roomsT2R.push(room);
+    //     }
+    //     //console.log('Z = in table2rooms() - rooms[] = ' + roomsT2R.length);
+    //     return roomsT2R;
+    // }
 
     // make a room from a 'table row' node
     private makeRoom(node: parse5.ASTNode): Room {
@@ -402,52 +387,52 @@ export default class DatasetController {
     }
 
     // use traverse to get the table of rooms
-    private getRooms(html: string, rooms: Room[]): any {
-        let that = this;
-        var root = parse5.parse(html);
-        //console.log('Z - root is a ' + root.nodeName);
-        //console.log('Z - in getRooms');
-
-        // get div where all info about building is
-        var buildingInfoTable = this.traverse(root, 'views-row views-row-1 views-row-odd views-row-first views-row-last', []);
-
-        // get address, hours (will be first 2 elements in buildingInfo[])
-        var buildingInfo = this.traverse(root, 'field-content', []);
-
-        var shortName: string = '';
-
-        var nodearray = this.traverse(root, 'views-table cols-5 table', []);
-
-        //console.log('Z - nodearray length = ' + nodearray.length);
-
-        var fullName: string = buildingInfo[0].childNodes[0].value;
-        var address: string = buildingInfo[1].childNodes[0].value;
-        // var hours: string = buildingInfo[2].childNodes[0].value;
-        var latitude: number = 0;
-        var longitude: number = 0;
-
-        /*  rooms[] is empty when the for loop runs to populate it, need to fix control flow
-            solution 1: would be to change everything to async calls, but those methods aren't working too well right now
-            solution 2: force the program to wait a couple milliseconds for rooms[] to get elements
-        */
-
-        for (let node of nodearray) {
-            //console.log('Z - in for, nodeArray[i] = ' + node.nodeName);
-            rooms.concat(that.table2rooms(node));
-        }
-
-
-        for (let x in rooms) {
-            rooms[x].FullName = fullName;
-            rooms[x].ShortName = shortName;
-            rooms[x].Name = shortName + '_' + rooms[x].Number;
-            rooms[x].Address = address;
-            rooms[x].Latitude = latitude;
-            rooms[x].Longitude = longitude;
-        }
-
-
-    }
+    // private getRooms(html: string, rooms: Room[]): any {
+    //     let that = this;
+    //     var root = parse5.parse(html);
+    //     //console.log('Z - root is a ' + root.nodeName);
+    //     //console.log('Z - in getRooms');
+    //
+    //     // get div where all info about building is
+    //     var buildingInfoTable = this.traverse(root, 'views-row views-row-1 views-row-odd views-row-first views-row-last', []);
+    //
+    //     // get address, hours (will be first 2 elements in buildingInfo[])
+    //     var buildingInfo = this.traverse(root, 'field-content', []);
+    //
+    //     var shortName: string = '';
+    //
+    //     var nodearray = this.traverse(root, 'views-table cols-5 table', []);
+    //
+    //     //console.log('Z - nodearray length = ' + nodearray.length);
+    //
+    //     var fullName: string = buildingInfo[0].childNodes[0].value;
+    //     var address: string = buildingInfo[1].childNodes[0].value;
+    //     // var hours: string = buildingInfo[2].childNodes[0].value;
+    //     var latitude: number = 0;
+    //     var longitude: number = 0;
+    //
+    //     /*  rooms[] is empty when the for loop runs to populate it, need to fix control flow
+    //         solution 1: would be to change everything to async calls, but those methods aren't working too well right now
+    //         solution 2: force the program to wait a couple milliseconds for rooms[] to get elements
+    //     */
+    //
+    //     for (let node of nodearray) {
+    //         //console.log('Z - in for, nodeArray[i] = ' + node.nodeName);
+    //         rooms.concat(that.table2rooms(node));
+    //     }
+    //
+    //
+    //     for (let x in rooms) {
+    //         rooms[x].FullName = fullName;
+    //         rooms[x].ShortName = shortName;
+    //         rooms[x].Name = shortName + '_' + rooms[x].Number;
+    //         rooms[x].Address = address;
+    //         rooms[x].Latitude = latitude;
+    //         rooms[x].Longitude = longitude;
+    //     }
+    //
+    //
+    // }
 
     private getRoomsASYNC(htmls: string[], rooms: Room[]): Promise<any> {
         let that = this;
@@ -527,17 +512,17 @@ export default class DatasetController {
                                         fulfill(rooms);
                                     }
                                 }
-                            }).catch(function (err) {
-                                console.log('Error in getGeoLocation ' + err);
-                                reject(err);
+                            // }).catch(function (err) {
+                            //     console.log('Error in getGeoLocation ' + err);
+                            //     reject(err);
                             });
-                        }).catch(function (err) {
-                            console.log('Error in table2Rooms ' + err);
-                            reject(err);
+                        // }).catch(function (err) {
+                        //     console.log('Error in table2Rooms ' + err);
+                        //     reject(err);
                         });
-                    }).catch(function (err) {
-                        console.log('Error in find tables ' + err);
-                        reject(err);
+                    // }).catch(function (err) {
+                    //     console.log('Error in find tables ' + err);
+                    //     reject(err);
                     });
                 }).catch(function (err) {
                     console.log('Error in getBuildingInformation  ' + err);

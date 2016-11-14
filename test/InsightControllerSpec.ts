@@ -59,7 +59,7 @@ describe("InsightController", function () {
         });
     });
 
-    it.only("Should be able to add a new dataset with html content (204)", function () {
+    it("Should be able to add a new dataset with html content (204)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         return facade.addDataset('rooms', zipHtmlContents).then(function (response: InsightResponse) {
@@ -1012,6 +1012,314 @@ describe("InsightController", function () {
             GROUP: ['courses_audit'],
             APPLY: [{'minAudit':{'MIN':"courses_audit"}}],
             AS: 'TABLE'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    // D3 tests on room keys
+
+    it("Should be able to query on rooms_seats GT (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_fullname", "rooms_number"],
+            WHERE: {
+                'GT': {'rooms_seats': 100}
+            },
+            ORDER: 'rooms_number',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on rooms_seats LT (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_fullname", "rooms_number"],
+            WHERE: {
+                'LT': {'rooms_seats': 30}
+            },
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on rooms_seats EQ (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_fullname", "rooms_number"],
+            WHERE: {
+                'EQ': {'rooms_seats': 20}
+            },
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    // valid lat lon data for tests: lat: 49.26973, lon: -123.25504
+
+    it("Should be able to query on rooms_lat EQ (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_fullname", "rooms_number"],
+            WHERE: {
+                'EQ': {'rooms_lat': 49.26973}
+            },
+            ORDER: 'rooms_lat',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on rooms_lat GT (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_fullname", "rooms_number"],
+            WHERE: {
+                'GT': {'rooms_lat': 49.26973}
+            },
+            ORDER: 'rooms_lat',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on rooms_lat LT (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_fullname", "rooms_number"],
+            WHERE: {
+                'LT': {'rooms_lat': 49.26973}
+            },
+            ORDER: 'rooms_lat',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on rooms_lon GT (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_fullname", "rooms_number"],
+            WHERE: {
+                'GT': {'rooms_lon': -123.25504}
+            },
+            ORDER: 'rooms_lon',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on rooms_lon LT (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_fullname", "rooms_number"],
+            WHERE: {
+                'LT': {'rooms_lon': -123.25504}
+            },
+            ORDER: 'rooms_lon',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on rooms_lon EQ (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_fullname", "rooms_number"],
+            WHERE: {
+                'EQ': {'rooms_lon': -123.25504}
+            },
+            ORDER: 'rooms_lon',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on rooms_fullname (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_fullname", "rooms_number"],
+            WHERE: {
+                'IS': {'rooms_fullname': 'Hugh Dempster Pavilion'}
+            },
+            ORDER: 'rooms_number',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on rooms_number (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_fullname", "rooms_number"],
+            WHERE: {
+                'IS': {'rooms_number': '100'}
+            },
+            ORDER: 'rooms_fullname',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on rooms_shortname (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_shortname", "rooms_number"],
+            WHERE: {
+                'IS': {'rooms_shortname': 'DMP'}
+            },
+            ORDER: 'rooms_number',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on rooms_name (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_name", "rooms_furnitue"],
+            WHERE: {
+                'IS': {'rooms_name': 'DMP_110'}
+            },
+            ORDER: 'rooms_name',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on rooms_address (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_address", "rooms_name"],
+            WHERE: {
+                'IS': {'rooms_address': '2202 Main Mall'}
+            },
+            ORDER: 'rooms_name',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on rooms_furniture (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_name", "rooms_furniture"],
+            WHERE: {
+                'IS': {'rooms_furniture': 'Classroom-Movable Tables & Chairs'}
+            },
+            ORDER: 'rooms_name',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on rooms_type (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_name", "rooms_type"],
+            WHERE: {
+                'IS': {'rooms_type': 'Open Design General Purpose'}
+            },
+            ORDER: 'rooms_name',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on rooms_href (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_name", "rooms_type"],
+            WHERE: {
+                'IS': {'rooms_href': 'http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/ALRD-112'}
+            },
+            ORDER: 'rooms_href',
+            AS: 'table'
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
             expect(response.code).to.equal(200);
