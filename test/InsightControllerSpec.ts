@@ -1080,7 +1080,7 @@ describe("InsightController", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         let query: QueryRequest = {
-            GET:  ["rooms_fullname", "rooms_number"],
+            GET:  ["rooms_fullname", "rooms_number", 'rooms_lat'],
             WHERE: {
                 'EQ': {'rooms_lat': 49.26973}
             },
@@ -1098,7 +1098,7 @@ describe("InsightController", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         let query: QueryRequest = {
-            GET:  ["rooms_fullname", "rooms_number"],
+            GET:  ["rooms_fullname", "rooms_number", 'rooms_lat'],
             WHERE: {
                 'GT': {'rooms_lat': 49.26973}
             },
@@ -1116,7 +1116,7 @@ describe("InsightController", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         let query: QueryRequest = {
-            GET:  ["rooms_fullname", "rooms_number"],
+            GET:  ["rooms_fullname", "rooms_number", 'rooms_lat'],
             WHERE: {
                 'LT': {'rooms_lat': 49.26973}
             },
@@ -1134,7 +1134,7 @@ describe("InsightController", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         let query: QueryRequest = {
-            GET:  ["rooms_fullname", "rooms_number"],
+            GET:  ["rooms_fullname", "rooms_number", 'rooms_lon'],
             WHERE: {
                 'GT': {'rooms_lon': -123.25504}
             },
@@ -1152,7 +1152,7 @@ describe("InsightController", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         let query: QueryRequest = {
-            GET:  ["rooms_fullname", "rooms_number"],
+            GET:  ["rooms_fullname", "rooms_number", 'rooms_lon'],
             WHERE: {
                 'LT': {'rooms_lon': -123.25504}
             },
@@ -1170,7 +1170,7 @@ describe("InsightController", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         let query: QueryRequest = {
-            GET:  ["rooms_fullname", "rooms_number"],
+            GET:  ["rooms_fullname", "rooms_number", 'rooms_lon'],
             WHERE: {
                 'EQ': {'rooms_lon': -123.25504}
             },
@@ -1242,7 +1242,7 @@ describe("InsightController", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         let query: QueryRequest = {
-            GET:  ["rooms_name", "rooms_furnitue"],
+            GET:  ["rooms_name", "rooms_furniture"],
             WHERE: {
                 'IS': {'rooms_name': 'DMP_110'}
             },
@@ -1314,7 +1314,7 @@ describe("InsightController", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         let query: QueryRequest = {
-            GET:  ["rooms_name", "rooms_type"],
+            GET:  ["rooms_name", "rooms_type", "rooms_href"],
             WHERE: {
                 'IS': {'rooms_href': 'http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/ALRD-112'}
             },
