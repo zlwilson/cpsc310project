@@ -5,10 +5,10 @@ export default class Room {
     FullName:string;    // eg: Hugh Dempster Pavilion
     ShortName:string;   // eg: DMP
     Number:string;      // room number
-    Name:string;        // room_id, should equal ShortName_Number (eg: DMP_110)
+    name:string;        // room_id, should equal ShortName_Number (eg: DMP_110)
     Address:string;     // building address (eg: "6245 Agronomy Road V6T 1Z4")
-    Latitude:number
-    Longitude:number;
+    latitude:number
+    longitude:number;
     Seats:number;       // number of seats in room
     Type:string;        // room type (eg: "Small Group")
     Furniture:string;   // room type and amenities (eg: "Classroom-Movable Tables & Chairs")
