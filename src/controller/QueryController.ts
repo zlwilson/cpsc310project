@@ -381,6 +381,7 @@ export default class QueryController {
         //AS
         orderedDs.render = query.AS.toLocaleUpperCase();
 
+        console.log(orderedDs);
         return orderedDs;
     }
 
@@ -613,10 +614,12 @@ export default class QueryController {
                     case 'rooms_type':
                     case 'rooms_furniture':
                     case 'rooms_href':
+                        result[preamble[p]] = sections[section][this.roomTranslator(preamble[p])];
+                        break;
                     case 'rooms_lat':
                     case 'rooms_lon':
                     case 'rooms_seats':
-                        result[preamble[p]] = sections[section][this.roomTranslator(preamble[p])];
+                        result[preamble[p]] = Number(sections[section][this.roomTranslator(preamble[p])]);
                         break;
                     default:
                         if(applyTerms.indexOf(preamble[p]) > -1) {
