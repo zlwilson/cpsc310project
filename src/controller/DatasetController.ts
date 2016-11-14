@@ -332,7 +332,7 @@ export default class DatasetController {
         // room.formatRoom();
         // room.printRoom();
 
-        room.formatRoom();
+        room = room.formatRoom();
         return room;
     }
 

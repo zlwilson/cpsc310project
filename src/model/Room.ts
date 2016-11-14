@@ -34,7 +34,7 @@ export default class Room {
     // }
 
     // clean up the format of a Room (remove spaces etc)
-    public formatRoom() {
+    public formatRoom(): Room {
         // TODO: format the values of each entry in the Room (remove spaces and things)
         this.ShortName = this.ShortName.replace(/\s+/g, '');
         this.Number = this.Number.replace(/\s+/g, '');
@@ -42,5 +42,7 @@ export default class Room {
         this.Furniture = this.Furniture.substr(13);
         this.Type = this.Type.trim();
         this.Furniture = this.Furniture.trim();
+
+        return this;
     }
 }
