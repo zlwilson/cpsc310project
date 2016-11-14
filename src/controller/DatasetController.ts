@@ -455,17 +455,17 @@ export default class DatasetController {
         try {
             return new Promise(function (fulfill, reject) {
                 var root = parse5.parse(html);
-                var table: any;
-                var localRooms: any = [];
-                var promiseArray: any = [];
+                var table:any;
+                var localRooms:any = [];
+                var promiseArray:any = [];
                 //console.log('Z - root is a ' + root.nodeName);
                 //console.log('Z - in getRoomsASYNC()');
 
                 var fullName: string = '';
                 var address: string = '';
-                var hours: string = '';
                 var latitude: number;
                 var longitude: number;
+
 
                 // get div where all info about building is
                 // var buildingInfoTable = this.traverse(root, 'views-row views-row-1 views-row-odd views-row-first views-row-last', []);
@@ -474,8 +474,9 @@ export default class DatasetController {
                 that.traverseASYNC(root, 'field-content', []).then(function (buildingInfo) {
                     fullName = buildingInfo[0].childNodes[0].value;
                     address = buildingInfo[1].childNodes[0].value;
+
                     that.httpGetGeolocation(address).then(function (result) {
-                        if (result.error != null){
+                        if (result.error != null) {
                             reject(result.error);
                         } else {
                             latitude = result.lat;
@@ -510,6 +511,7 @@ export default class DatasetController {
                             })
 
                         }
+
                     });
                 }).catch(function (err) {
                     console.log('error in getrooms - ' + err)
@@ -517,7 +519,7 @@ export default class DatasetController {
 
 
             });
-        }catch (err){
+        } catch (err){
             console.log(err);
         }
 
@@ -543,7 +545,9 @@ export default class DatasetController {
 
                 res.on('end', () => {
                     try {
+
                         let parsedData : GeoLocation = JSON.parse(JSON.parse(JSON.stringify(rawData.substr(15))));
+
                         console.log(parsedData);
                         fulfill(parsedData);
                     } catch (e) {
