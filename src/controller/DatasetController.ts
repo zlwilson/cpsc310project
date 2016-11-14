@@ -214,46 +214,41 @@ export default class DatasetController {
             var indexRooms: string[] = [];
             var buildingNodes: parse5.ASTNode[] = [];
 
-            zip.file('index.html').async('string').then(function (result) {
+            zip.file('index').async('string').then(function (result) {
                 var html = parse5.parse(result);
 
-                that.traverseASYNC(html, 'view-content', []).then(function (result) {
-                    var root = result[0];
-                    that.traverseASYNC(html, 'odd views-row-first', buildingNodes).then(function (result) {
-                        buildingNodes.concat(result);
-                        that.traverseASYNC(html, 'even', buildingNodes).then(function (result) {
-                            buildingNodes.concat(result);
-                            that.traverseASYNC(html, 'odd', buildingNodes).then(function (result) {
-                                buildingNodes.concat(result);
-                                that.traverseASYNC(html, 'even views-row-last', buildingNodes).then(function (result) {
-                                    buildingNodes.concat(result);
-                                    that.traverseASYNC(html, 'odd views-row-last', buildingNodes).then(function (result) {
-                                        buildingNodes.concat(result);
-                                        console.log('Z - parse Index(), bNodes length = ' + buildingNodes.length);
-                                        for (let i in buildingNodes) {
-                                            // add the short name of the building to the array of buildings in the index file
-                                            let name = buildingNodes[i].childNodes[3].childNodes[0].value;
-                                            indexRooms.push(name);
-                                        }
-                                        for (let j in indexRooms) {
-                                            indexRooms[j] = indexRooms[j].substr(2);
-                                            indexRooms[j] = indexRooms[j].replace(/\s+/g, '');
-                                        }
-                                        console.log('Z - parse Index(), about to fulfill...');
-                                        fulfill(indexRooms);
-                                    });
-                                });
-                            });
-                        });
-                    });
-                })
-                
-                console.log('Z - parse Index(), about to fulfill...');
+                that.traverseASYNC(html, 'view-content', buildingNodes).then(function () {
+                    //var root = result[0];
+                    that.traverseASYNC(html, 'odd views-row-first', buildingNodes);
+                }).then(function () {
+                    that.traverseASYNC(html, 'even', buildingNodes);
+                }).then(function () {
+                    that.traverseASYNC(html, 'odd', buildingNodes);
+                }).then(function () {
+                    that.traverseASYNC(html, 'even views-row-last', buildingNodes);
+                }).then(function () {
+                    that.traverseASYNC(html, 'odd views-row-last', buildingNodes);
+                }).then(function () {
+                    console.log('Z - parse Index(), bNodes length = ' + buildingNodes.length);
+                    for (let i in buildingNodes) {
+                        // add the short name of the building to the array of buildings in the index file
+                        let name = buildingNodes[i].childNodes[3].childNodes[0].value;
+                        indexRooms.push(name);
+                    }
+
+                    for (let j in indexRooms) {
+                        indexRooms[j] = indexRooms[j].substr(2);
+                        indexRooms[j] = indexRooms[j].replace(/\s+/g, '');
+                    }
+
+                    console.log('Z - parse Index(), about to fulfill...');
+                    fulfill(indexRooms);});
 
             }).catch(function (err) {
                 console.log('ERROR in parse Index()');
                 reject(err);
             });
+
         });
     }
 
@@ -565,7 +560,7 @@ export default class DatasetController {
 
 
 
-    public processJSON(id: string, zip: JSZip): Promise<Room[]> {
+    public processJSON(id: string, zip: JSZip): Promise<Number> {
         let that = this;
 
         try {
@@ -649,7 +644,7 @@ export default class DatasetController {
     }
 
     // Process the dataset if it contains HTML files
-    public processHTML(id: string, zip: JSZip): Promise<Room[]> {
+    public processHTML(id: string, zip: JSZip): Promise<Number> {
         let that = this;
 
         try {
@@ -660,7 +655,7 @@ export default class DatasetController {
                 let promisesArray: any = [];
                 var htmlArray : any = [];
 
-                that.parseIndexASYNC(zip).then(function (result) {
+                //that.parseIndexASYNC(zip).then(function (result) {
                     //console.log('Z - processHTML(), before zip.folder...');
 
                     //console.log('Z - processHTML(), result = ' + result.length);
@@ -718,7 +713,7 @@ export default class DatasetController {
                         reject(e);
                     })
 
-                });
+                //});
 
 
             });
@@ -758,9 +753,9 @@ export default class DatasetController {
                     //check if it is a JSON file or HTML file here
                     if (zip.file(/index/) instanceof Array && zip.file(/index/).length != 0) {
                         console.log('It is a html file.');
-                        that.processHTML(id, zip).then(function (rooms) {
-                            console.log('HTML processed successfully, should be saved to disk/memory ' + rooms.length);
-                            fulfill(100);
+                        that.processHTML(id, zip).then(function (result) {
+
+                            fulfill(result);
                         }).catch(function (err) {
                             console.log('Problems when processing HTML');
                             reject(400);
