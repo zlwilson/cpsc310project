@@ -38,7 +38,9 @@ export default class Room {
         // TODO: format the values of each entry in the Room (remove spaces and things)
         this.ShortName = this.ShortName.replace(/\s+/g, '');
         this.Number = this.Number.replace(/\s+/g, '');
-        this.Type = this.Type.substr(14, this.Type.length - 10); // subtract \n and leading 11 spaces, and trailing 10 space
-        this.Furniture = this.Furniture.substr(14, this.Furniture.length - 10);
+        this.Type = this.Type.substr(13); // subtract \n and leading 11 spaces, and trailing 10 space
+        this.Furniture = this.Furniture.substr(13);
+        this.Type = this.Type.trim();
+        this.Furniture = this.Furniture.trim();
     }
 }

@@ -468,7 +468,7 @@ export default class DatasetController {
                         console.log('Lo - get table numbers: ' + tables.length);
 
                         for (var i = 0; i < tables.length; i++) {
-                            console.log(tables[i]);
+                            // console.log(tables[i]);
                             if (tables[i].length > 0) {
                                 promissedArray3.push(that.table2roomsASYNC(tables[i][0]));
                                 selectedBuildnfos.push(buildingInfos[i]);
@@ -683,11 +683,11 @@ export default class DatasetController {
 
 
                        let name = relativePath.substr(34);
-                       console.log('Z - adding building: ' + name);
+                       // console.log('Z - adding building: ' + name);
 
 
                        if (result.indexOf(name) > -1) {
-                           console.log('Z - processHTML(), in push to promised array...');
+                           // console.log('Z - processHTML(), in push to promised array...');
                            // Building with 'name' is in the array (index.html)
 
                            var promisedContent = file.async('string');
@@ -697,7 +697,7 @@ export default class DatasetController {
 
                     Promise.all(promisesArray).then(function (data) {
 
-                        console.log('Z - promises all pushed, length = ' + promisesArray.length);
+                        // console.log('Z - promises all pushed, length = ' + promisesArray.length);
 
 
                         for (var i = 0; i < data.length; i++) {
@@ -705,7 +705,7 @@ export default class DatasetController {
                             htmlArray.push(html);
                         }
 
-                        console.log('Z - html array: ' + htmlArray.length);
+                        // console.log('Z - html array: ' + htmlArray.length);
                     }).then(function () {
 
                             that.getRoomsASYNC(htmlArray, roomArray).then(function (result) {
