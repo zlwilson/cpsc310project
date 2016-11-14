@@ -276,6 +276,11 @@ describe("DatasetController", function () {
         });
     });
 
+    it('Should be able to use getDataset(id)', function () {
+        let controller = new DatasetController;
+        return controller.getDatasets
+    });
+
 
     it("Should be able to get Lat Lon", function () {
         let controller = new DatasetController();

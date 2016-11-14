@@ -59,7 +59,7 @@ describe("InsightController", function () {
         });
     });
 
-    it.only("Should be able to add a new dataset with html content (204)", function () {
+    it("Should be able to add a new dataset with html content (204)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         return facade.addDataset('rooms', zipHtmlContents).then(function (response: InsightResponse) {
@@ -560,11 +560,11 @@ describe("InsightController", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         let query: QueryRequest = {
-            GET:  ['missing_dept', 'other_avg'],
+            GET:  ['missing_dept', 'missing_avg'],
             WHERE: {
                 'GT': {'courses_avg': 90}
             },
-            ORDER: 'other_avg',
+            ORDER: 'missing_avg',
             AS: 'table'
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
