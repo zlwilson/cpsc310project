@@ -1286,10 +1286,10 @@ export default class QueryController {
                 translated = "Address";
                 break;
             case 'rooms_lat':
-                translated = "Latitude";
+                translated = "latitude";
                 break;
             case 'rooms_lon':
-                translated = "Longitude";
+                translated = "longitude";
                 break;
             case 'rooms_seats':
                 translated = "Seats";

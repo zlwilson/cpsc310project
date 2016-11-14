@@ -101,6 +101,12 @@ export default class InsightFacade implements IInsightFacade {
                             }
                         }).then(function () {
                             if (typeof missedId === "undefined" || missedId.length == 0) {
+                                if (idList.length > 1){
+                                    response.code = 400;
+                                    response.body = {error: 'Should not query on two datasets'};
+                                    reject(response);
+                                }
+
                                 let result = controller.query(query, idList[0]);
                                 // Log.trace('InsightFacades::performQuery(..) - processedQuery');
                                 response.code = 200;
