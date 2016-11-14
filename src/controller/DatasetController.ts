@@ -98,10 +98,10 @@ export default class DatasetController {
 
                             var jsonString: string = (fs.readFileSync('data/' + data, 'utf8'));
 
-                            var dataParsed = JSON.parse(JSON.stringify(jsonString));
+                            var dataParsed = JSON.parse(JSON.parse(JSON.stringify(jsonString)));
 
-                            if (dataParsed.result.length > 0) {
-                                var innerroomArray = dataParsed.result;
+                            if (dataParsed.length > 0) {
+                                var innerroomArray = dataParsed;
 
                                 for (var s in innerroomArray) {
                                     var instanceRoom: Room = innerroomArray[s];
