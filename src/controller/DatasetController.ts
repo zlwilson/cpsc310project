@@ -464,8 +464,8 @@ export default class DatasetController {
                 var fullName: string = '';
                 var address: string = '';
                 var hours: string = '';
-                var latitude: number = 0;
-                var longitude: number = 0;
+                var latitude: number;
+                var longitude: number;
 
                 // get div where all info about building is
                 // var buildingInfoTable = this.traverse(root, 'views-row views-row-1 views-row-odd views-row-first views-row-last', []);
@@ -474,47 +474,48 @@ export default class DatasetController {
                 that.traverseASYNC(root, 'field-content', []).then(function (buildingInfo) {
                     fullName = buildingInfo[0].childNodes[0].value;
                     address = buildingInfo[1].childNodes[0].value;
-                    latitude = 0;
-                    longitude = 0;
                     that.httpGetGeolocation(address).then(function (result) {
                         if (result.error != null){
                             reject(result.error);
                         } else {
                             latitude = result.lat;
                             longitude = result.lon;
+
+                            that.traverseASYNC(root, 'views-table cols-5 table', []).then(function (result) {
+                                //console.log('Z - nodearray length = ' + result.length);
+                                table = result;
+                            }).then(function () {
+                                //for (let node of table) {
+                                that.table2roomsASYNC(table[0], rooms).then(function (result) {
+                                    //console.log('Z - rooms[] length = ' + result.length);
+                                    for (let x in result) {
+                                        result[x].FullName = fullName;
+                                        result[x].Address = address;
+                                        result[x].Latitude = latitude;
+                                        result[x].Longitude = longitude;
+
+                                        localRooms.push(result[x]);
+                                    }
+                                }).then(function () {
+                                    //console.log('Z - rooms[] length = ' + localRooms.length);
+                                    //console.log(localRooms);
+                                    fulfill(localRooms);
+                                }).catch(function (err) {
+                                    console.log('error in table2room' + err);
+                                });
+                                //}
+
+                            }).catch(function (err) {
+                                reject(err);
+                            })
+
                         }
                     });
                 }).catch(function (err) {
                     console.log('error in getrooms - ' + err)
                 });
 
-                that.traverseASYNC(root, 'views-table cols-5 table', []).then(function (result) {
-                    //console.log('Z - nodearray length = ' + result.length);
-                    table = result;
-                }).then(function () {
-                    //for (let node of table) {
-                        that.table2roomsASYNC(table[0], rooms).then(function (result) {
-                            //console.log('Z - rooms[] length = ' + result.length);
-                            for (let x in result) {
-                                result[x].FullName = fullName;
-                                result[x].Address = address;
-                                result[x].Latitude = latitude;
-                                result[x].Longitude = longitude;
 
-                                localRooms.push(result[x]);
-                            }
-                        }).then(function () {
-                            //console.log('Z - rooms[] length = ' + localRooms.length);
-                            //console.log(localRooms);
-                            fulfill(localRooms);
-                        }).catch(function (err) {
-                            console.log('error in table2room' + err);
-                        });
-                    //}
-
-                }).catch(function (err) {
-                    reject(err);
-                })
             });
         }catch (err){
             console.log(err);
@@ -542,8 +543,8 @@ export default class DatasetController {
 
                 res.on('end', () => {
                     try {
-                        let parsedData: GeoLocation = JSON.parse(JSON.stringify(rawData));
-                        //console.log(parsedData);
+                        let parsedData : GeoLocation = JSON.parse(JSON.parse(JSON.stringify(rawData.substr(15))));
+                        console.log(parsedData);
                         fulfill(parsedData);
                     } catch (e) {
                         console.log(e.message);
@@ -557,8 +558,6 @@ export default class DatasetController {
         });
 
     }
-
-
 
 
     public processJSON(id: string, zip: JSZip): Promise<Number> {

@@ -281,6 +281,8 @@ describe("DatasetController", function () {
         let controller = new DatasetController();
         return controller.httpGetGeolocation("6245 Agronomy Road V6T 1Z4").then(function (obj) {
             console.log(obj);
+            console.log(obj.lat);
+            console.log(obj.lon);
             expect((obj.lat == 49.26125 && obj.lon == -123.24807)).to.equal(true);
         });
     });
