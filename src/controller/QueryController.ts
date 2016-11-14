@@ -1280,7 +1280,7 @@ export default class QueryController {
                 translated = "Number";
                 break;
             case 'rooms_name':
-                translated = "Name";
+                translated = "name";
                 break;
             case 'rooms_address':
                 translated = "Address";

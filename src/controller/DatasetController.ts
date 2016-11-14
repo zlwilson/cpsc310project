@@ -520,6 +520,7 @@ export default class DatasetController {
                                             room.Address = address;
                                             room.latitude = latitude;
                                             room.longitude = longitude;
+                                            room.name = room.ShortName + "_" + room.Number;
 
                                             rooms.push(room);
                                         }
