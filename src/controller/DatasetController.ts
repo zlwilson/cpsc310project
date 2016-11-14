@@ -850,28 +850,28 @@ export default class DatasetController {
             try {
                 fs.unlink('data/' + id + '.json', function (err) {
                     if (err) {
-                        // console.log('Z - no such file ' + id + '.json in ./data');
-                        reject(404);
+                        try {
+                            fs.unlink('data/' + id + '.html', function (err) {
+                                if (err) {
+                                    // console.log('Z - no such file ' + id + '.json in ./data');
+                                    reject(404);
+                                } else {
+                                    // console.log('Z - successfully deleted data/' + id + '.json');
+                                    fulfill(204);
+                                }
+                            });
+                        } catch (err) {
+                            console.log('Z - unsuccessful delete' + err);
+                            reject(400);
+                        }
                     } else {
                         // console.log('Z - successfully deleted data/' + id + '.json');
                         fulfill(204);
                     }
                 });
             } catch (err) {
-                try {
-                    fs.unlink('data/' + id + '.html', function (err) {
-                        if (err) {
-                            // console.log('Z - no such file ' + id + '.json in ./data');
-                            reject(404);
-                        } else {
-                            // console.log('Z - successfully deleted data/' + id + '.json');
-                            fulfill(204);
-                        }
-                    });
-                } catch (err) {
-                    console.log('Z - unsuccessful delete' + err);
-                    reject(400);
-                }
+                console.log('Z - unsuccessful delete' + err);
+                reject(400);
             }
         });
     }
