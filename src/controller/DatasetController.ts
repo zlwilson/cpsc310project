@@ -325,7 +325,7 @@ export default class DatasetController {
 
     }
 
-    private getRoomsASYNC(html: string, rooms: Room[]): Promise<Room[]> {
+    private getRoomsASYNC(html: string, rooms: Room[]): Promise<any> {
         let that = this;
 
         try {
@@ -508,16 +508,15 @@ export default class DatasetController {
                    for (var h in htmlArray){
                        //console.log('Z - NEW HTML FILE - htmlArray item ' + h);
                        // change this method to regular or ASYNC version
-                       that.getRoomsASYNC(htmlArray[h], roomArray).then(function (rooms) {
-                           roomArray = rooms;
-
-                       }).then(function () {
+                       that.getRoomsASYNC(htmlArray[h], roomArray).then(function () {
                            var p = that.save(id, roomArray, '.html');
 
                            p.then(function (result) {
                                // console.log('Z - save() result: ' + result);
                                Log.trace('DatasetController::process(..) - saved with code: ' + result);
-                               fulfill(result);
+                               if (result === 204){
+                                   fulfill(result);
+                               }
                            }).catch(function (result) {
                                // console.log('Z - error in this.save()');
                                throw 400;
