@@ -629,14 +629,14 @@ export default class DatasetController {
                        console.log('Z - processHTML(), in zip.folder...');
 
                        //console.log('Z - iterating over ' + relativePath);
-                       let name = relativePath.substr(34);
+                       //let name = relativePath.substr(34);
 
-                       if (result.indexOf(name) > -1) {
+                       //if (result.indexOf(name) > -1) {
                            console.log('Z - processHTML(), in push to promised array...');
                            // Building with 'name' is in the array (index.html)
                            var promiseContent = file.async('string');
                            promisesArray.push(promiseContent);
-                       }
+                       //}
                    })
                 });
 
@@ -652,7 +652,9 @@ export default class DatasetController {
                     for (var h in htmlArray){
                         //console.log('Z - NEW HTML FILE - htmlArray item ' + h);
                         // change this method to regular or ASYNC version
+
                         that.getRoomsASYNC(htmlArray[h], roomArray).then(function (result) {
+
                             var p = that.save(id, roomArray, '.html');
 
                             p.then(function (result) {
@@ -666,6 +668,7 @@ export default class DatasetController {
                                 throw 400;
                             });
                         });
+
                     }
                 }).catch(function (e) {
                     console.log(e);
