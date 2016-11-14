@@ -347,6 +347,42 @@ describe("InsightController", function () {
         });
     });
 
+    it("Should be able to query on courses_uuid IS (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_uuid'],
+            WHERE: {
+                'IS': {'courses_uuid': ''}
+            },
+            ORDER: 'courses_uuid',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to query on courses_year EQ (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ['courses_dept', 'courses_year'],
+            WHERE: {
+                'EQ': {'courses_year': 2012}
+            },
+            ORDER: 'courses_year',
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
     // Todo: make this test more robust
     it("Should be able to query on courses_instructor (200)", function () {
         var that = this;
@@ -1064,6 +1100,25 @@ describe("InsightController", function () {
             GET:  ["rooms_fullname", "rooms_number"],
             WHERE: {
                 'EQ': {'rooms_seats': 20}
+            },
+            AS: 'table'
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(200);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
+
+    it("Should be able to answer a valid NOT EQ query (200)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        let query: QueryRequest = {
+            GET:  ["rooms_fullname", "rooms_number"],
+            WHERE: {
+                NOT: {
+                    'EQ': {'rooms_seats': 90}
+                }
             },
             AS: 'table'
         };
