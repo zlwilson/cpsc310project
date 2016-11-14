@@ -55,8 +55,19 @@ export default class DatasetController {
             try {
                 fs.readFile('data/' + id + '.json', 'utf8', function (err, data) {
                     if (err) {
-                        // console.log('Z - in getDatasets(id), no such file: ' + id + '.json in ./data');
-                        fulfill(false);
+                        try {
+                            fs.readFile('data/' + id + '.html', 'utf8', function (err, data) {
+                                if (err) {
+                                    fulfill(false)
+                                } else {
+                                    // console.log('Z - ' + id + '.html exists in ./data');
+                                    fulfill(true);
+                                }
+                            });
+                        } catch (err) {
+                            // console.log('Z - in getDatasets(id), no such file: ' + id + '.json in ./data');
+                            fulfill(false);
+                        }
                     } else {
                         // console.log('Z - ' + id + '.json exists in ./data');
                         fulfill(true);
@@ -78,32 +89,50 @@ export default class DatasetController {
 
             if (Object.keys(this.datasets).length == 0) {
                 dir.forEach(function (data, err) {
-                    var name = data.substring(0, data.length-5);
+                    var name = data.substring(0, data.length - 5);
 
-                    // console.log('Z - name(0,1) = ' + name.substr(0,1));
+                    if (name.substr(0, 1) !== '.') {
+                        if (data.substring(data.length - 4, data.length) == 'html') {
+                            // TODO: create room dictionary here
+                            var roomArray: Room[] = [];
 
-                    if (name.substr(0,1) !== '.') {
-                        var sectionArray: Section[] = [];
+                            var jsonString: string = (fs.readFileSync('data/' + data, 'utf8'));
 
-                        // console.log('Z - name of file: ' + name);
+                            var dataParsed = JSON.parse(JSON.stringify(jsonString));
 
-                        var jsonString: string = (fs.readFileSync('data/' + data, 'utf8'));
+                            if (dataParsed.result.length > 0) {
+                                var innerroomArray = dataParsed.result;
 
-                        jsonString = '{"result": ' + jsonString + '}';
-                        // console.log('Z - got jsonString: ' + jsonString);
-
-                        var dataParsed = JSON.parse(jsonString);
-
-                        if (dataParsed.result.length > 0) {
-                            var innersectionArray = dataParsed.result;
-
-                            for (var s in innersectionArray) {
-                                var instanceSection: Section = innersectionArray[s];
-                                sectionArray.push(instanceSection);
-                                // console.log('Z - just finished reading dir: ' + Object.keys(that.datasets).length);
+                                for (var s in innerroomArray) {
+                                    var instanceRoom: Room = innerroomArray[s];
+                                    roomArray.push(instanceRoom);
+                                    // console.log('Z - just finished reading dir: ' + Object.keys(that.datasets).length);
+                                }
                             }
+                            that.datasets[name] = roomArray;
+
+                        } else {
+                            var sectionArray:Section[] = [];
+
+                            // console.log('Z - name of file: ' + name);
+                            var jsonString:string = (fs.readFileSync('data/' + data, 'utf8'));
+
+                            jsonString = '{"result": ' + jsonString + '}';
+                            // console.log('Z - got jsonString: ' + jsonString);
+
+                            var dataParsed = JSON.parse(jsonString);
+
+                            if (dataParsed.result.length > 0) {
+                                var innersectionArray = dataParsed.result;
+
+                                for (var s in innersectionArray) {
+                                    var instanceSection:Section = innersectionArray[s];
+                                    sectionArray.push(instanceSection);
+                                    // console.log('Z - just finished reading dir: ' + Object.keys(that.datasets).length);
+                                }
+                            }
+                            that.datasets[name] = sectionArray;
                         }
-                        that.datasets[name] = sectionArray;
                     }
                 })
             }
