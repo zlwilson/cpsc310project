@@ -247,7 +247,7 @@ export default class DatasetController {
                         });
                     });
                 })
-                
+
                 console.log('Z - parse Index(), about to fulfill...');
 
             }).catch(function (err) {
@@ -565,6 +565,7 @@ export default class DatasetController {
 
 
 
+
     public processJSON(id: string, zip: JSZip): Promise<Room[]> {
         let that = this;
 
@@ -666,7 +667,7 @@ export default class DatasetController {
                     console.log('Z - processHTML(), result = ' + result.length);
 
 
-                   zip.folder('campus/').forEach(function (relativePath, file) {
+                    zip.folder('campus/').forEach(function (relativePath, file) {
 
                        let name = relativePath.substr(34);
                        console.log('Z - adding building: ' + name);
@@ -714,8 +715,6 @@ export default class DatasetController {
                     })
 
                 });
-
-
             });
         } catch (e){
            console.log(e);

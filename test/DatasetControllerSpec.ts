@@ -253,7 +253,7 @@ describe("DatasetController", function () {
         });
     });
 
-    it.only('Should be able to process HTML from given ZIP', function () {
+    it('Should be able to process HTML from given ZIP', function () {
         Log.test('Creating dataset - rooms');
         var zip = new JSZip;
         try {
