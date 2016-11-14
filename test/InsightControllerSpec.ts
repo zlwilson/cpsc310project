@@ -59,7 +59,7 @@ describe("InsightController", function () {
         });
     });
 
-    it.only("Should be able to add a new dataset with html content (204)", function () {
+    it("Should be able to add a new dataset with html content (204)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         return facade.addDataset('rooms', zipHtmlContents).then(function (response: InsightResponse) {

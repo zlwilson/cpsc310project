@@ -271,6 +271,10 @@ export default class DatasetController {
         let url = node.childNodes[9].childNodes[1].attrs[0].value;
         room.href = url;
 
+        let shortName = url.split('/').slice(-1)[0];
+        shortName = shortName.split('-')[0];
+        room.ShortName = shortName;
+
         // room.formatRoom();
         // room.printRoom();
         return room;
@@ -376,6 +380,30 @@ export default class DatasetController {
 
     }
 
+    public httpGetGeolocation(address: string) : Promise<any> {
+        let http = require('http');
+        return new Promise(function(fulfill, reject) {
+            http.get({
+                host: 'skaha.cs.ubc.ca',
+                port: 8022,
+                path: '/api/v1/team78/' + encodeURIComponent(address)
+            }, function(res: any) {
+                res.setEncoding('utf8');
+                res.on('data', function (chunk:any) {
+                    let parsedData = JSON.parse(chunk);
+                    fulfill(chunk);
+                });
+                //var result = JSON.parse(res);
+                //var latLon = {lat: res.lat, lon: res.lon};
+                fulfill(res);
+            }).on('error', function(e:any) {
+                console.log('DatasetController::getLatLong: ' + e);
+                reject(e);
+            })
+        });
+
+    }
+
     private getRoomsASYNC(html: string, rooms: Room[]): Promise<any> {
         let that = this;
 
@@ -389,7 +417,6 @@ export default class DatasetController {
                 //console.log('Z - in getRoomsASYNC()');
 
                 var fullName: string = '';
-                var shortName: string = '';
                 var address: string = '';
                 var hours: string = '';
                 var latitude: number = 0;
@@ -402,7 +429,6 @@ export default class DatasetController {
                 that.traverseASYNC(root, 'field-content', []).then(function (buildingInfo) {
                     fullName = buildingInfo[0].childNodes[0].value;
                     address = buildingInfo[1].childNodes[0].value;
-                    // hours = buildingInfo[2].childNodes[0].value;
                     latitude = 0;
                     longitude = 0;
                 }).catch(function (err) {
@@ -418,7 +444,6 @@ export default class DatasetController {
                             //console.log('Z - rooms[] length = ' + result.length);
                             for (let x in result) {
                                 result[x].FullName = fullName;
-                                result[x].ShortName = shortName;
                                 result[x].Address = address;
                                 result[x].Latitude = latitude;
                                 result[x].Longitude = longitude;
@@ -544,8 +569,8 @@ export default class DatasetController {
                 that.parseIndex(zip).then(function (result) {
                     console.log('Z - processHTML(), before zip.folder...');
 
-                   zip.folder('campus/').forEach(function (relativePath, file) {
 
+                   zip.folder('campus/').forEach(function (relativePath, file) {
                        console.log('Z - processHTML(), in zip.folder...');
 
                        //console.log('Z - iterating over ' + relativePath);
