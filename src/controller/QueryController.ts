@@ -32,6 +32,7 @@ export interface QueryToken {
             courses_pass?: number;
             courses_fail?: number;
             courses_audit?: number;
+            courses_year?: number;
 
             rooms_lat?: number;
             rooms_lon?: number;
@@ -43,6 +44,7 @@ export interface QueryToken {
             courses_pass?: number;
             courses_fail?: number;
             courses_audit?: number;
+            courses_year?: number;
 
             rooms_lat?: number;
             rooms_lon?: number;
@@ -54,6 +56,7 @@ export interface QueryToken {
             courses_pass?: number;
             courses_fail?: number;
             courses_audit?: number;
+            courses_year?: number;
 
             rooms_lat?: number;
             rooms_lon?: number;
@@ -70,6 +73,7 @@ export interface QueryToken {
             courses_pass?: number;
             courses_fail?: number;
             courses_audit?: number;
+            courses_year?: number;
 
             rooms_fullname?: string;
             rooms_shortname?: string;
@@ -113,6 +117,7 @@ export interface QueryBody
         courses_pass?: number;
         courses_fail?: number;
         courses_audit?: number;
+        courses_year?: number;
 
         rooms_lat?: number;
         rooms_lon?: number;
@@ -124,6 +129,7 @@ export interface QueryBody
         courses_pass?: number;
         courses_fail?: number;
         courses_audit?: number;
+        courses_year?: number;
 
         rooms_lat?: number;
         rooms_lon?: number;
@@ -135,6 +141,7 @@ export interface QueryBody
         courses_fail?: number;
         courses_audit?: number;
         courses_id?: string;
+        courses_year?: number;
 
         rooms_lat?: number;
         rooms_lon?: number;
@@ -162,6 +169,7 @@ export interface Result
     courses_pass?: number;
     courses_fail?: number;
     courses_audit?: number;
+    courses_year?: number;
 
     rooms_fullname?: string;
     rooms_shortname?: string;
@@ -594,6 +602,7 @@ export default class QueryController {
                     case 'courses_fail':
                     case 'courses_audit':
                     case 'courses_uuid':
+                    case 'courses_year':
                         result[preamble[p]] = sections[section][this.sectionTranslator(preamble[p])];
                         break;
                     case 'rooms_fullname':
@@ -708,6 +717,7 @@ export default class QueryController {
             case 'courses_pass':
             case 'courses_fail':
             case 'courses_audit':
+            case 'courses_year':
             case 'rooms_lat':
             case 'rooms_lon':
             case 'rooms_seats':
@@ -824,6 +834,7 @@ export default class QueryController {
             case 'courses_pass':
             case 'courses_fail':
             case 'courses_audit':
+            case 'courses_year':
                 var sectionKey = this.sectionTranslator(comparedKey[0]);
 
                 comparedVal = gtToken[comparedKey[0]];
@@ -871,6 +882,7 @@ export default class QueryController {
             case 'courses_pass':
             case 'courses_fail':
             case 'courses_audit':
+            case 'courses_year':
                 var sectionKey = this.sectionTranslator(comparedKey[0]);
 
                 comparedVal = ltToken[comparedKey[0]];
@@ -917,6 +929,7 @@ export default class QueryController {
             case 'courses_pass':
             case 'courses_fail':
             case  'courses_audit':
+            case 'courses_year':
                 var sectionKey = this.sectionTranslator(comparedKey[0]);
 
                 comparedVal = eqToken[comparedKey[0]];
@@ -1329,6 +1342,8 @@ export default class QueryController {
             case 'courses_uuid':
                 translated = "id";
                 break;
+            case 'courses_year':
+                translated = "Year";
             default:
                 throw new Error('QueryController:: Invalid Query Key');
         }
