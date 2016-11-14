@@ -446,6 +446,7 @@ export default class DatasetController {
         for (let x in rooms) {
             rooms[x].FullName = fullName;
             rooms[x].ShortName = shortName;
+            rooms[x].Name = shortName + '_' + rooms[x].Number;
             rooms[x].Address = address;
             rooms[x].Latitude = latitude;
             rooms[x].Longitude = longitude;
