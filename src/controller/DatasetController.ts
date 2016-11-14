@@ -349,8 +349,9 @@ export default class DatasetController {
         return room;
     }
 
-    private table2roomsASYNC(node: parse5.ASTNode, rooms: Array<any>): Promise<Room[]> {
+    private table2roomsASYNC(node: parse5.ASTNode): Promise<Room[]> {
         let that = this;
+        var rooms: Room[] = [];
         return new Promise(function (fulfill, reject) {
             try {
                 var nodeArray: parse5.ASTNode[] = [];
@@ -382,7 +383,6 @@ export default class DatasetController {
                         let room = new Room();
 
                         room = that.makeRoom(nodeArray[c]);
-
                         rooms.push(room);
                     }
 
@@ -449,79 +449,105 @@ export default class DatasetController {
 
     }
 
-    private getRoomsASYNC(html: string, rooms: Room[]): Promise<any> {
+    private getRoomsASYNC(htmls: string[], rooms: Room[]): Promise<any> {
         let that = this;
 
         try {
             return new Promise(function (fulfill, reject) {
-                var root = parse5.parse(html);
-                var table:any;
-                var localRooms:any = [];
-                var promiseArray:any = [];
-                //console.log('Z - root is a ' + root.nodeName);
-                //console.log('Z - in getRoomsASYNC()');
 
-                var fullName: string = '';
-                var address: string = '';
-                var latitude: number;
-                var longitude: number;
+                var promissedArray: any = [];
 
+                for (var h in htmls) {
 
-                // get div where all info about building is
-                // var buildingInfoTable = this.traverse(root, 'views-row views-row-1 views-row-odd views-row-first views-row-last', []);
+                    var root = parse5.parse(htmls[h]);
 
-                // get address, hours (will be first 2 elements in buildingInfo[])
-                that.traverseASYNC(root, 'field-content', []).then(function (buildingInfo) {
-                    fullName = buildingInfo[0].childNodes[0].value;
-                    address = buildingInfo[1].childNodes[0].value;
+                    promissedArray.push(that.traverseASYNC(root, 'field-content', []));
+                }
 
-                    that.httpGetGeolocation(address).then(function (result) {
-                        if (result.error != null) {
-                            reject(result.error);
-                        } else {
-                            latitude = result.lat;
-                            longitude = result.lon;
+                Promise.all(promissedArray).then(function (buildingInfos:any) {
 
-                            that.traverseASYNC(root, 'views-table cols-5 table', []).then(function (result) {
-                                //console.log('Z - nodearray length = ' + result.length);
-                                table = result;
-                            }).then(function () {
-                                //for (let node of table) {
-                                that.table2roomsASYNC(table[0], rooms).then(function (result) {
-                                    //console.log('Z - rooms[] length = ' + result.length);
-                                    for (let x in result) {
-                                        result[x].FullName = fullName;
-                                        result[x].Address = address;
-                                        result[x].Latitude = latitude;
-                                        result[x].Longitude = longitude;
+                    console.log('Lo - get building information for ' + buildingInfos.length + ' buildings');
 
-                                        localRooms.push(result[x]);
-                                    }
-                                }).then(function () {
-                                    //console.log('Z - rooms[] length = ' + localRooms.length);
-                                    //console.log(localRooms);
-                                    fulfill(localRooms);
-                                }).catch(function (err) {
-                                    console.log('error in table2room' + err);
-                                });
-                                //}
+                    var promissedArray2: any = [];
 
-                            }).catch(function (err) {
-                                reject(err);
-                            })
+                    for (var h in htmls) {
+                        var root = parse5.parse(htmls[h]);
+                        promissedArray2.push(that.traverseASYNC(root, 'views-table cols-5 table', []));
+                    }
 
+                    Promise.all(promissedArray2).then(function (tables: any) {
+                        var promissedArray3: any = [];
+                        console.log('Lo - get table numbers: ' + tables.length);
+
+                        for (var i = 0; i < tables.length; i++) {
+                            console.log(tables[i]);
+                            if (tables[i].length > 0) {
+                                promissedArray3.push(that.table2roomsASYNC(tables[i][0]))
+                            } else {
+                                buildingInfos.splice(i, 1);
+                                console.log('Lo - No rooms for building ' + i);
+                            }
                         }
 
+                        Promise.all(promissedArray3).then(function (roomforBuildings : any) {
+                            var promissedArray4: any = [];
+
+                            for (var j = 0; j < roomforBuildings.length; j++) {
+
+                                var address: string = buildingInfos[j][1].childNodes[0].value;
+                                promissedArray4.push(that.httpGetGeolocation(address));
+                            }
+
+                            Promise.all(promissedArray4).then(function (latlonForBuildings : any) {
+
+                                for (var k = 0; k < latlonForBuildings.length; k++) {
+                                    var buildingInfo = buildingInfos[k];
+                                    var fullName: string = buildingInfo[0].childNodes[0].value;
+                                    var address: string = buildingInfo[1].childNodes[0].value;
+                                    var latitude: number;
+                                    var longitude: number;
+
+                                    if (latlonForBuildings[k].error != null) {
+                                        reject(latlonForBuildings[k])
+                                    } else {
+                                        latitude = latlonForBuildings[k].lat;
+                                        longitude = latlonForBuildings[k].lon;
+
+                                        for (var r in roomforBuildings[k]) {
+                                            var room = roomforBuildings[k][r];
+                                            room.FullName = fullName;
+                                            room.Address = address;
+                                            room.latitude = latitude;
+                                            room.longitude = longitude;
+
+                                            rooms.push(room);
+                                        }
+                                        fulfill(rooms);
+                                    }
+                                }
+                            }).catch(function (err) {
+                                console.log('Error in getGeoLocation ' + err);
+                                reject(err);
+                            });
+                        }).catch(function (err) {
+                            console.log('Error in table2Rooms ' + err);
+                            reject(err);
+                        });
+                    }).catch(function (err) {
+                        console.log('Error in find tables ' + err);
+                        reject(err);
                     });
                 }).catch(function (err) {
-                    console.log('error in getrooms - ' + err)
+                    console.log('Error in getBuildingInformation  ' + err);
+                    reject(err);
                 });
 
             });
+
         } catch (err){
             console.log(err);
+            throw 400;
         }
-
     }
 
 
@@ -664,7 +690,6 @@ export default class DatasetController {
 
                     //console.log('Z - processHTML(), result = ' + result.length);
 
-
                     zip.folder('campus/').forEach(function (relativePath, file) {
 
 
@@ -672,15 +697,14 @@ export default class DatasetController {
                        console.log('Z - adding building: ' + name);
 
 
-                       //if (result.indexOf(name) > -1) {
+                       if (result.indexOf(name) > -1) {
                            console.log('Z - processHTML(), in push to promised array...');
                            // Building with 'name' is in the array (index.html)
 
                            var promisedContent = file.async('string');
                            promisesArray.push(promisedContent);
-                       //}
+                       }
                     });
-
 
                     Promise.all(promisesArray).then(function (data) {
 
@@ -694,10 +718,9 @@ export default class DatasetController {
 
                         console.log('Z - html array: ' + htmlArray.length);
                     }).then(function () {
-                        for (var h in htmlArray){
-                            //console.log('Z - NEW HTML FILE - htmlArray item ' + h);
-                            // change this method to regular or ASYNC version
-                            that.getRoomsASYNC(htmlArray[h], roomArray).then(function (result) {
+
+                            that.getRoomsASYNC(htmlArray, roomArray).then(function (result) {
+
                                 var p = that.save(id, roomArray, '.html');
 
                                 p.then(function (result) {
@@ -711,7 +734,9 @@ export default class DatasetController {
                                     throw 400;
                                 });
                             });
-                        }
+
+                    }).then(function () {
+                        // fulfill(204);
                     }).catch(function (e) {
                         console.log(e);
                         reject(e);
