@@ -244,6 +244,7 @@ export default class DatasetController {
                     console.log('Z - parse Index(), about to fulfill...');
                     fulfill(indexRooms);});
 
+
             }).catch(function (err) {
                 console.log('ERROR in parse Index()');
                 reject(err);
@@ -441,6 +442,7 @@ export default class DatasetController {
         for (let x in rooms) {
             rooms[x].FullName = fullName;
             rooms[x].ShortName = shortName;
+            rooms[x].Name = shortName + '_' + rooms[x].Number;
             rooms[x].Address = address;
             rooms[x].Latitude = latitude;
             rooms[x].Longitude = longitude;
@@ -560,7 +562,9 @@ export default class DatasetController {
 
 
 
+
     public processJSON(id: string, zip: JSZip): Promise<Number> {
+
         let that = this;
 
         try {
@@ -661,7 +665,7 @@ export default class DatasetController {
                     //console.log('Z - processHTML(), result = ' + result.length);
 
 
-                   zip.folder('campus/').forEach(function (relativePath, file) {
+                    zip.folder('campus/').forEach(function (relativePath, file) {
 
 
                        let name = relativePath.substr(34);
@@ -714,7 +718,6 @@ export default class DatasetController {
                     })
 
                 //});
-
 
             });
         } catch (e){

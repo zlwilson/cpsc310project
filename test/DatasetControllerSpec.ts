@@ -253,27 +253,29 @@ describe("DatasetController", function () {
     //     });
     // });
 
-    // it('Should be able to process HTML from given ZIP', function () {
-    //     Log.test('Creating dataset - rooms');
-    //     var zip = new JSZip;
-    //     try {
-    //         let html = fs.readdirSync('html/');
-    //         zip.folder("campus");
-    //         html.forEach(function (name, index) {
-    //             if (name !== '.DS_Store') {
-    //                 zip.folder("campus").file(name, fs.readFileSync("html/" + name).toString('utf8'), 'utf8');
-    //             }
-    //         });
-    //     } catch (err) {
-    //         console.log('OH NO AN ERROR!');
-    //     }
-    //     console.log('Z - zip created, successfully if DMP = ' + zip.file('campus/DMP').name);
-    //     let controller = new DatasetController;
-    //     return controller.processHTML('rooms', zip).then(function (data) {
-    //         var rooms = data;
-    //         expect(rooms).to.be.an('array');
-    //     });
-    // });
+
+    it('Should be able to process HTML from given ZIP', function () {
+        Log.test('Creating dataset - rooms');
+        var zip = new JSZip;
+        try {
+            let html = fs.readdirSync('html/');
+            zip.folder("campus");
+            html.forEach(function (name, index) {
+                if (name !== '.DS_Store') {
+                    zip.folder("campus").file(name, fs.readFileSync("html/" + name).toString('utf8'), 'utf8');
+                }
+            });
+        } catch (err) {
+            console.log('OH NO AN ERROR!');
+        }
+        console.log('Z - zip created, successfully if DMP = ' + zip.file('campus/DMP').name);
+        let controller = new DatasetController;
+        return controller.processHTML('rooms', zip).then(function (data) {
+            var rooms = data;
+            expect(rooms).to.be.an('array');
+        });
+    });
+
 
     it("Should be able to get Lat Lon", function () {
         let controller = new DatasetController();
