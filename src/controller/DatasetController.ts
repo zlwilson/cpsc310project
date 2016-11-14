@@ -24,6 +24,12 @@ export interface File {
     rank: any;
 }
 
+export interface GeoLocation {
+    lat?: number;
+    lon?: number;
+    error?: string;
+}
+
 export default class DatasetController {
     private datasets: Datasets = {};
 
@@ -417,30 +423,6 @@ export default class DatasetController {
 
     }
 
-    public httpGetGeolocation(address: string) : Promise<any> {
-        let http = require('http');
-        return new Promise(function(fulfill, reject) {
-            http.get({
-                host: 'skaha.cs.ubc.ca',
-                port: 8022,
-                path: '/api/v1/team78/' + encodeURIComponent(address)
-            }, function(res: any) {
-                res.setEncoding('utf8');
-                res.on('data', function (chunk:any) {
-                    let parsedData = JSON.parse(chunk);
-                    fulfill(chunk);
-                });
-                //var result = JSON.parse(res);
-                //var latLon = {lat: res.lat, lon: res.lon};
-                fulfill(res);
-            }).on('error', function(e:any) {
-                console.log('DatasetController::getLatLong: ' + e);
-                reject(e);
-            })
-        });
-
-    }
-
     private getRoomsASYNC(html: string, rooms: Room[]): Promise<any> {
         let that = this;
 
@@ -503,6 +485,42 @@ export default class DatasetController {
         }catch (err){
             console.log(err);
         }
+
+    }
+
+
+
+    public httpGetGeolocation(address: string) : Promise<any> {
+        let http = require('http');
+        console.log('Z - in getLocation');
+        return new Promise(function(fulfill, reject) {
+            http.get('http://skaha.cs.ubc.ca:8022/api/v1/team78/' + encodeURIComponent(address), function(res: any) {
+                console.log(`STATUS: ${res.statusCode}`);
+                console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
+
+                res.setEncoding('utf8');
+
+                let rawData: any = {};
+
+                res.on('data', (chunk: any) => {
+                    rawData += chunk;
+                });
+
+                res.on('end', () => {
+                    try {
+                        let parsedData = JSON.parse(JSON.stringify(rawData));
+                        console.log(parsedData);
+                        fulfill(parsedData);
+                    } catch (e) {
+                        console.log(e.message);
+                    }
+                });
+
+            }).on('error', function(e:any) {
+                console.log('DatasetController::getLatLong: ' + e);
+                reject(e);
+            })
+        });
 
     }
 
@@ -634,18 +652,19 @@ export default class DatasetController {
                     for (var h in htmlArray){
                         //console.log('Z - NEW HTML FILE - htmlArray item ' + h);
                         // change this method to regular or ASYNC version
-                        that.getRooms(htmlArray[h], roomArray);
-                        var p = that.save(id, roomArray, '.html');
+                        that.getRoomsASYNC(htmlArray[h], roomArray).then(function (result) {
+                            var p = that.save(id, roomArray, '.html');
 
-                        p.then(function (result) {
-                            // console.log('Z - save() result: ' + result);
-                            Log.trace('DatasetController::process(..) - saved with code: ' + result);
-                            if (result === 204) {
-                                fulfill(result);
-                            }
-                        }).catch(function (result) {
-                            // console.log('Z - error in this.save()');
-                            throw 400;
+                            p.then(function (result) {
+                                // console.log('Z - save() result: ' + result);
+                                Log.trace('DatasetController::process(..) - saved with code: ' + result);
+                                if (result === 204) {
+                                    fulfill(result);
+                                }
+                            }).catch(function (result) {
+                                // console.log('Z - error in this.save()');
+                                throw 400;
+                            });
                         });
                     }
                 }).catch(function (e) {
