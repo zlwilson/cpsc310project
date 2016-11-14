@@ -25,7 +25,6 @@ export interface File {
 }
 
 export default class DatasetController {
-
     private datasets: Datasets = {};
 
     private returnCode: Number;
@@ -112,6 +111,8 @@ export default class DatasetController {
     }
 
 
+
+
     // return an array of nodes who's 'class' attribute matches arg
     private traverse(tree: parse5.ASTNode, arg: string, nodeArray: parse5.ASTNode[]): parse5.ASTNode[] {
         let that = this;
@@ -167,6 +168,57 @@ export default class DatasetController {
         }
     }
 
+
+
+    public parseIndex(zip: JSZip): Promise<string[]> {
+        let that = this;
+        // console.log('Z - in parseIndex()...');
+        // console.log('Z - index.html exists = ' + zip.file('index.htm') != null);
+
+        return new Promise(function (fulfill, reject) {
+            var indexRooms: string[] = [];
+            var buildingNodes: parse5.ASTNode[] = [];
+
+            zip.file('index.htm').async('string').then(function (result) {
+                var html = parse5.parse(result);
+
+                that.traverseASYNC(html, 'odd views-row-first', buildingNodes).then(function (result) {
+                    buildingNodes.concat(result);
+                    that.traverseASYNC(html, 'even', buildingNodes).then(function (result) {
+                        buildingNodes.concat(result);
+                        that.traverseASYNC(html, 'odd', buildingNodes).then(function (result) {
+                            buildingNodes.concat(result);
+                            that.traverseASYNC(html, 'even views-row-last', buildingNodes).then(function (result) {
+                                buildingNodes.concat(result);
+                                that.traverseASYNC(html, 'odd views-row-last', buildingNodes).then(function (result) {
+                                    buildingNodes.concat(result);
+                                    console.log('Z - parse Index(), bNodes length = ' + buildingNodes.length);
+                                    for (let i in buildingNodes) {
+                                        // add the short name of the building to the array of buildings in the index file
+                                        let name = buildingNodes[i].childNodes[3].childNodes[0].value;
+                                        indexRooms.push(name);
+                                    }
+                                    for (let j in indexRooms) {
+                                        indexRooms[j] = indexRooms[j].substr(2);
+                                        indexRooms[j] = indexRooms[j].replace(/\s+/g, '');
+                                    }
+                                    console.log('Z - parse Index(), about to fulfill...');
+                                    fulfill(indexRooms);
+                                });
+                            });
+                        });
+                    });
+                });
+            }).catch(function (err) {
+                console.log('ERROR in parse Index()');
+                reject(err);
+            });
+        });
+    }
+
+
+
+
     // create an array of all the Rooms from the 'table' in a building html file
     private table2rooms(node: parse5.ASTNode): Room[] {
         let that = this;
@@ -199,8 +251,6 @@ export default class DatasetController {
         return roomsT2R;
     }
 
-
-
     // make a room from a 'table row' node
     private makeRoom(node: parse5.ASTNode): Room {
         let that = this;
@@ -222,7 +272,7 @@ export default class DatasetController {
         room.href = url;
 
         // room.formatRoom();
-        room.printRoom();
+        // room.printRoom();
         return room;
     }
 
@@ -237,6 +287,7 @@ export default class DatasetController {
                 // node is the root of the tree corresponding to the table with room info
                 // traverse the tree to add all nodes that correspond to rooms in the table
                 // the arguments here are all the possible class names for table elements
+
                 that.traverseASYNC(node, 'even', nodeArray).then(function () {
                     //console.log(nodeArray);
                     that.traverseASYNC(node, 'odd', nodeArray);
@@ -351,7 +402,7 @@ export default class DatasetController {
                 that.traverseASYNC(root, 'field-content', []).then(function (buildingInfo) {
                     fullName = buildingInfo[0].childNodes[0].value;
                     address = buildingInfo[1].childNodes[0].value;
-                    hours = buildingInfo[2].childNodes[0].value;
+                    // hours = buildingInfo[2].childNodes[0].value;
                     latitude = 0;
                     longitude = 0;
                 }).catch(function (err) {
@@ -392,6 +443,8 @@ export default class DatasetController {
         }
 
     }
+
+
 
     public processJSON(id: string, zip: JSZip): Promise<Room[]> {
         let that = this;
@@ -481,55 +534,66 @@ export default class DatasetController {
         let that = this;
 
         try {
-           return new Promise(function (fulfill, reject) {
+            return new Promise(function (fulfill, reject) {
 
-               let roomArray: Room[] = [];
+                let roomArray: Room[] = [];
 
-               let promisesArray: any = [];
-               var htmlArray : any = [];
+                let promisesArray: any = [];
+                var htmlArray : any = [];
 
-               zip.folder('campus/').forEach(function (relativePath, file) {
+                that.parseIndex(zip).then(function (result) {
+                    console.log('Z - processHTML(), before zip.folder...');
 
-                   //console.log('Z - iterating over ' + relativePath);
-                   //console.log(file);
+                   zip.folder('campus/').forEach(function (relativePath, file) {
 
-                   var promiseContent = file.async('string');
-                   promisesArray.push(promiseContent);
+                       console.log('Z - processHTML(), in zip.folder...');
 
-               });
+                       //console.log('Z - iterating over ' + relativePath);
+                       let name = relativePath.substr(34);
 
-               Promise.all(promisesArray).then(function (data) {
+                       if (result.indexOf(name) > -1) {
+                           console.log('Z - processHTML(), in push to promised array...');
+                           // Building with 'name' is in the array (index.html)
+                           var promiseContent = file.async('string');
+                           promisesArray.push(promiseContent);
+                       }
+                   })
+                });
 
-                   for (var i = 0; i < data.length; i++) {
-                       var html = data[i] as string;
-                       htmlArray.push(html);
-                   }
-               }).then(function () {
-                   for (var h in htmlArray){
-                       //console.log('Z - NEW HTML FILE - htmlArray item ' + h);
-                       // change this method to regular or ASYNC version
-                       that.getRoomsASYNC(htmlArray[h], roomArray).then(function () {
-                           var p = that.save(id, roomArray, '.html');
+                Promise.all(promisesArray).then(function (data) {
 
-                           p.then(function (result) {
-                               // console.log('Z - save() result: ' + result);
-                               Log.trace('DatasetController::process(..) - saved with code: ' + result);
-                               if (result === 204){
-                                   fulfill(result);
-                               }
-                           }).catch(function (result) {
-                               // console.log('Z - error in this.save()');
-                               throw 400;
-                           });
-                       })
-                   }
-               }).catch(function (e) {
-                   console.log(e);
-                   reject(e);
-               })
+                    console.log('Z - promises all pushed.');
+
+                    for (var i = 0; i < data.length; i++) {
+                        var html = data[i] as string;
+                        htmlArray.push(html);
+                    }
+                }).then(function () {
+                    for (var h in htmlArray){
+                        //console.log('Z - NEW HTML FILE - htmlArray item ' + h);
+                        // change this method to regular or ASYNC version
+                         that.getRoomsASYNC(htmlArray[h], roomArray).then(function () {
+                             var p = that.save(id, roomArray, '.html');
+
+                             p.then(function (result) {
+                                 // console.log('Z - save() result: ' + result);
+                                 Log.trace('DatasetController::process(..) - saved with code: ' + result);
+                                 if (result === 204) {
+                                    fulfill(result);
+                                 }
+                             }).catch(function (result) {
+                                 // console.log('Z - error in this.save()');
+                                 throw 400;
+                             });
+                        })
+                    }
+                }).catch(function (e) {
+                    console.log(e);
+                    reject(e);
+                })
 
 
-           });
+            });
         } catch (e){
            console.log(e);
         }
@@ -573,7 +637,6 @@ export default class DatasetController {
                             console.log('Problems when processing HTML');
                             reject(400);
                         })
-
                     } else {
                         console.log('It is a json file.');
                         that.processJSON(id,zip).then(function (result) {
@@ -582,9 +645,6 @@ export default class DatasetController {
                             reject(err);
                         })
                     }
-
-
-
                 }).catch(function (err) {
                     Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);
                     reject(400);
