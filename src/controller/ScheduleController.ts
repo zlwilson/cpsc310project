@@ -20,7 +20,7 @@ export default class ScheduleController {
     private schedule: Scheduled[];
 
     public makeSchedule(rooms: Room[], sections: Section[]) {
-        
+
     }
 
 }
