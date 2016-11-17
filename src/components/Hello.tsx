@@ -1,7 +1,3 @@
-/**
- * Created by pablo on 11/17/16.
- */
-
 import * as React from "react";
 
 export interface HelloProps { compiler: string; framework: string; }

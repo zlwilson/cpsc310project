@@ -1,7 +1,3 @@
-/**
- * Created by pablo on 11/17/16.
- */
-
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
