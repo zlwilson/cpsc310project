@@ -3,4 +3,20 @@ import * as ReactDOM from "react-dom";
 
 import { Hello } from "./components/Hello";
 
-ReactDOM.render(<Hello compiler="TypeScript" framework="React" />, document.getElementById("example"));
+const root = document.getElementById('example');
+
+class Main extends React.Component<any, any> {
+    constructor(props: any){
+        super(props);
+    }
+
+    public render() {
+        return (
+            <div>
+                <Hello defaultName='World' />
+            </div>
+        );
+    }
+}
+
+ReactDOM.render(<Main />, root);
