@@ -4,7 +4,7 @@ import * as ReactDOM from "react-dom";
 import { QueryComponent } from "./components/QueryComponent";
 import { ManageDatasets } from "./components/ManageDatasets";
 
-const root = document.getElementById('example');
+const root = document.getElementById('root');
 
 class Main extends React.Component<any, any> {
     constructor(props: any){
@@ -18,7 +18,7 @@ class Main extends React.Component<any, any> {
                     <ManageDatasets defaultName='[none]'/>
                 </div>
                 <div>
-                    <QueryComponent defaultName='World' />
+                    <QueryComponent defaultQuery='[no query yet]' />
                 </div>
             </body>
         );
