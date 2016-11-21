@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import { Hello } from "./components/Hello";
+import { QueryComponent } from "./components/QueryComponent";
 import { ManageDatasets } from "./components/ManageDatasets";
 
 const root = document.getElementById('example');
@@ -15,10 +15,10 @@ class Main extends React.Component<any, any> {
         return (
             <body>
                 <div>
-                    <Hello defaultName='World' />
+                    <ManageDatasets defaultName='[none]'/>
                 </div>
                 <div>
-                    <ManageDatasets defaultName='[none]'/>
+                    <QueryComponent defaultName='World' />
                 </div>
             </body>
         );
