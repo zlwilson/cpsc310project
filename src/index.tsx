@@ -15,9 +15,7 @@ class Main extends React.Component<any, any> {
         return (
             <body>
                 <div>
-                    <ManageDatasets defaultName='[none]'/>
-                </div>
-                <div>
+                    <p>Hello world</p>
                     <QueryComponent defaultQuery='[no query yet]' />
                 </div>
             </body>

@@ -40,6 +40,7 @@
     "mochawesome": "^1.5.2",
     "parse5": "^2.2.3",
     "react": "^15.4.0",
+    "react-ajax": "^0.1.1",
     "react-dom": "^15.4.0",
     "restify": "^4.0.3",
     "tslint": "^3.15.1",

@@ -1,64 +1,61 @@
 import * as React from "react";
-
-export interface HelloProps {
-    compiler: string;
-    framework: string;
-}
+import RouteHandler from "../rest/RouteHandler";
+// var Ajax = require("react-ajax");
 
 export class QueryComponent extends React.Component<any, any> {
-    constructor(props: any){
+    constructor(props:any) {
         super(props);
-        this.state = { query: this.props.defaultQuery };
-        this.state = { courseFilters_size_mod: 'GT' };
-        this.state = { roomFilters_size_mod: 'GT' };
+        this.state = {query: this.props.defaultQuery};
+        this.state = {courseFilters_size_mod: 'GT'};
+        this.state = {roomFilters_size_mod: 'GT'};
     }
 
-    public handleCourseSearch(event: any, input: any) : void {
-        this.setState({ query: input });
+    public handleCourseSearch(event:any, input:any):void {
+        this.setState({query: input});
     }
 
-    public updateCourseSearch(event: any): void {
-        this.setState({ courseSearch: 'courses.get: ' + event.target.value });
+    public updateCourseSearch(event:any):void {
+        this.setState({courseSearch: 'courses.get: ' + event.target.value});
     }
 
-    public applyCourseFilters(event: any, input: any) : void {
+    public applyCourseFilters(event:any, input:any):void {
         // TODO: sort query results (ie: new querry with filter values
-        this.setState({ courseFilters: input});
+        this.setState({courseFilters: input});
     }
 
-    public updateCourseFilters(event: any, type: number): void {
+    public updateCourseFilters(event:any, type:number):void {
         if (type == 1) {
-            this.setState({ courseFilters_size_mod: event.target.value });
+            this.setState({courseFilters_size_mod: event.target.value});
         } else if (type == 2) {
-            this.setState({ courseFilters_size: event.target.value });
+            this.setState({courseFilters_size: event.target.value});
         } else if (type == 3) {
-            this.setState({ courseFilters_dept: event.target.value });
+            this.setState({courseFilters_dept: event.target.value});
         } else {
-            this.setState({ courseFilters_num: event.target.value });
+            this.setState({courseFilters_num: event.target.value});
         }
     }
 
-    public handleRoomSearch(event: any, input: any) : void {
-        this.setState({ query: input});
+    public handleRoomSearch(event:any, input:any):void {
+        this.setState({query: input});
     }
 
-    public updateRoomSearch(event: any): void {
-        this.setState({ roomSearch: 'rooms.get: ' + event.target.value });
+    public updateRoomSearch(event:any):void {
+        this.setState({roomSearch: 'rooms.get: ' + event.target.value});
     }
 
-    public applyRoomFilters(event: any, input: any) : void {
-        this.setState({ query: input});
+    public applyRoomFilters(event:any, input:any):void {
+        this.setState({query: input});
     }
 
-    public updateRoomFilters(event: any, type: number): void {
+    public updateRoomFilters(event:any, type:number):void {
         if (type == 1) {
-            this.setState({ roomFilters_size_mod: event.target.value });
+            this.setState({roomFilters_size_mod: event.target.value});
         } else if (type == 2) {
-            this.setState({ roomFilters_size: event.target.value });
+            this.setState({roomFilters_size: event.target.value});
         } else if (type == 4) {
-            this.setState({ roomFilters_furniture: event.target.value });
+            this.setState({roomFilters_furniture: event.target.value});
         } else {
-            this.setState({ roomFilters_type: event.target.value });
+            this.setState({roomFilters_type: event.target.value});
         }
     }
 
@@ -94,59 +91,64 @@ export class QueryComponent extends React.Component<any, any> {
                     <div style={style1}>
                         <h4>Course Xplorer</h4>
                         <div>
-                            <p>Search the course catalog by course name, department or instructor:</p>
+                            <p>Search the course catalog by course name or instructor:</p>
                             <input onChange={ e => this.updateCourseSearch(e) }/>
-                            <button name = "SearchCourses" onClick = { e => this.handleCourseSearch(e, this.state.courseSearch) }>
+                            <button name="SearchCourses"
+                                    onClick={ e => this.handleCourseSearch(e, this.state.courseSearch) }>
                                 Search
                             </button>
                         </div>
                         <div>
                             <h4>Filters</h4>
-                            <button name = "ApplyCourses" onClick = { e => this.applyCourseFilters(e, this.state.courseFilters) }>
+                            <button name="ApplyCourses"
+                                    onClick={ e => this.applyCourseFilters(e, this.state.courseFilters) }>
                                 Apply
                             </button>
                             <div>
                                 <div style={style11}>
                                     <p>Size:
-                                        <select value={this.state.name} onChange={ e => this.updateCourseFilters(e, 2) }>
+                                        <select value={this.state.name}
+                                                onChange={ e => this.updateCourseFilters(e, 2) }>
                                             <option value="GT">Greater Than</option>
                                             <option value="LT">Less Than</option>
                                             <option value="EQ">Equal To</option>
                                         </select>
                                         <input onChange={ e => this.updateCourseFilters(e, 1) }/>
                                     </p>
-                            </div>
-                            <div style={style11}>
-                                <p>Dept:
-                                    <input onChange={ e => this.updateCourseFilters(e, 3) }/>
-                                </p>
-                            </div>
-                            <div style={style11}>
-                                <p>Number:
-                                    <input onChange={ e => this.updateCourseFilters(e, 4) }/>
-                                </p>
+                                </div>
+                                <div style={style11}>
+                                    <p>Dept:
+                                        <input onChange={ e => this.updateCourseFilters(e, 3) }/>
+                                    </p>
+                                </div>
+                                <div style={style11}>
+                                    <p>Number:
+                                        <input onChange={ e => this.updateCourseFilters(e, 4) }/>
+                                    </p>
+                                </div>
                             </div>
                         </div>
+                        <div>
+                            <h5>Filters:</h5>
+                            <p>Size:  { this.state.courseFilters_size_mod } { this.state.courseFilters_size }</p>
+                            <p>Dept: { this.state.courseFilters_dept }</p>
+                            <p>Number: { this.state.courseFilters_num }</p>
+                        </div>
                     </div>
-                    <div>
-                        <h5>Filters:</h5>
-                        <p>Size:  { this.state.courseFilters_size_mod } { this.state.courseFilters_size }</p>
-                        <p>Dept: { this.state.courseFilters_dept }</p>
-                        <p>Number: { this.state.courseFilters_num }</p>
-                    </div>
-                </div>
                     <div style={style2}>
                         <h4>Room Xplorer</h4>
                         <div>
                             <p>Search the rooms of UBC by building or room number:</p>
                             <input onChange={ e => this.updateRoomSearch(e)  }/>
-                            <button name = "SearchRooms" onClick = { e => this.handleRoomSearch(e, this.state.roomSearch)  }>
+                            <button name="SearchRooms"
+                                    onClick={ e => this.handleRoomSearch(e, this.state.roomSearch)  }>
                                 Search
                             </button>
                         </div>
                         <div>
                             <h4>Filters</h4>
-                            <button name = "ApplyRooms" onClick = { e => this.applyCourseFilters(e, this.state.roomFilters) }>
+                            <button name="ApplyRooms"
+                                    onClick={ e => this.applyCourseFilters(e, this.state.roomFilters) }>
                                 Apply
                             </button>
                             <div>
@@ -188,8 +190,8 @@ export class QueryComponent extends React.Component<any, any> {
                         </div>
                     </div>
                 </div>
-                <div id='result'>
-                    TODO: render query response here
+                <div id='result' className="tablesorter">
+
                 </div>
             </div>
         );
