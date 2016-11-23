@@ -1,6 +1,5 @@
 import * as React from "react";
-import RouteHandler from "../rest/RouteHandler";
-// var Ajax = require("react-ajax");
+var Ajax = require("react-ajax");
 
 export class QueryComponent extends React.Component<any, any> {
     constructor(props:any) {
@@ -10,20 +9,21 @@ export class QueryComponent extends React.Component<any, any> {
         this.state = {roomFilters_size_mod: 'GT'};
     }
 
-    public handleCourseSearch(event:any, input:any):void {
-        this.setState({query: input});
+    private handleQueryResponse() {
+
     }
 
-    public updateCourseSearch(event:any):void {
+    private handleCourseSearch(event:any, input:any):void {
+        // TODO: this is the course search button action, so it should send an AJAX request to courses dataset
+        this.setState({query: input});
+        // React.createElement(Ajax, {url: 'http://localhost:4321', method: 'POST', body: this.state.query});
+    }
+
+    private updateCourseSearch(event:any):void {
         this.setState({courseSearch: 'courses.get: ' + event.target.value});
     }
 
-    public applyCourseFilters(event:any, input:any):void {
-        // TODO: sort query results (ie: new querry with filter values
-        this.setState({courseFilters: input});
-    }
-
-    public updateCourseFilters(event:any, type:number):void {
+    private updateCourseFilters(event:any, type:number):void {
         if (type == 1) {
             this.setState({courseFilters_size_mod: event.target.value});
         } else if (type == 2) {
@@ -35,19 +35,26 @@ export class QueryComponent extends React.Component<any, any> {
         }
     }
 
-    public handleRoomSearch(event:any, input:any):void {
+    private applyCourseFilters(event:any, input:any):void {
+        // TODO: this is the course filter apply button action, so it should send an AJAX request to courses dataset
+        this.setState({courseFilters: input});
+    }
+
+    private handleRoomSearch(event:any, input:any):void {
+        // TODO: this is the room search button action, so it should send an AJAX request to rooms dataset
         this.setState({query: input});
     }
 
-    public updateRoomSearch(event:any):void {
+    private updateRoomSearch(event:any):void {
         this.setState({roomSearch: 'rooms.get: ' + event.target.value});
     }
 
-    public applyRoomFilters(event:any, input:any):void {
+    private applyRoomFilters(event:any, input:any):void {
+        // TODO: this is the room filter apply button action, so it should send an AJAX request to rooms dataset
         this.setState({query: input});
     }
 
-    public updateRoomFilters(event:any, type:number):void {
+    private updateRoomFilters(event:any, type:number):void {
         if (type == 1) {
             this.setState({roomFilters_size_mod: event.target.value});
         } else if (type == 2) {
@@ -59,7 +66,11 @@ export class QueryComponent extends React.Component<any, any> {
         }
     }
 
-    public render() {
+    componentDidMount() {
+
+    }
+
+    render() {
         var style1 = {
             backgroundColor: 'rgb(240,250,255)',
             float: 'left',
@@ -190,8 +201,51 @@ export class QueryComponent extends React.Component<any, any> {
                         </div>
                     </div>
                 </div>
-                <div id='result' className="tablesorter">
-
+                <div id='result'>
+                    <p>Before my AJAX tag...</p>
+                    <Ajax url="" onResponse={this.handleQueryResponse()}/>
+                        <p>After my AJAX tag.</p>
+                    <table id="myTable" class="tablesorter">
+                        <thead>
+                        <tr>
+                            <th>Last Name</th>
+                            <th>First Name</th>
+                            <th>Email</th>
+                            <th>Due</th>
+                            <th>Web Site</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Smith</td>
+                            <td>John</td>
+                            <td>jsmith@gmail.com</td>
+                            <td>$50.00</td>
+                            <td>http://www.jsmith.com</td>
+                        </tr>
+                        <tr>
+                            <td>Bach</td>
+                            <td>Frank</td>
+                            <td>fbach@yahoo.com</td>
+                            <td>$50.00</td>
+                            <td>http://www.frank.com</td>
+                        </tr>
+                        <tr>
+                            <td>Doe</td>
+                            <td>Jason</td>
+                            <td>jdoe@hotmail.com</td>
+                            <td>$100.00</td>
+                            <td>http://www.jdoe.com</td>
+                        </tr>
+                        <tr>
+                            <td>Conway</td>
+                            <td>Tim</td>
+                            <td>tconway@earthlink.net</td>
+                            <td>$50.00</td>
+                            <td>http://www.timconway.com</td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         );
