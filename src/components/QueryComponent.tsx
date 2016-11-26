@@ -1,5 +1,8 @@
 import * as React from "react";
-var Ajax = require("react-ajax");
+
+import axios from 'axios';
+
+interface
 
 export class QueryComponent extends React.Component<any, any> {
     constructor(props:any) {
@@ -15,7 +18,16 @@ export class QueryComponent extends React.Component<any, any> {
 
     private handleCourseSearch(event:any, input:any):void {
         // TODO: this is the course search button action, so it should send an AJAX request to courses dataset
-        this.setState({query: input});
+        axios.get('http://www.reddit.com/r/reactjs.json').then(res => {
+            console.log(res.data);
+            this.setState({query: res.data});
+        }).catch(
+            err=>{
+
+            }
+        );
+
+
         // React.createElement(Ajax, {url: 'http://localhost:4321', method: 'POST', body: this.state.query});
     }
 
@@ -203,7 +215,7 @@ export class QueryComponent extends React.Component<any, any> {
                 </div>
                 <div id='result'>
                     <p>Before my AJAX tag...</p>
-                    <Ajax url="" onResponse={this.handleQueryResponse()}/>
+                    {/*<Ajax url="" onResponse={this.handleQueryResponse()}/>*/}
                         <p>After my AJAX tag.</p>
                     <table id="myTable" class="tablesorter">
                         <thead>
