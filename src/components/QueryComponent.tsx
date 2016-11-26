@@ -2,9 +2,11 @@ import * as React from "react";
 
 import axios from 'axios';
 
-interface
+interface IQueryProps {
+    defaultQuery: string;
+}
 
-export class QueryComponent extends React.Component<any, any> {
+export class QueryComponent extends React.Component<IQueryProps, any> {
     constructor(props:any) {
         super(props);
         this.state = {query: this.props.defaultQuery};
