@@ -40,11 +40,11 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         // TODO: this is the course search button action, so it should send an AJAX request to courses dataset
         console.log('L - start handling course search with ' + input);
 
-        var query : IQueryRequest = {GET:['courses_title', 'courses_instructor'], WHERE:"{'OR': [{'IS': {courses_title: " + input + "}}, [{'IS': {courses_instructor: " + input + "}}]]}", AS:'TABLE' };
+        var query : IQueryRequest = {GET:["courses_title", "courses_instructor"], WHERE:{"OR": [{"IS": {courses_title: input }}, {"IS": {courses_instructor:  input }}]}, AS:'TABLE'};
         var queryJSON = JSON.stringify(query);
         console.log('L - handle course search query string: ' + queryJSON);
 
-        axios.post('http://localhost:4321', queryJSON, ).then(res => {
+        axios.post('http://localhost:4321/query', query).then(res => {
             console.log(res.data);
             this.setState({result: res.data});
         }).catch( err=>{
@@ -57,7 +57,8 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
     }
 
     private updateCourseSearch(event:any):void {
-        this.setState({courseSearch: 'courses.get: ' + event.target.value});
+        //Add * for searching if ever appear in dataset
+        this.setState({courseSearch: "*" + event.target.value + "*"});
     }
 
     private updateCourseFilters(event:any, type:number):void {

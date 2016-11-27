@@ -60,6 +60,8 @@ export default class RouteHandler {
     public static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::postQuery(..) - params: ' + JSON.stringify(req.params));
         res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+        res.header("Access-Control-Allow-Headers", "Content-Type");
         try {
 
             // if(RouteHandler.isJson(req.params)) {
