@@ -1,16 +1,31 @@
 import * as React from "react";
-
 import axios from 'axios';
 
-interface IQueryProps {
+export interface IQueryProps {
     defaultQuery: string;
+}
+
+export interface IQueryRequest {
+    GET: string|string[];
+    WHERE: any;
+    GROUP?: string[];
+    APPLY?: any;
+    ORDER?: any;
+    AS: string;
 }
 
 export class QueryComponent extends React.Component<IQueryProps, any> {
     constructor(props:any) {
         super(props);
-        this.state = {query: this.props.defaultQuery};
-        this.state = {courseFilters_size_mod: 'GT'};
+        //this.state = {query: this.props.defaultQuery};
+        this.state = {courseFilters_size_mod: ""};
+        this.state = {result:''};
+        this.state = {courseSearch:""};
+        this.state = {courseFilters_size: ""};
+        this.state = {courseFilters_dept: ""};
+        this.state = {courseFilters_num: ""};
+
+        //Room
         this.state = {roomFilters_size_mod: 'GT'};
     }
 
@@ -18,14 +33,22 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
     }
 
+    //Search using IS query, assume only one field searching is valid.
+    //@Param: event -> click
+    //        input -> field to search
     private handleCourseSearch(event:any, input:any):void {
         // TODO: this is the course search button action, so it should send an AJAX request to courses dataset
-        axios.get('http://www.reddit.com/r/reactjs.json').then(res => {
-            console.log(res.data);
-            this.setState({query: res.data});
-        }).catch(
-            err=>{
+        console.log('L - start handling course search with ' + input);
 
+        var query : IQueryRequest = {GET:['courses_title', 'courses_instructor'], WHERE:"{'OR': [{'IS': {courses_title: " + input + "}}, [{'IS': {courses_instructor: " + input + "}}]]}", AS:'TABLE' };
+        var queryJSON = JSON.stringify(query);
+        console.log('L - handle course search query string: ' + queryJSON);
+
+        axios.post('http://localhost:4321', queryJSON, ).then(res => {
+            console.log(res.data);
+            this.setState({result: res.data});
+        }).catch( err=>{
+            console.log(err);
             }
         );
 
@@ -116,7 +139,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                     <div style={style1}>
                         <h4>Course Xplorer</h4>
                         <div>
-                            <p>Search the course catalog by course name or instructor:</p>
+                            <p>Search the course catalog by course title or instructor:</p>
                             <input onChange={ e => this.updateCourseSearch(e) }/>
                             <button name="SearchCourses"
                                     onClick={ e => this.handleCourseSearch(e, this.state.courseSearch) }>
@@ -219,47 +242,47 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                     <p>Before my AJAX tag...</p>
                     {/*<Ajax url="" onResponse={this.handleQueryResponse()}/>*/}
                         <p>After my AJAX tag.</p>
-                    <table id="myTable" class="tablesorter">
-                        <thead>
-                        <tr>
-                            <th>Last Name</th>
-                            <th>First Name</th>
-                            <th>Email</th>
-                            <th>Due</th>
-                            <th>Web Site</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>Smith</td>
-                            <td>John</td>
-                            <td>jsmith@gmail.com</td>
-                            <td>$50.00</td>
-                            <td>http://www.jsmith.com</td>
-                        </tr>
-                        <tr>
-                            <td>Bach</td>
-                            <td>Frank</td>
-                            <td>fbach@yahoo.com</td>
-                            <td>$50.00</td>
-                            <td>http://www.frank.com</td>
-                        </tr>
-                        <tr>
-                            <td>Doe</td>
-                            <td>Jason</td>
-                            <td>jdoe@hotmail.com</td>
-                            <td>$100.00</td>
-                            <td>http://www.jdoe.com</td>
-                        </tr>
-                        <tr>
-                            <td>Conway</td>
-                            <td>Tim</td>
-                            <td>tconway@earthlink.net</td>
-                            <td>$50.00</td>
-                            <td>http://www.timconway.com</td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    {/*<table id="myTable" class="tablesorter">*/}
+                        {/*<thead>*/}
+                        {/*<tr>*/}
+                            {/*<th>Last Name</th>*/}
+                            {/*<th>First Name</th>*/}
+                            {/*<th>Email</th>*/}
+                            {/*<th>Due</th>*/}
+                            {/*<th>Web Site</th>*/}
+                        {/*</tr>*/}
+                        {/*</thead>*/}
+                        {/*<tbody>*/}
+                        {/*<tr>*/}
+                            {/*<td>Smith</td>*/}
+                            {/*<td>John</td>*/}
+                            {/*<td>jsmith@gmail.com</td>*/}
+                            {/*<td>$50.00</td>*/}
+                            {/*<td>http://www.jsmith.com</td>*/}
+                        {/*</tr>*/}
+                        {/*<tr>*/}
+                            {/*<td>Bach</td>*/}
+                            {/*<td>Frank</td>*/}
+                            {/*<td>fbach@yahoo.com</td>*/}
+                            {/*<td>$50.00</td>*/}
+                            {/*<td>http://www.frank.com</td>*/}
+                        {/*</tr>*/}
+                        {/*<tr>*/}
+                            {/*<td>Doe</td>*/}
+                            {/*<td>Jason</td>*/}
+                            {/*<td>jdoe@hotmail.com</td>*/}
+                            {/*<td>$100.00</td>*/}
+                            {/*<td>http://www.jdoe.com</td>*/}
+                        {/*</tr>*/}
+                        {/*<tr>*/}
+                            {/*<td>Conway</td>*/}
+                            {/*<td>Tim</td>*/}
+                            {/*<td>tconway@earthlink.net</td>*/}
+                            {/*<td>$50.00</td>*/}
+                            {/*<td>http://www.timconway.com</td>*/}
+                        {/*</tr>*/}
+                        {/*</tbody>*/}
+                    {/*</table>*/}
                 </div>
             </div>
         );
