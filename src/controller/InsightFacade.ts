@@ -78,6 +78,7 @@ export default class InsightFacade implements IInsightFacade {
                     let datasets: Datasets = InsightFacade.datasetController.getDatasets();
                     let controller = new QueryController(datasets);
                     let isValid = controller.isValid(query);
+                    //query = controller.removeEmptyField(query);
                     let idList = controller.getId(query);
 
                     if (isValid === true) {

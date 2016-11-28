@@ -19,6 +19,7 @@ export default class Section {
     Avg: number;
     Campus: string;
     Subject: string;
+    Size: number;
 
     constructor (title: string, section: string, id: string, prof: string, audit: number, withdrew: number, year: number, stddev: number, enrolled: number, high: number, course: string, session: string, pass: number, fail: number, avg: number, campus: string, subject: string) {
         this.Title = title;
@@ -44,4 +45,5 @@ export default class Section {
         var obj = JSON.parse (json);
         return new Section (obj.Title, obj.Section, obj.id, obj.Professor, obj.Audit, obj.Withdrew, obj.Year, obj.Stddev, obj.Enrolled, obj.High, obj.Course, obj.Session, obj.Pass, obj.Fail, obj.Avg, obj.Campus, obj.Subject);
     };
+
 }

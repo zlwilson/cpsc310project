@@ -1,5 +1,6 @@
 import * as React from "react";
 import axios from 'axios';
+import {type} from "os";
 
 export interface IQueryProps {
     defaultQuery: string;
@@ -19,9 +20,9 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         super(props);
         //this.state = {query: this.props.defaultQuery};
         this.state = {courseFilters_size_mod: ""};
-        this.state = {result:''};
+        this.state = {result:""};
         this.state = {courseSearch:""};
-        this.state = {courseFilters_size: ""};
+        this.state = {courseFilters_size: 0};
         this.state = {courseFilters_dept: ""};
         this.state = {courseFilters_num: ""};
 
@@ -40,7 +41,17 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         // TODO: this is the course search button action, so it should send an AJAX request to courses dataset
         console.log('L - start handling course search with ' + input);
 
-        var query : IQueryRequest = {GET:["courses_title", "courses_instructor"], WHERE:{"OR": [{"IS": {courses_title: input }}, {"IS": {courses_instructor:  input }}]}, AS:'TABLE'};
+        var query : IQueryRequest = {
+            GET:["courses_title", "courses_instructor"],
+            WHERE:{
+                "AND": [
+                    {"OR":[
+                        {"IS": {courses_title: input}},
+                        {"IS":{courses_instructor:input}}
+                        ]},
+                {"EQ": {courses_year: 2014}}]},
+            AS:'TABLE'};
+
         var queryJSON = JSON.stringify(query);
         console.log('L - handle course search query string: ' + queryJSON);
 
@@ -51,9 +62,6 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             console.log(err);
             }
         );
-
-
-        // React.createElement(Ajax, {url: 'http://localhost:4321', method: 'POST', body: this.state.query});
     }
 
     private updateCourseSearch(event:any):void {
@@ -63,19 +71,131 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
     private updateCourseFilters(event:any, type:number):void {
         if (type == 1) {
-            this.setState({courseFilters_size_mod: event.target.value});
-        } else if (type == 2) {
             this.setState({courseFilters_size: event.target.value});
+        } else if (type == 2) {
+            this.setState({courseFilters_size_mod: event.target.value});
         } else if (type == 3) {
-            this.setState({courseFilters_dept: event.target.value});
+            this.setState({courseFilters_dept: event.target.value });
         } else {
-            this.setState({courseFilters_num: event.target.value});
+            this.setState({courseFilters_num: event.target.value });
         }
     }
 
-    private applyCourseFilters(event:any, input:any):void {
+    private applyCourseFilters(event:any):void {
         // TODO: this is the course filter apply button action, so it should send an AJAX request to courses dataset
-        this.setState({courseFilters: input});
+        var andQuery: any = {"AND":[
+            {"EQ":{courses_year:2014}}
+        ]};
+
+        console.log(this.state.courseFilters_size + this.state.courseFilters_num + this.state.courseFilters_dept);
+
+        if (typeof this.state.courseFilters_size_mod === "" ||typeof this.state.courseFilters_size === "undefined" || this.state.courseFilters_dept === ""){
+
+            if (typeof this.state.courseFilters_dept === "undefined" || this.state.courseFilters_dept === ""){
+
+                if (typeof this.state.courseFilters_num === "undefined" || this.state.courseFilters_num === ""){
+                    //Case 1: all left empty -> get all courses
+
+                } else {
+                    //Case 2: only course number indicated
+                    andQuery["AND"].push({"IS": {courses_id: this.state.courseFilters_num}});
+                }
+            } else {
+                if (typeof this.state.courseFilters_num === "undefined" || this.state.courseFilters_num === ""){
+                    //Case 3: only course department indicated
+                    andQuery["AND"].push({"IS": {courses_dept: this.state.courseFilters_dept}});
+                } else {
+                    //Case 4: courses_id and courses_department indicated
+                    andQuery["AND"].push({"IS": {courses_dept: this.state.courseFilters_dept}});
+                    andQuery["AND"].push({"IS": {courses_id: this.state.courseFilters_num}});
+                }
+            }
+        } else {
+            if (typeof this.state.courseFilters_dept === "undefined" || this.state.courseFilters_dept === ""){
+
+                if (typeof this.state.courseFilters_num === "undefined" || this.state.courseFilters_num === ""){
+                    //Case 5: only courses_size indicated
+
+                } else {
+                    //Case 6: courses_size and courses_id indicated
+                    andQuery["AND"].push({"IS": {courses_id: this.state.courseFilters_num}});
+                }
+            } else {
+                if (typeof this.state.courseFilters_num === "undefined" || this.state.courseFilters_num === ""){
+                    //Case 7: courses_size and courses_department indicated
+                    andQuery["AND"].push({"IS": {courses_dept: this.state.courseFilters_dept}});
+                } else {
+                    //Case 8: courses_size, courses_id and courses_department indicated
+                    andQuery["AND"].push({"IS": {courses_dept: this.state.courseFilters_dept}});
+                    andQuery["AND"].push({"IS": {courses_id: this.state.courseFilters_num}});
+                }
+            }
+
+            var sizeMode = this.state.courseFilters_size_mod;
+            switch (sizeMode){
+                case 'GT':
+                    andQuery['AND'].push({"GT": {courses_size: this.state.courseFilters_size}});
+                    break;
+                case 'LT':
+                    andQuery['AND'].push({'LT': {courses_size: this.state.courseFilters_size}});
+                    break;
+                case 'EQ':
+                    andQuery['AND'].push({'EQ': {courses_size: this.state.courseFilters_size}});
+                    break;
+                default:
+                    console.log("Error in filter course size");
+            }
+        }
+
+        console.log(andQuery);
+        var query : IQueryRequest = {
+            GET:["courses_dept", "courses_id", "courses_pass", "courses_fail"],
+            WHERE: andQuery,
+            AS:'TABLE'
+        };
+
+        axios.post('http://localhost:4321/query', query).then(res => {
+            console.log(res.data);
+            var newResult = res.data.result;
+            var oldResult = this.state.result;
+            oldResult.filter(function (n:any) {
+                return newResult.indexOf(n);
+            })
+
+            this.setState({result: oldResult});
+
+            var table = document.getElementById("myTable");
+            var thead = document.createElement("thead");
+            var tbody = document.createElement("tbody");
+
+            table.appendChild(thead);
+            table.appendChild(tbody);
+
+            var headRow = document.createElement("tr");
+            thead.appendChild(headRow);
+
+            var head:string[] = query.GET as string[];
+            head.forEach(function (field: string) {
+                var headCell = document.createElement("dt");
+                headCell.textContent = field;
+                headRow.appendChild(headCell);
+            })
+
+            oldResult.forEach(function (items: any) {
+                var row = document.createElement("tr");
+                for (var i in items){
+                    var cell = document.createElement("dt");
+                    cell.textContent = items[i];
+                    row.appendChild(cell);
+                }
+
+                tbody.appendChild(row);
+            });
+
+        }).catch( err=>{
+                console.log(err);
+            }
+        );
     }
 
     private handleRoomSearch(event:any, input:any):void {
@@ -149,15 +269,12 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                         </div>
                         <div>
                             <h4>Filters</h4>
-                            <button name="ApplyCourses"
-                                    onClick={ e => this.applyCourseFilters(e, this.state.courseFilters) }>
-                                Apply
-                            </button>
                             <div>
                                 <div style={style11}>
                                     <p>Size:
                                         <select value={this.state.name}
                                                 onChange={ e => this.updateCourseFilters(e, 2) }>
+                                            <option value={""}> - </option>
                                             <option value="GT">Greater Than</option>
                                             <option value="LT">Less Than</option>
                                             <option value="EQ">Equal To</option>
@@ -176,6 +293,10 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                                     </p>
                                 </div>
                             </div>
+                            <button name="ApplyCourses"
+                                    onClick={ e => this.applyCourseFilters(e) }>
+                                Apply
+                            </button>
                         </div>
                         <div>
                             <h5>Filters:</h5>
@@ -197,7 +318,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                         <div>
                             <h4>Filters</h4>
                             <button name="ApplyRooms"
-                                    onClick={ e => this.applyCourseFilters(e, this.state.roomFilters) }>
+                                    onClick={ e => this.applyRoomFilters(e, this.state.roomFilters) }>
                                 Apply
                             </button>
                             <div>
@@ -243,47 +364,9 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                     <p>Before my AJAX tag...</p>
                     {/*<Ajax url="" onResponse={this.handleQueryResponse()}/>*/}
                         <p>After my AJAX tag.</p>
-                    {/*<table id="myTable" class="tablesorter">*/}
-                        {/*<thead>*/}
-                        {/*<tr>*/}
-                            {/*<th>Last Name</th>*/}
-                            {/*<th>First Name</th>*/}
-                            {/*<th>Email</th>*/}
-                            {/*<th>Due</th>*/}
-                            {/*<th>Web Site</th>*/}
-                        {/*</tr>*/}
-                        {/*</thead>*/}
-                        {/*<tbody>*/}
-                        {/*<tr>*/}
-                            {/*<td>Smith</td>*/}
-                            {/*<td>John</td>*/}
-                            {/*<td>jsmith@gmail.com</td>*/}
-                            {/*<td>$50.00</td>*/}
-                            {/*<td>http://www.jsmith.com</td>*/}
-                        {/*</tr>*/}
-                        {/*<tr>*/}
-                            {/*<td>Bach</td>*/}
-                            {/*<td>Frank</td>*/}
-                            {/*<td>fbach@yahoo.com</td>*/}
-                            {/*<td>$50.00</td>*/}
-                            {/*<td>http://www.frank.com</td>*/}
-                        {/*</tr>*/}
-                        {/*<tr>*/}
-                            {/*<td>Doe</td>*/}
-                            {/*<td>Jason</td>*/}
-                            {/*<td>jdoe@hotmail.com</td>*/}
-                            {/*<td>$100.00</td>*/}
-                            {/*<td>http://www.jdoe.com</td>*/}
-                        {/*</tr>*/}
-                        {/*<tr>*/}
-                            {/*<td>Conway</td>*/}
-                            {/*<td>Tim</td>*/}
-                            {/*<td>tconway@earthlink.net</td>*/}
-                            {/*<td>$50.00</td>*/}
-                            {/*<td>http://www.timconway.com</td>*/}
-                        {/*</tr>*/}
-                        {/*</tbody>*/}
-                    {/*</table>*/}
+                    <table id="myTable" class="tablesorter">
+                    </table>
+
                 </div>
             </div>
         );

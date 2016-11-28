@@ -610,7 +610,7 @@ export default class DatasetController {
 
 
                 Promise.all(promisesArray).then(function (data) {
-                    // console.log('Z - iterating through all Promises...');
+                    console.log('Z - iterating through all Promises...');
 
                     for (let r = 0; r < data.length; r++) {
 
@@ -627,6 +627,7 @@ export default class DatasetController {
 
                                 for (var s in sectionArray) {
                                     var instanceSection: Section = sectionArray[s];
+                                    instanceSection.Size = instanceSection.Pass + instanceSection.Fail;
                                     processedDataset.push(instanceSection);
                                     // console.log('Z - this should be a section object: ' + instanceSection);
                                 }
@@ -639,7 +640,7 @@ export default class DatasetController {
                         throw 400;
                     }
 
-                    // console.log('Z - heading to save sections[], id = ' + id);
+                    console.log('Z - heading to save sections[], id = ' + id);
 
                     var p = that.save(id, processedDataset, '.json');
 
@@ -648,14 +649,14 @@ export default class DatasetController {
                         Log.trace('DatasetController::process(..) - saved with code: ' + result);
                         fulfill(result);
                     }).catch(function (result) {
-                        // console.log('Z - error in this.save()');
+                         console.log('Z - error in this.save()');
                         throw 400;
                     });
 
-                    // console.log('Z - save ID = ' + p);
+                     console.log('Z - save ID = ' + p);
 
                 }).catch(function (err) {
-                    // console.log('Z - Error in Promise.all() ' + err);
+                     console.log('Z - Error in Promise.all() ' + err);
                     reject(400);
                 });
 
@@ -848,7 +849,7 @@ export default class DatasetController {
                     }
                 });
             } catch (err) {
-                // console.log('Z - error saving');
+                 console.log('Z - error saving');
                 // returnCode = 400;
                 reject(400);
             }
