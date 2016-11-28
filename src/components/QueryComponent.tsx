@@ -163,39 +163,47 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             })
 
             this.setState({result: oldResult});
-
-            var table = document.getElementById("myTable");
-            var thead = document.createElement("thead");
-            var tbody = document.createElement("tbody");
-
-            table.appendChild(thead);
-            table.appendChild(tbody);
-
-            var headRow = document.createElement("tr");
-            thead.appendChild(headRow);
-
             var head:string[] = query.GET as string[];
-            head.forEach(function (field: string) {
-                var headCell = document.createElement("dt");
-                headCell.textContent = field;
-                headRow.appendChild(headCell);
-            })
-
-            oldResult.forEach(function (items: any) {
-                var row = document.createElement("tr");
-                for (var i in items){
-                    var cell = document.createElement("dt");
-                    cell.textContent = items[i];
-                    row.appendChild(cell);
-                }
-
-                tbody.appendChild(row);
-            });
-
+            this.generateTable(head);
         }).catch( err=>{
                 console.log(err);
             }
         );
+    }
+
+    private generateTable(head:string[]) {
+        var table = document.getElementById("myTable");
+        var thead = document.createElement("thead");
+        var tbody = document.createElement("tbody");
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
+
+        var cols = head.map(function (colData) {
+            return <th key={colData}> {colData}</th>
+        });
+        //thead.appendChild(cols);
+
+        var data = this.state.result.map(function (item: any) {
+            var cells = head.map(function (colData) {
+                return <td>{item[colData]}</td>;
+            });
+
+            return <tr key={item}>{cells}</tr>;
+        });
+        tbody.appendChild(data);
+
+
+        // this.state.result.forEach(function (items: any) {
+        //     var row = document.createElement("tr");
+        //     for (var i in items){
+        //         var cell = document.createElement("dt");
+        //         cell.textContent = items[i];
+        //         row.appendChild(cell);
+        //     }
+        //
+        //     tbody.appendChild(row);
+        // });
     }
 
     private handleRoomSearch(event:any, input:any):void {
@@ -365,6 +373,8 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                     {/*<Ajax url="" onResponse={this.handleQueryResponse()}/>*/}
                         <p>After my AJAX tag.</p>
                     <table id="myTable" class="tablesorter">
+                        <thead></thead>
+                        <tbody></tbody>
                     </table>
 
                 </div>
