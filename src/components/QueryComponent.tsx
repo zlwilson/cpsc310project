@@ -28,6 +28,8 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
         //Room
         this.state = {roomFilters_size_mod: 'GT'};
+        this.state = {roomFilters_building: " "};
+        this.state = {nearBuilding: false};
     }
 
     private handleQueryResponse() {
@@ -206,6 +208,30 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         // });
     }
 
+    private updateCourseSorting(event:any){
+
+    }
+
+    private updateBuilding(event:any):void{
+
+    }
+
+    private toggleNearby(event:any):void{
+        if (this.state.nearBuilding === true){
+            this.setState({nearbyBuilding: false});
+        }
+    }
+
+    private updateNearbyRooms(event:any):void{
+        if (this.state.nearBuilding === false){
+            return;
+        }
+
+        //update room lists accordingly
+    }
+
+
+
     private handleRoomSearch(event:any, input:any):void {
         // TODO: this is the room search button action, so it should send an AJAX request to rooms dataset
         this.setState({query: input});
@@ -247,6 +273,16 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             float: 'left',
             width: '33%'
         };
+        var style111 = {
+            backgroundColor: 'rgb(240,250,255)',
+            float: 'right',
+            width: '30%'
+        }
+        var style110 = {
+            backgroundColor: 'rgb(240,250,255)',
+            float: 'right',
+            width: '18%'
+        }
         var style2 = {
             backgroundColor: 'rgb(240,255,250)',
             float: 'left',
@@ -257,6 +293,10 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             float: 'left',
             width: '33%'
         };
+
+
+        var experiment = ['some', 'fake', 'options','to', 'test'];
+        var makeSelectItem = function (x:any):any { return <option value={x}>{x}</option>; };
 
         return (
             <div>
@@ -301,6 +341,8 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                                     </p>
                                 </div>
                             </div>
+                        </div>
+                        <div style={style110}>
                             <button name="ApplyCourses"
                                     onClick={ e => this.applyCourseFilters(e) }>
                                 Apply
@@ -311,6 +353,37 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                             <p>Size:  { this.state.courseFilters_size_mod } { this.state.courseFilters_size }</p>
                             <p>Dept: { this.state.courseFilters_dept }</p>
                             <p>Number: { this.state.courseFilters_num }</p>
+                            <div>
+
+                                <div style={style110}>
+                                    <p>
+                                        <input type="checkbox" name="sortAvg" value="avg"
+                                               onChange={ e => this.updateCourseSorting(e)}>
+                                        </input>
+                                        average
+                                    </p>
+                                </div>
+
+                                <div style={style110}>
+                                    <p>
+                                        <input type="checkbox" name="sortFail" value="fail"
+                                               onChange={ e => this.updateCourseSorting(e)}>
+                                        </input>
+                                        most failing
+                                    </p>
+                                </div>
+
+                                <div style={style111}>
+                                    <p>
+                                        Sort by:
+                                        <input type="checkbox" name="sortPass" value="pass"
+                                               onChange={ e => this.updateCourseSorting(e)}>
+                                        </input>
+                                        most passing
+                                    </p>
+                                </div>
+
+                            </div>
                         </div>
                     </div>
                     <div style={style2}>
@@ -325,10 +398,30 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                         </div>
                         <div>
                             <h4>Filters</h4>
-                            <button name="ApplyRooms"
-                                    onClick={ e => this.applyRoomFilters(e, this.state.roomFilters) }>
-                                Apply
-                            </button>
+                            <div>
+                                <div style={style2}>
+                                    <p> List Rooms in Building:
+                                        <select value={this.state.name} onChange={ e => this.updateBuilding(e) }>
+                                            <option value="1">pseudo building 1</option>
+                                            <option value="2">pseudo building 2</option>
+                                            <option value="3">pseudo building 3</option>
+                                        </select>
+                                    </p>
+                                </div>
+                                <div style={style2}>
+                                    <p>
+                                        <input type="checkbox" name="nearBuilding" value="near"
+                                               onChange={ e => this.toggleNearby(e)}>
+                                        </input>
+                                        in
+                                        <select value={this.state.name} onChange={ e => this.updateNearbyRooms(e) }>
+                                            {experiment.map(makeSelectItem)}
+                                        </select>
+                                        meters
+                                    </p>
+                                </div>
+                            </div>
+
                             <div>
                                 <div style={style21}>
                                     <p>Size:
@@ -359,6 +452,10 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                                     </p>
                                 </div>
                             </div>
+                            <button name="ApplyRooms"
+                                    onClick={ e => this.applyRoomFilters(e, this.state.roomFilters) }>
+                                Apply
+                            </button>
                         </div>
                         <div>
                             <h5>Filters:</h5>
