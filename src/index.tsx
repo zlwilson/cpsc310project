@@ -13,12 +13,10 @@ class Main extends React.Component<any, any> {
 
     public render() {
         return (
-            <body>
-                <div>
+            <div>
                     <p>Hello world</p>
                     <QueryComponent defaultQuery='[no query yet]' />
-                </div>
-            </body>
+            </div>
         );
     }
 }

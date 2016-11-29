@@ -60,7 +60,7 @@
 	        _super.call(this, props);
 	    }
 	    Main.prototype.render = function () {
-	        return (React.createElement("body", null, React.createElement("div", null, React.createElement("p", null, "Hello world"), React.createElement(QueryComponent_1.QueryComponent, {defaultQuery: '[no query yet]'}))));
+	        return (React.createElement("div", null, React.createElement("p", null, "Hello world"), React.createElement(QueryComponent_1.QueryComponent, {defaultQuery: '[no query yet]'})));
 	    };
 	    return Main;
 	}(React.Component));
@@ -95,29 +95,52 @@
 	    __extends(QueryComponent, _super);
 	    function QueryComponent(props) {
 	        _super.call(this, props);
-	        this.state = { query: this.props.defaultQuery };
-	        this.state = { courseFilters_size_mod: 'GT' };
+	        this.state = { courseFilters_size_mod: "" };
+	        this.state = { result: "" };
+	        this.state = { courseSearch: "" };
+	        this.state = { courseFilters_size: 0 };
+	        this.state = { courseFilters_dept: "" };
+	        this.state = { courseFilters_num: "" };
 	        this.state = { roomFilters_size_mod: 'GT' };
+	        this.state = { roomFilters_building: " " };
+	        this.state = { nearBuilding: false };
 	    }
 	    QueryComponent.prototype.handleQueryResponse = function () {
 	    };
 	    QueryComponent.prototype.handleCourseSearch = function (event, input) {
 	        var _this = this;
-	        axios_1.default.get('http://www.reddit.com/r/reactjs.json').then(function (res) {
+	        console.log('L - start handling course search with ' + input);
+	        var query = {
+	            GET: ["courses_title", "courses_instructor"],
+	            WHERE: {
+	                "AND": [
+	                    { "OR": [
+	                            { "IS": { courses_title: input } },
+	                            { "IS": { courses_instructor: input } }
+	                        ] },
+	                    { "EQ": { courses_year: 2014 } }] },
+	            AS: 'TABLE' };
+	        var queryJSON = JSON.stringify(query);
+	        console.log('L - handle course search query string: ' + queryJSON);
+	        axios_1.default.post('http://localhost:4321/query', query).then(function (res) {
+	            console.log('Z - got some data!');
 	            console.log(res.data);
-	            _this.setState({ query: res.data });
+	            _this.setState({ result: res.data });
+	            console.log('Z - whats the states result?');
+	            console.log(_this.state.result.result);
 	        }).catch(function (err) {
+	            console.log(err);
 	        });
 	    };
 	    QueryComponent.prototype.updateCourseSearch = function (event) {
-	        this.setState({ courseSearch: 'courses.get: ' + event.target.value });
+	        this.setState({ courseSearch: "*" + event.target.value + "*" });
 	    };
 	    QueryComponent.prototype.updateCourseFilters = function (event, type) {
 	        if (type == 1) {
-	            this.setState({ courseFilters_size_mod: event.target.value });
+	            this.setState({ courseFilters_size: event.target.value });
 	        }
 	        else if (type == 2) {
-	            this.setState({ courseFilters_size: event.target.value });
+	            this.setState({ courseFilters_size_mod: event.target.value });
 	        }
 	        else if (type == 3) {
 	            this.setState({ courseFilters_dept: event.target.value });
@@ -126,14 +149,138 @@
 	            this.setState({ courseFilters_num: event.target.value });
 	        }
 	    };
-	    QueryComponent.prototype.applyCourseFilters = function (event, input) {
-	        this.setState({ courseFilters: input });
+	    QueryComponent.prototype.applyCourseFilters = function (event) {
+	        var _this = this;
+	        var andQuery = { "AND": [
+	                { "EQ": { courses_year: 2014 } }
+	            ] };
+	        console.log(this.state.courseFilters_size + this.state.courseFilters_num + this.state.courseFilters_dept);
+	        if (typeof this.state.courseFilters_size_mod === "" || typeof this.state.courseFilters_size === "undefined" || this.state.courseFilters_dept === "") {
+	            if (typeof this.state.courseFilters_dept === "undefined" || this.state.courseFilters_dept === "") {
+	                if (typeof this.state.courseFilters_num === "undefined" || this.state.courseFilters_num === "") {
+	                }
+	                else {
+	                    andQuery["AND"].push({ "IS": { courses_id: this.state.courseFilters_num } });
+	                }
+	            }
+	            else {
+	                if (typeof this.state.courseFilters_num === "undefined" || this.state.courseFilters_num === "") {
+	                    andQuery["AND"].push({ "IS": { courses_dept: this.state.courseFilters_dept } });
+	                }
+	                else {
+	                    andQuery["AND"].push({ "IS": { courses_dept: this.state.courseFilters_dept } });
+	                    andQuery["AND"].push({ "IS": { courses_id: this.state.courseFilters_num } });
+	                }
+	            }
+	        }
+	        else {
+	            if (typeof this.state.courseFilters_dept === "undefined" || this.state.courseFilters_dept === "") {
+	                if (typeof this.state.courseFilters_num === "undefined" || this.state.courseFilters_num === "") {
+	                }
+	                else {
+	                    andQuery["AND"].push({ "IS": { courses_id: this.state.courseFilters_num } });
+	                }
+	            }
+	            else {
+	                if (typeof this.state.courseFilters_num === "undefined" || this.state.courseFilters_num === "") {
+	                    andQuery["AND"].push({ "IS": { courses_dept: this.state.courseFilters_dept } });
+	                }
+	                else {
+	                    andQuery["AND"].push({ "IS": { courses_dept: this.state.courseFilters_dept } });
+	                    andQuery["AND"].push({ "IS": { courses_id: this.state.courseFilters_num } });
+	                }
+	            }
+	            var sizeMode = this.state.courseFilters_size_mod;
+	            switch (sizeMode) {
+	                case 'GT':
+	                    andQuery['AND'].push({ "GT": { courses_size: this.state.courseFilters_size } });
+	                    break;
+	                case 'LT':
+	                    andQuery['AND'].push({ 'LT': { courses_size: this.state.courseFilters_size } });
+	                    break;
+	                case 'EQ':
+	                    andQuery['AND'].push({ 'EQ': { courses_size: this.state.courseFilters_size } });
+	                    break;
+	                default:
+	                    console.log("Error in filter course size");
+	            }
+	        }
+	        console.log(andQuery);
+	        var query = {
+	            GET: ["courses_dept", "courses_id", "courses_pass", "courses_fail"],
+	            WHERE: andQuery,
+	            AS: 'TABLE'
+	        };
+	        axios_1.default.post('http://localhost:4321/query', query).then(function (res) {
+	            console.log(res.data);
+	            var newResult = res.data.result;
+	            var oldResult = _this.state.result;
+	            oldResult.filter(function (n) {
+	                return newResult.indexOf(n);
+	            });
+	            _this.setState({ result: oldResult });
+	            var head = query.GET;
+	            _this.generateTable(head);
+	        }).catch(function (err) {
+	            console.log(err);
+	        });
+	    };
+	    QueryComponent.prototype.generateTable = function (head) {
+	        var table = document.getElementById("myTable");
+	        var thead = document.createElement("thead");
+	        var tbody = document.createElement("tbody");
+	        table.appendChild(thead);
+	        table.appendChild(tbody);
+	        var cols = head.map(function (colData) {
+	            return React.createElement("th", {key: colData}, " ", colData);
+	        });
+	        var data = this.state.result.map(function (item) {
+	            var cells = head.map(function (colData) {
+	                return React.createElement("td", null, item[colData]);
+	            });
+	            return React.createElement("tr", {key: item}, cells);
+	        });
+	        tbody.appendChild(data);
+	    };
+	    QueryComponent.prototype.updateCourseSorting = function (event) {
+	    };
+	    QueryComponent.prototype.updateBuilding = function (event) {
+	    };
+	    QueryComponent.prototype.toggleNearby = function (event) {
+	        if (this.state.nearBuilding === true) {
+	            this.setState({ nearbyBuilding: false });
+	        }
+	    };
+	    QueryComponent.prototype.updateNearbyRooms = function (event) {
+	        if (this.state.nearBuilding === false) {
+	            return;
+	        }
 	    };
 	    QueryComponent.prototype.handleRoomSearch = function (event, input) {
-	        this.setState({ query: input });
+	        var _this = this;
+	        console.log('L - start handling room search with ' + input);
+	        var query = {
+	            GET: ["rooms_fullname", "rooms_number", "rooms_name"],
+	            WHERE: {
+	                "OR": [
+	                    { "IS": { rooms_fullname: input } },
+	                    { "IS": { rooms_number: input } }
+	                ] },
+	            AS: 'TABLE' };
+	        var queryJSON = JSON.stringify(query);
+	        console.log('L - handle room search query string: ' + queryJSON);
+	        axios_1.default.post('http://localhost:4321/query', query).then(function (res) {
+	            console.log('Z - got some data!');
+	            console.log(res.data);
+	            _this.setState({ result: res.data });
+	            console.log('Z - whats the states result?');
+	            console.log(_this.state.result.result);
+	        }).catch(function (err) {
+	            console.log(err);
+	        });
 	    };
 	    QueryComponent.prototype.updateRoomSearch = function (event) {
-	        this.setState({ roomSearch: 'rooms.get: ' + event.target.value });
+	        this.setState({ roomSearch: event.target.value });
 	    };
 	    QueryComponent.prototype.applyRoomFilters = function (event, input) {
 	        this.setState({ query: input });
@@ -152,6 +299,19 @@
 	            this.setState({ roomFilters_type: event.target.value });
 	        }
 	    };
+	    QueryComponent.prototype.renderCourseTableRow = function (array) {
+	        for (var i in array) {
+	            return (React.createElement("tr", null, React.createElement("th", null, " ", array[i].Title, " "), React.createElement("th", null, " ", array[i].Professor, " ")));
+	        }
+	    };
+	    QueryComponent.prototype.renderCoursesTable = function (result) {
+	        if (this.state.result != undefined) {
+	            return (React.createElement("table", null, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", null, "Title"), React.createElement("th", null, "Instructor"))), React.createElement("tbody", null, this.renderCourseTableRow(this.state.result))));
+	        }
+	        else {
+	            return (React.createElement("table", null, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", null, "Title"), React.createElement("th", null, "Instructor")))));
+	        }
+	    };
 	    QueryComponent.prototype.componentDidMount = function () {
 	    };
 	    QueryComponent.prototype.render = function () {
@@ -166,6 +326,16 @@
 	            float: 'left',
 	            width: '33%'
 	        };
+	        var style111 = {
+	            backgroundColor: 'rgb(240,250,255)',
+	            float: 'right',
+	            width: '30%'
+	        };
+	        var style110 = {
+	            backgroundColor: 'rgb(240,250,255)',
+	            float: 'right',
+	            width: '18%'
+	        };
 	        var style2 = {
 	            backgroundColor: 'rgb(240,255,250)',
 	            float: 'left',
@@ -176,7 +346,9 @@
 	            float: 'left',
 	            width: '33%'
 	        };
-	        return (React.createElement("div", null, React.createElement("div", {id: 'title'}, React.createElement("h3", null, "UBC Course Catalog"), React.createElement("h4", null, "Search: ", this.state.query)), React.createElement("div", {id: 'searchbar'}, React.createElement("div", {style: style1}, React.createElement("h4", null, "Course Xplorer"), React.createElement("div", null, React.createElement("p", null, "Search the course catalog by course name or instructor:"), React.createElement("input", {onChange: function (e) { return _this.updateCourseSearch(e); }}), React.createElement("button", {name: "SearchCourses", onClick: function (e) { return _this.handleCourseSearch(e, _this.state.courseSearch); }}, "Search")), React.createElement("div", null, React.createElement("h4", null, "Filters"), React.createElement("button", {name: "ApplyCourses", onClick: function (e) { return _this.applyCourseFilters(e, _this.state.courseFilters); }}, "Apply"), React.createElement("div", null, React.createElement("div", {style: style11}, React.createElement("p", null, "Size:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateCourseFilters(e, 2); }}, React.createElement("option", {value: "GT"}, "Greater Than"), React.createElement("option", {value: "LT"}, "Less Than"), React.createElement("option", {value: "EQ"}, "Equal To")), React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 1); }}))), React.createElement("div", {style: style11}, React.createElement("p", null, "Dept:", React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 3); }}))), React.createElement("div", {style: style11}, React.createElement("p", null, "Number:", React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 4); }}))))), React.createElement("div", null, React.createElement("h5", null, "Filters:"), React.createElement("p", null, "Size:  ", this.state.courseFilters_size_mod, " ", this.state.courseFilters_size), React.createElement("p", null, "Dept: ", this.state.courseFilters_dept), React.createElement("p", null, "Number: ", this.state.courseFilters_num))), React.createElement("div", {style: style2}, React.createElement("h4", null, "Room Xplorer"), React.createElement("div", null, React.createElement("p", null, "Search the rooms of UBC by building or room number:"), React.createElement("input", {onChange: function (e) { return _this.updateRoomSearch(e); }}), React.createElement("button", {name: "SearchRooms", onClick: function (e) { return _this.handleRoomSearch(e, _this.state.roomSearch); }}, "Search")), React.createElement("div", null, React.createElement("h4", null, "Filters"), React.createElement("button", {name: "ApplyRooms", onClick: function (e) { return _this.applyCourseFilters(e, _this.state.roomFilters); }}, "Apply"), React.createElement("div", null, React.createElement("div", {style: style21}, React.createElement("p", null, "Size:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 1); }}, React.createElement("option", {value: "GT"}, "Greater Than"), React.createElement("option", {value: "LT"}, "Less Than"), React.createElement("option", {value: "EQ"}, "Equal To")), React.createElement("input", {onChange: function (e) { return _this.updateRoomFilters(e, 2); }}))), React.createElement("div", {style: style21}, React.createElement("p", null, "Type:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 3); }}, React.createElement("option", {value: "Small"}, "Small"), React.createElement("option", {value: "Big"}, "Big"), React.createElement("option", {value: "Medium"}, "Medium")))), React.createElement("div", {style: style21}, React.createElement("p", null, "Furniture:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 4); }}, React.createElement("option", {value: "Lots"}, "Lots"), React.createElement("option", {value: "None"}, "None"), React.createElement("option", {value: "Some"}, "Some")))))), React.createElement("div", null, React.createElement("h5", null, "Filters:"), React.createElement("p", null, "Size: ", this.state.roomFilters_size_mod, " ", this.state.roomFilters_size), React.createElement("p", null, "Furniture: ", this.state.roomFilters_furniture), React.createElement("p", null, "Type: ", this.state.roomFilters_type)))), React.createElement("div", {id: 'result'}, React.createElement("p", null, "Before my AJAX tag..."), React.createElement("p", null, "After my AJAX tag."), React.createElement("table", {id: "myTable", class: "tablesorter"}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", null, "Last Name"), React.createElement("th", null, "First Name"), React.createElement("th", null, "Email"), React.createElement("th", null, "Due"), React.createElement("th", null, "Web Site"))), React.createElement("tbody", null, React.createElement("tr", null, React.createElement("td", null, "Smith"), React.createElement("td", null, "John"), React.createElement("td", null, "jsmith@gmail.com"), React.createElement("td", null, "$50.00"), React.createElement("td", null, "http://www.jsmith.com")), React.createElement("tr", null, React.createElement("td", null, "Bach"), React.createElement("td", null, "Frank"), React.createElement("td", null, "fbach@yahoo.com"), React.createElement("td", null, "$50.00"), React.createElement("td", null, "http://www.frank.com")), React.createElement("tr", null, React.createElement("td", null, "Doe"), React.createElement("td", null, "Jason"), React.createElement("td", null, "jdoe@hotmail.com"), React.createElement("td", null, "$100.00"), React.createElement("td", null, "http://www.jdoe.com")), React.createElement("tr", null, React.createElement("td", null, "Conway"), React.createElement("td", null, "Tim"), React.createElement("td", null, "tconway@earthlink.net"), React.createElement("td", null, "$50.00"), React.createElement("td", null, "http://www.timconway.com")))))));
+	        var experiment = ['some', 'fake', 'options', 'to', 'test'];
+	        var makeSelectItem = function (x) { return React.createElement("option", {value: x}, x); };
+	        return (React.createElement("div", null, React.createElement("div", {id: 'title'}, React.createElement("h3", null, "UBC Course Catalog"), React.createElement("h4", null, "Search: ", this.state.query)), React.createElement("div", {id: 'searchbar'}, React.createElement("div", {style: style1}, React.createElement("h4", null, "Course Xplorer"), React.createElement("div", null, React.createElement("p", null, "Search the course catalog by course title or instructor:"), React.createElement("input", {onChange: function (e) { return _this.updateCourseSearch(e); }}), React.createElement("button", {name: "SearchCourses", onClick: function (e) { return _this.handleCourseSearch(e, _this.state.courseSearch); }}, "Search")), React.createElement("div", null, React.createElement("h4", null, "Filters"), React.createElement("div", null, React.createElement("div", {style: style11}, React.createElement("p", null, "Size:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateCourseFilters(e, 2); }}, React.createElement("option", {value: ""}, " - "), React.createElement("option", {value: "GT"}, "Greater Than"), React.createElement("option", {value: "LT"}, "Less Than"), React.createElement("option", {value: "EQ"}, "Equal To")), React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 1); }}))), React.createElement("div", {style: style11}, React.createElement("p", null, "Dept:", React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 3); }}))), React.createElement("div", {style: style11}, React.createElement("p", null, "Number:", React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 4); }}))))), React.createElement("div", {style: style110}, React.createElement("button", {name: "ApplyCourses", onClick: function (e) { return _this.applyCourseFilters(e); }}, "Apply")), React.createElement("div", null, React.createElement("h5", null, "Filters:"), React.createElement("p", null, "Size:  ", this.state.courseFilters_size_mod, " ", this.state.courseFilters_size), React.createElement("p", null, "Dept: ", this.state.courseFilters_dept), React.createElement("p", null, "Number: ", this.state.courseFilters_num), React.createElement("div", null, React.createElement("div", {style: style110}, React.createElement("p", null, React.createElement("input", {type: "checkbox", name: "sortAvg", value: "avg", onChange: function (e) { return _this.updateCourseSorting(e); }}), "average")), React.createElement("div", {style: style110}, React.createElement("p", null, React.createElement("input", {type: "checkbox", name: "sortFail", value: "fail", onChange: function (e) { return _this.updateCourseSorting(e); }}), "most failing")), React.createElement("div", {style: style111}, React.createElement("p", null, "Sort by:", React.createElement("input", {type: "checkbox", name: "sortPass", value: "pass", onChange: function (e) { return _this.updateCourseSorting(e); }}), "most passing")))), React.createElement("div", {id: 'result'}, React.createElement("h4", null, "Results"), this.renderCoursesTable(this.state.result))), React.createElement("div", {style: style2}, React.createElement("h4", null, "Room Xplorer"), React.createElement("div", null, React.createElement("p", null, "Search the rooms of UBC by building or room number:"), React.createElement("input", {onChange: function (e) { return _this.updateRoomSearch(e); }}), React.createElement("button", {name: "SearchRooms", onClick: function (e) { return _this.handleRoomSearch(e, _this.state.roomSearch); }}, "Search")), React.createElement("div", null, React.createElement("h4", null, "Filters"), React.createElement("div", null, React.createElement("div", {style: style2}, React.createElement("p", null, " List Rooms in Building:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateBuilding(e); }}, React.createElement("option", {value: "1"}, "pseudo building 1"), React.createElement("option", {value: "2"}, "pseudo building 2"), React.createElement("option", {value: "3"}, "pseudo building 3")))), React.createElement("div", {style: style2}, React.createElement("p", null, React.createElement("input", {type: "checkbox", name: "nearBuilding", value: "near", onChange: function (e) { return _this.toggleNearby(e); }}), "in", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateNearbyRooms(e); }}, experiment.map(makeSelectItem)), "meters"))), React.createElement("div", null, React.createElement("div", {style: style21}, React.createElement("p", null, "Size:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 1); }}, React.createElement("option", {value: ""}, " - "), React.createElement("option", {value: "GT"}, "Greater Than"), React.createElement("option", {value: "LT"}, "Less Than"), React.createElement("option", {value: "EQ"}, "Equal To")), React.createElement("input", {onChange: function (e) { return _this.updateRoomFilters(e, 2); }}))), React.createElement("div", {style: style21}, React.createElement("p", null, "Type:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 3); }}, React.createElement("option", {value: "Small Group"}, "Small Group"), React.createElement("option", {value: "Tiered Large Group"}, "Tiered Large Group"), React.createElement("option", {value: "Open Design General Purpose"}, "Open Design General Purpose"), React.createElement("option", {value: "Case Style"}, "Case Style")))), React.createElement("div", {style: style21}, React.createElement("p", null, "Furniture:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 4); }}, React.createElement("option", {value: "Classroom-Movable Tables & Chairs"}, "Movable Tables & Chairs"), React.createElement("option", {value: "Classroom-Fixed Tables/Movable Chairs"}, "Fixed Tables/Movable Chairs"), React.createElement("option", {value: "Classroom-Movable Tablets"}, "Movable Tablets"), React.createElement("option", {value: "Classroom-Fixed Tablets"}, "Fixed Tablets"))))), React.createElement("button", {name: "ApplyRooms", onClick: function (e) { return _this.applyRoomFilters(e, _this.state.roomFilters); }}, "Apply")), React.createElement("div", null, React.createElement("h5", null, "Filters:"), React.createElement("p", null, "Size: ", this.state.roomFilters_size_mod, " ", this.state.roomFilters_size), React.createElement("p", null, "Furniture: ", this.state.roomFilters_furniture), React.createElement("p", null, "Type: ", this.state.roomFilters_type))))));
 	    };
 	    return QueryComponent;
 	}(React.Component));
@@ -198,6 +370,7 @@
 	var utils = __webpack_require__(6);
 	var bind = __webpack_require__(7);
 	var Axios = __webpack_require__(8);
+	var defaults = __webpack_require__(9);
 	
 	/**
 	 * Create an instance of Axios
@@ -219,14 +392,14 @@
 	}
 	
 	// Create the default instance to be exported
-	var axios = createInstance();
+	var axios = createInstance(defaults);
 	
 	// Expose Axios class to allow class inheritance
 	axios.Axios = Axios;
 	
 	// Factory for creating new instances
-	axios.create = function create(defaultConfig) {
-	  return createInstance(defaultConfig);
+	axios.create = function create(instanceConfig) {
+	  return createInstance(utils.merge(defaults, instanceConfig));
 	};
 	
 	// Expose Cancel & CancelToken
@@ -584,10 +757,10 @@
 	/**
 	 * Create a new instance of Axios
 	 *
-	 * @param {Object} defaultConfig The default config for the instance
+	 * @param {Object} instanceConfig The default config for the instance
 	 */
-	function Axios(defaultConfig) {
-	  this.defaults = utils.merge(defaults, defaultConfig);
+	function Axios(instanceConfig) {
+	  this.defaults = instanceConfig;
 	  this.interceptors = {
 	    request: new InterceptorManager(),
 	    response: new InterceptorManager()
@@ -691,7 +864,7 @@
 	  return adapter;
 	}
 	
-	module.exports = {
+	var defaults = {
 	  adapter: getDefaultAdapter(),
 	
 	  transformRequest: [function transformRequest(data, headers) {
@@ -729,15 +902,6 @@
 	    return data;
 	  }],
 	
-	  headers: {
-	    common: {
-	      'Accept': 'application/json, text/plain, */*'
-	    },
-	    patch: utils.merge(DEFAULT_CONTENT_TYPE),
-	    post: utils.merge(DEFAULT_CONTENT_TYPE),
-	    put: utils.merge(DEFAULT_CONTENT_TYPE)
-	  },
-	
 	  timeout: 0,
 	
 	  xsrfCookieName: 'XSRF-TOKEN',
@@ -749,6 +913,22 @@
 	    return status >= 200 && status < 300;
 	  }
 	};
+	
+	defaults.headers = {
+	  common: {
+	    'Accept': 'application/json, text/plain, */*'
+	  }
+	};
+	
+	utils.forEach(['delete', 'get', 'head'], function forEachMehtodNoData(method) {
+	  defaults.headers[method] = {};
+	});
+	
+	utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+	  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+	});
+	
+	module.exports = defaults;
 	
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
 
@@ -968,7 +1148,7 @@
 	var parseHeaders = __webpack_require__(17);
 	var isURLSameOrigin = __webpack_require__(18);
 	var createError = __webpack_require__(14);
-	var btoa = (typeof window !== 'undefined' && window.btoa) || __webpack_require__(19);
+	var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || __webpack_require__(19);
 	
 	module.exports = function xhrAdapter(config) {
 	  return new Promise(function dispatchXhrRequest(resolve, reject) {

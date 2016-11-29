@@ -1,6 +1,7 @@
 import * as React from "react";
 import axios from 'axios';
 import {type} from "os";
+import Section from "../model/Section";
 
 export interface IQueryProps {
     defaultQuery: string;
@@ -58,8 +59,11 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         console.log('L - handle course search query string: ' + queryJSON);
 
         axios.post('http://localhost:4321/query', query).then(res => {
+            console.log('Z - got some data!');
             console.log(res.data);
             this.setState({result: res.data});
+            console.log('Z - whats the states result?');
+            console.log(this.state.result.result);
         }).catch( err=>{
             console.log(err);
             }
@@ -234,11 +238,34 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
     private handleRoomSearch(event:any, input:any):void {
         // TODO: this is the room search button action, so it should send an AJAX request to rooms dataset
-        this.setState({query: input});
+        console.log('L - start handling room search with ' + input);
+
+        var query : IQueryRequest = {
+            GET:["rooms_fullname","rooms_number", "rooms_name"],
+            WHERE:{
+                "OR":[
+                        {"IS": {rooms_fullname: input}},
+                        {"IS":{rooms_number:input}}
+                    ]},
+            AS:'TABLE'};
+
+        var queryJSON = JSON.stringify(query);
+        console.log('L - handle room search query string: ' + queryJSON);
+
+        axios.post('http://localhost:4321/query', query).then(res => {
+            console.log('Z - got some data!');
+            console.log(res.data);
+            this.setState({result: res.data});
+            console.log('Z - whats the states result?');
+            console.log(this.state.result.result);
+        }).catch( err=>{
+                console.log(err);
+            }
+        );
     }
 
     private updateRoomSearch(event:any):void {
-        this.setState({roomSearch: 'rooms.get: ' + event.target.value});
+        this.setState({roomSearch: event.target.value});
     }
 
     private applyRoomFilters(event:any, input:any):void {
@@ -255,6 +282,46 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             this.setState({roomFilters_furniture: event.target.value});
         } else {
             this.setState({roomFilters_type: event.target.value});
+        }
+    }
+
+    private renderCourseTableRow(array: Section[]): JSX.Element {
+        for (let i in array) {
+            return (
+                <tr>
+                    <th> { array[i].Title } </th>
+                    <th> { array[i].Professor } </th>
+                </tr>
+            )
+        }
+    }
+
+    private renderCoursesTable(result: any): JSX.Element {
+        if (this.state.result != undefined) {
+            return (
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Instructor</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    { this.renderCourseTableRow(this.state.result) }
+                    </tbody>
+                </table>
+            )
+        } else {
+            return (
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Instructor</th>
+                    </tr>
+                    </thead>
+                </table>
+            )
         }
     }
 
@@ -385,6 +452,10 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
                             </div>
                         </div>
+                        <div id='result'>
+                            <h4>Results</h4>
+                            { this.renderCoursesTable(this.state.result) }
+                        </div>
                     </div>
                     <div style={style2}>
                         <h4>Room Xplorer</h4>
@@ -426,6 +497,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                                 <div style={style21}>
                                     <p>Size:
                                         <select value={this.state.name} onChange={ e => this.updateRoomFilters(e, 1) }>
+                                            <option value={""}> - </option>
                                             <option value="GT">Greater Than</option>
                                             <option value="LT">Less Than</option>
                                             <option value="EQ">Equal To</option>
@@ -436,18 +508,20 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                                 <div style={style21}>
                                     <p>Type:
                                         <select value={this.state.name} onChange={ e => this.updateRoomFilters(e, 3) }>
-                                            <option value="Small">Small</option>
-                                            <option value="Big">Big</option>
-                                            <option value="Medium">Medium</option>
+                                            <option value="Small Group">Small Group</option>
+                                            <option value="Tiered Large Group">Tiered Large Group</option>
+                                            <option value="Open Design General Purpose">Open Design General Purpose</option>
+                                            <option value="Case Style">Case Style</option>
                                         </select>
                                     </p>
                                 </div>
                                 <div style={style21}>
                                     <p>Furniture:
                                         <select value={this.state.name} onChange={ e => this.updateRoomFilters(e, 4) }>
-                                            <option value="Lots">Lots</option>
-                                            <option value="None">None</option>
-                                            <option value="Some">Some</option>
+                                            <option value="Classroom-Movable Tables & Chairs">Movable Tables & Chairs</option>
+                                            <option value="Classroom-Fixed Tables/Movable Chairs">Fixed Tables/Movable Chairs</option>
+                                            <option value="Classroom-Movable Tablets">Movable Tablets</option>
+                                            <option value="Classroom-Fixed Tablets">Fixed Tablets</option>
                                         </select>
                                     </p>
                                 </div>
@@ -464,16 +538,6 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                             <p>Type: { this.state.roomFilters_type }</p>
                         </div>
                     </div>
-                </div>
-                <div id='result'>
-                    <p>Before my AJAX tag...</p>
-                    {/*<Ajax url="" onResponse={this.handleQueryResponse()}/>*/}
-                        <p>After my AJAX tag.</p>
-                    <table id="myTable" class="tablesorter">
-                        <thead></thead>
-                        <tbody></tbody>
-                    </table>
-
                 </div>
             </div>
         );
