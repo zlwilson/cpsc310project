@@ -21,13 +21,14 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         super(props);
         //this.state = {query: this.props.defaultQuery};
         this.state = {courseFilters_size_mod: ""};
-        this.state = {result:""};
+        this.state = {courseResult:""};
         this.state = {courseSearch:""};
         this.state = {courseFilters_size: 0};
         this.state = {courseFilters_dept: ""};
         this.state = {courseFilters_num: ""};
 
         //Room
+        this.state = {roomResult:""};
         this.state = {roomFilters_size_mod: ""};
         this.state = {roomFilters_building: " "};
         this.state = {nearBuilding: false};
@@ -60,10 +61,10 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
         axios.post('http://localhost:4321/query', query).then(res => {
             console.log('Z - got some data!');
-            console.log(res.data);
-            this.setState({result: res.data});
+            console.log(res.data.result);
+            this.setState({courseResult: res.data.result});
             console.log('Z - whats the states result?');
-            console.log(this.state.result.result);
+            console.log(this.state.courseResult);
         }).catch( err=>{
             console.log(err);
             }
@@ -163,12 +164,12 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         axios.post('http://localhost:4321/query', query).then(res => {
             console.log(res.data);
             var newResult = res.data.result;
-            var oldResult = this.state.result;
+            var oldResult = this.state.courseResult;
             oldResult.filter(function (n:any) {
                 return newResult.indexOf(n);
             })
 
-            this.setState({result: oldResult});
+            this.setState({courseResult: oldResult});
             var head:string[] = query.GET as string[];
             this.generateTable(head);
         }).catch( err=>{
@@ -344,12 +345,12 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         axios.post('http://localhost:4321/query', query).then(res => {
             console.log(res.data);
             var newResult = res.data.result;
-            var oldResult = this.state.result;
+            var oldResult = this.state.roomResult;
             oldResult.filter(function (n:any) {
                 return newResult.indexOf(n);
             })
 
-            this.setState({result: oldResult});
+            this.setState({roomResult: oldResult});
             var head:string[] = query.GET as string[];
             this.generateTable(head);
         }).catch( err=>{
@@ -382,32 +383,19 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
     }
 
     private renderCoursesTable(result: any): JSX.Element {
-        if (this.state.result != undefined) {
-            return (
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Instructor</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    { this.renderCourseTableRow(this.state.result) }
-                    </tbody>
-                </table>
-            )
-        } else {
-            return (
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Instructor</th>
-                    </tr>
-                    </thead>
-                </table>
-            )
-        }
+        return (
+            <table>
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Instructor</th>
+                </tr>
+                </thead>
+                <tbody>
+                { this.renderCourseTableRow(this.state.courseResult) }
+                </tbody>
+            </table>
+        )
     }
 
     componentDidMount() {
@@ -449,7 +437,6 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             float: 'left',
             width: '33%'
         };
-
         var style215 = {
             backgroundColor: 'rgb(240,255,250)',
             float: 'left',
@@ -549,7 +536,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                         </div>
                         <div id='result'>
                             <h4>Results</h4>
-                            { this.renderCoursesTable(this.state.result) }
+                            { this.renderCoursesTable(this.state.courseResult) }
                         </div>
                     </div>
                     <div style={style2}>
