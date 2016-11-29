@@ -4,6 +4,7 @@ import {type} from "os";
 import Section from "../model/Section";
 import ScheduleController from "../controller/ScheduleController";
 import TableComponent from "../components/TableComponent";
+import Scheduled from "../model/Scheduled";
 
 export interface IQueryProps {
     defaultQuery: string;
@@ -34,6 +35,9 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         this.state = {roomFilters_size_mod: ""};
         this.state = {roomFilters_building: " "};
         this.state = {nearBuilding: false};
+
+        //Schedule
+        this.state = {schedule:""};
     }
 
     private handleQueryResponse() {
@@ -409,6 +413,41 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         this.state.schedule = schedule;
     }
 
+    private renderScheduleTableRow(array: Scheduled[]): JSX.Element {
+        for (let i in array) {
+            return (
+                <tr>
+                    <th> { array[i].Section.Title } </th>
+                    <th> { array[i].Section.Section } </th>
+                    <th> { array[i].Room.name } </th>
+                    <th> { array[i].time } </th>
+                </tr>
+            )
+        }
+    }
+
+    private renderScheduleTable(): JSX.Element {
+        if (this.state.schedule == "") {
+            return null;
+        } else {
+            return (
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Section</th>
+                        <th>Room</th>
+                        <th>Time</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    { this.renderScheduleTableRow(this.state.courseResult) }
+                    </tbody>
+                </table>
+            );
+        }
+    }
+
     componentDidMount() {
 
     }
@@ -639,6 +678,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                     <button name="makeSchedule" onClick={ e => this.handleScheduler(e, this.state.roomResult, this.state.courseResult) }>
                         Create!
                     </button>
+                    { this.renderScheduleTable() }
                     <TableComponent defaultHeader='schedule' data={this.state.schedule}/>
                 </div>
             </div>

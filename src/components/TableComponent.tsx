@@ -12,14 +12,14 @@ export default class TableComponent extends React.Component<any, any> {
         this.state = { data: this.props.data };
     }
 
-    private renderScheduleRows(data: Scheduled[]): JSX.Element {
+    private renderScheduleRows(data: any): JSX.Element {
         for (let i in data) {
             return (
                 <tr>
-                    <td>data[i][0].Title</td>
-                    <td>data[i][0].Section</td>
-                    <td>data[i][1].name</td>
-                    <td>data[i][2]</td>
+                    <td> { data[i][0].Title } </td>
+                    <td> { data[i][0].Section } </td>
+                    <td> { data[i][1].name } </td>
+                    <td> { data[i][2].time } </td>
                 </tr>
             )
         }
@@ -29,9 +29,9 @@ export default class TableComponent extends React.Component<any, any> {
         for (let i in data) {
             return (
                 <tr>
-                    <td>data[i].name</td>
-                    <td>data[i].Seats</td>
-                    <td>data[i].FullName</td>
+                    <td> { data[i].name } </td>
+                    <td> { data[i].Seats } </td>
+                    <td> { data[i].FullName } </td>
                 </tr>
             )
         }
@@ -41,10 +41,10 @@ export default class TableComponent extends React.Component<any, any> {
         for (let i in data) {
             return (
                 <tr>
-                    <td>data[i].Professor</td>
-                    <td>data[i].Title</td>
-                    <td>data[i].Section</td>
-                    <td>data[i].Size</td>
+                    <td> { data[i].Professor } </td>
+                    <td> { data[i].Title } </td>
+                    <td> { data[i].Section } </td>
+                    <td> { data[i].Size } </td>
                 </tr>
             )
         }
