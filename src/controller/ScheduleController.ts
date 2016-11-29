@@ -53,16 +53,22 @@ export default class ScheduleController {
         return this.findTime(section, this.rooms, time.getNext());
     }
 
-    private getRooms(size: Number, rooms: Room[]): Room[] {
-        // get all rooms large enough for a section
+    private getRooms(size: number, rooms: Room[]): Room[] {
+        // get all rooms large enough for a section, but not too large (2*size)
         let array: Room[] = [];
         for (let r in rooms) {
             if (rooms[r].Seats >= size) {
-                array.push(rooms[r]);
+                if (rooms[r].Seats < 2*size) {
+                    array.push(rooms[r]);
+                }
             }
         }
 
-        // TODO: sort array of rooms, smallest to largest
+        // sort array smallet to largest so a section chooses the smallest available classroom
+        array.sort(function (obj1, obj2) {
+            return obj1.Seats - obj2.Seats;
+        });
+
         return array;
     }
 
