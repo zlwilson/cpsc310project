@@ -586,7 +586,6 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                         </div>
                         <div id='result'>
                             <h4>Results</h4>
-                            <TableComponent defaultHeader="courses" data={this.state.courseResult}/>
                             { this.renderCoursesTable(this.state.courseResult) }
                         </div>
                     </div>
@@ -672,14 +671,13 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                         </div>
                     </div>
                 </div>
-                <div id="scheduler">
+                <div id="scheduler" style={style1}>
                     <h4>Scheduler</h4>
                     <p>Click to schedule the selected courses into the selected rooms</p>
                     <button name="makeSchedule" onClick={ e => this.handleScheduler(e, this.state.roomResult, this.state.courseResult) }>
                         Create!
                     </button>
                     { this.renderScheduleTable() }
-                    <TableComponent defaultHeader='schedule' data={this.state.schedule}/>
                 </div>
             </div>
         );

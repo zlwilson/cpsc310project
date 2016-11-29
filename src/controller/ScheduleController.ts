@@ -116,7 +116,8 @@ export default class ScheduleController {
                 counter++;
             }
         }
-        return counter;
+        let quality = (counter/(schedule.length-1));
+        return quality;
     }
 
 }
