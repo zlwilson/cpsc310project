@@ -24,9 +24,14 @@ export default class ScheduleController {
 
     private clock: Number = 8;
 
-    private schedule: Scheduled[];
+    private schedule: Scheduled[] = [];
 
     private roomIsFree(room: Room, time: Time): boolean {
+        console.log('Z - in roomIsFree(), room: ' + room.name + ', time: ' + time.time + ' ' + time.days);
+
+        if (this.schedule.length == 0) {
+            return true;
+        }
         for (let s in this.schedule) {
             if (this.schedule[s].Room == room && this.schedule[s].time == time) {
                 return false;
@@ -36,6 +41,7 @@ export default class ScheduleController {
     }
 
     private findTime(section: Section, possibleRooms: Room[], time: Time): Scheduled {
+        console.log('Z - in findTime()...');
         var timeslot = new Scheduled();
         let flag: boolean = false;
 
@@ -55,8 +61,13 @@ export default class ScheduleController {
 
     private getRooms(size: number, rooms: Room[]): Room[] {
         // get all rooms large enough for a section, but not too large (2*size)
+        console.log('Z - in getRooms(), size = ' + size);
+
+        console.log('Z - in getRooms(), rooms = ' + rooms.length);
         let array: Room[] = [];
+
         for (let r in rooms) {
+            // rooms[r].printRoom();
             if (rooms[r].Seats >= size) {
                 if (rooms[r].Seats < 2*size) {
                     array.push(rooms[r]);
@@ -64,20 +75,23 @@ export default class ScheduleController {
             }
         }
 
-        // sort array smallet to largest so a section chooses the smallest available classroom
+        // sort array smallest to largest so a section chooses the smallest available classroom
         array.sort(function (obj1, obj2) {
             return obj1.Seats - obj2.Seats;
         });
 
+        console.log('Z - getRooms() array: ' + array.length);
         return array;
     }
 
     public makeSchedule(rooms: Room[], sections: Section[]): Scheduled[] {
+        console.log('Z - in makeSchedule()...');
         for (let i in sections) {
             let scheduledRoom = new Scheduled();
             let time = new Time('MWF', 8);
 
-            let possibleRooms = this.getRooms(sections[i].Enrolled, rooms);
+            let possibleRooms = this.getRooms(sections[i].Size, rooms);
+            console.log('Z - in makeSchedule(), number of possible rooms: ' + possibleRooms.length);
 
             var timeslot = this.findTime(sections[i], possibleRooms, time);
 

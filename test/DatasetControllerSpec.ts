@@ -276,12 +276,6 @@ describe("DatasetController", function () {
         });
     });
 
-    it('Should be able to use getDataset(id)', function () {
-        let controller = new DatasetController;
-        return controller.getDatasets
-    });
-
-
     it("Should be able to get Lat Lon", function () {
         let controller = new DatasetController();
         return controller.httpGetGeolocation("6245 Agronomy Road V6T 1Z4").then(function (obj) {
