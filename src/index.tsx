@@ -14,7 +14,7 @@ class Main extends React.Component<any, any> {
     public render() {
         return (
             <div>
-                    <p>Hello world</p>
+                    <p></p>
                     <QueryComponent defaultQuery='[no query yet]' />
             </div>
         );

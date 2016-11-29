@@ -28,7 +28,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         this.state = {courseFilters_num: ""};
 
         //Room
-        this.state = {roomFilters_size_mod: 'GT'};
+        this.state = {roomFilters_size_mod: ""};
         this.state = {roomFilters_building: " "};
         this.state = {nearBuilding: false};
     }
@@ -95,7 +95,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
         console.log(this.state.courseFilters_size + this.state.courseFilters_num + this.state.courseFilters_dept);
 
-        if (typeof this.state.courseFilters_size_mod === "" ||typeof this.state.courseFilters_size === "undefined" || this.state.courseFilters_dept === ""){
+        if (typeof this.state.courseFilters_size_mod === "" || typeof this.state.courseFilters_size === "undefined" || this.state.courseFilters_dept === ""){
 
             if (typeof this.state.courseFilters_dept === "undefined" || this.state.courseFilters_dept === ""){
 
@@ -270,7 +270,92 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
     private applyRoomFilters(event:any, input:any):void {
         // TODO: this is the room filter apply button action, so it should send an AJAX request to rooms dataset
-        this.setState({query: input});
+        var andQuery: any = {"AND":[
+            {"LT":{rooms_lat:100}}
+        ]};
+
+        console.log(this.state.roomFilters_size + this.state.roomFilters_furniture + this.state.roomFilters_type);
+
+        if (typeof this.state.roomFilters_size_mod === "" || typeof this.state.roomFilters_size === "undefined" || this.state.roomFilters_size === ""){
+
+            if (typeof this.state.roomFilters_type === "undefined" || this.state.roomFilters_type === ""){
+
+                if (typeof this.state.roomFilters_furniture === "undefined" || this.state.roomFilters_furniture === ""){
+                    //Case 1: all left empty -> get all courses
+
+                } else {
+                    //Case 2: only room furniture indicated
+                    andQuery["AND"].push({"IS": {rooms_furniture: this.state.roomFilters_furniture}});
+                }
+            } else {
+                if (typeof this.state.roomFilters_furniture === "undefined" || this.state.roomFilters_furniture === ""){
+                    //Case 3: only room type indicated
+                    andQuery["AND"].push({"IS": {rooms_type: this.state.roomFilters_type}});
+                } else {
+                    //Case 4: room type and furniture indicated
+                    andQuery["AND"].push({"IS": {rooms_type: this.state.roomFilters_type}});
+                    andQuery["AND"].push({"IS": {rooms_furniture: this.state.roomFilters_furniture}});
+                }
+            }
+        } else {
+            if (typeof this.state.roomFilters_type === "undefined" || this.state.roomFilters_type === ""){
+
+                if (typeof this.state.roomFilters_furniture === "undefined" || this.state.roomFilters_furniture === ""){
+                    //Case 5: only room size indicated
+
+                } else {
+                    //Case 6: room size and furniture indicated
+                    andQuery["AND"].push({"IS": {rooms_furniture: this.state.roomFilters_furniture}});
+                }
+            } else {
+                if (typeof this.state.roomFilters_furniture === "undefined" || this.state.roomFilters_furniture === ""){
+                    //Case 7: room size and type indicated
+                    andQuery["AND"].push({"IS": {rooms_type: this.state.roomFilters_type}});
+                } else {
+                    //Case 8: room size, type and furniture indicated
+                    andQuery["AND"].push({"IS": {rooms_type: this.state.roomFilters_type}});
+                    andQuery["AND"].push({"IS": {rooms_furniture: this.state.roomFilters_furniture}});
+                }
+            }
+
+            var sizeMode = this.state.roomFilters_size_mod;
+            switch (sizeMode){
+                case 'GT':
+                    andQuery['AND'].push({"GT": {rooms_seats: this.state.roomFilters_size}});
+                    break;
+                case 'LT':
+                    andQuery['AND'].push({'LT': {rooms_seats: this.state.roomFilters_size}});
+                    break;
+                case 'EQ':
+                    andQuery['AND'].push({'EQ': {rooms_seats: this.state.roomFilters_size}});
+                    break;
+                default:
+                    console.log("Error in filter room size");
+            }
+        }
+
+        console.log(andQuery);
+        var query : IQueryRequest = {
+            GET:["rooms_name", "rooms_fullname", "rooms_seats", "rooms_type", "rooms_furniture"],
+            WHERE: andQuery,
+            AS:'TABLE'
+        };
+
+        axios.post('http://localhost:4321/query', query).then(res => {
+            console.log(res.data);
+            var newResult = res.data.result;
+            var oldResult = this.state.result;
+            oldResult.filter(function (n:any) {
+                return newResult.indexOf(n);
+            })
+
+            this.setState({result: oldResult});
+            var head:string[] = query.GET as string[];
+            this.generateTable(head);
+        }).catch( err=>{
+                console.log(err);
+            }
+        );
     }
 
     private updateRoomFilters(event:any, type:number):void {
@@ -333,7 +418,9 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         var style1 = {
             backgroundColor: 'rgb(240,250,255)',
             float: 'left',
-            width: '50%'
+            borderStyle: 'solid',
+            borderWidth: '1px',
+            width: '100%'
         };
         var style11 = {
             backgroundColor: 'rgb(240,250,255)',
@@ -353,12 +440,20 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         var style2 = {
             backgroundColor: 'rgb(240,255,250)',
             float: 'left',
-            width: '50%'
+            borderStyle: 'solid',
+            borderWidth: '1px',
+            width: '100%'
         };
         var style21 = {
             backgroundColor: 'rgb(240,255,250)',
             float: 'left',
             width: '33%'
+        };
+
+        var style215 = {
+            backgroundColor: 'rgb(240,255,250)',
+            float: 'left',
+            width: '50%'
         };
 
 
@@ -470,7 +565,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                         <div>
                             <h4>Filters</h4>
                             <div>
-                                <div style={style2}>
+                                <div style={style215}>
                                     <p> List Rooms in Building:
                                         <select value={this.state.name} onChange={ e => this.updateBuilding(e) }>
                                             <option value="1">pseudo building 1</option>
@@ -479,7 +574,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                                         </select>
                                     </p>
                                 </div>
-                                <div style={style2}>
+                                <div style={style215}>
                                     <p>
                                         <input type="checkbox" name="nearBuilding" value="near"
                                                onChange={ e => this.toggleNearby(e)}>

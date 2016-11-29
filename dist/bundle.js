@@ -60,7 +60,7 @@
 	        _super.call(this, props);
 	    }
 	    Main.prototype.render = function () {
-	        return (React.createElement("div", null, React.createElement("p", null, "Hello world"), React.createElement(QueryComponent_1.QueryComponent, {defaultQuery: '[no query yet]'})));
+	        return (React.createElement("div", null, React.createElement("p", null), React.createElement(QueryComponent_1.QueryComponent, {defaultQuery: '[no query yet]'})));
 	    };
 	    return Main;
 	}(React.Component));
@@ -101,7 +101,7 @@
 	        this.state = { courseFilters_size: 0 };
 	        this.state = { courseFilters_dept: "" };
 	        this.state = { courseFilters_num: "" };
-	        this.state = { roomFilters_size_mod: 'GT' };
+	        this.state = { roomFilters_size_mod: "" };
 	        this.state = { roomFilters_building: " " };
 	        this.state = { nearBuilding: false };
 	    }
@@ -283,7 +283,80 @@
 	        this.setState({ roomSearch: event.target.value });
 	    };
 	    QueryComponent.prototype.applyRoomFilters = function (event, input) {
-	        this.setState({ query: input });
+	        var _this = this;
+	        var andQuery = { "AND": [
+	                { "LT": { rooms_lat: 100 } }
+	            ] };
+	        console.log(this.state.roomFilters_size + this.state.roomFilters_furniture + this.state.roomFilters_type);
+	        if (typeof this.state.roomFilters_size_mod === "" || typeof this.state.roomFilters_size === "undefined" || this.state.roomFilters_size === "") {
+	            if (typeof this.state.roomFilters_type === "undefined" || this.state.roomFilters_type === "") {
+	                if (typeof this.state.roomFilters_furniture === "undefined" || this.state.roomFilters_furniture === "") {
+	                }
+	                else {
+	                    andQuery["AND"].push({ "IS": { rooms_furniture: this.state.roomFilters_furniture } });
+	                }
+	            }
+	            else {
+	                if (typeof this.state.roomFilters_furniture === "undefined" || this.state.roomFilters_furniture === "") {
+	                    andQuery["AND"].push({ "IS": { rooms_type: this.state.roomFilters_type } });
+	                }
+	                else {
+	                    andQuery["AND"].push({ "IS": { rooms_type: this.state.roomFilters_type } });
+	                    andQuery["AND"].push({ "IS": { rooms_furniture: this.state.roomFilters_furniture } });
+	                }
+	            }
+	        }
+	        else {
+	            if (typeof this.state.roomFilters_type === "undefined" || this.state.roomFilters_type === "") {
+	                if (typeof this.state.roomFilters_furniture === "undefined" || this.state.roomFilters_furniture === "") {
+	                }
+	                else {
+	                    andQuery["AND"].push({ "IS": { rooms_furniture: this.state.roomFilters_furniture } });
+	                }
+	            }
+	            else {
+	                if (typeof this.state.roomFilters_furniture === "undefined" || this.state.roomFilters_furniture === "") {
+	                    andQuery["AND"].push({ "IS": { rooms_type: this.state.roomFilters_type } });
+	                }
+	                else {
+	                    andQuery["AND"].push({ "IS": { rooms_type: this.state.roomFilters_type } });
+	                    andQuery["AND"].push({ "IS": { rooms_furniture: this.state.roomFilters_furniture } });
+	                }
+	            }
+	            var sizeMode = this.state.roomFilters_size_mod;
+	            switch (sizeMode) {
+	                case 'GT':
+	                    andQuery['AND'].push({ "GT": { rooms_seats: this.state.roomFilters_size } });
+	                    break;
+	                case 'LT':
+	                    andQuery['AND'].push({ 'LT': { rooms_seats: this.state.roomFilters_size } });
+	                    break;
+	                case 'EQ':
+	                    andQuery['AND'].push({ 'EQ': { rooms_seats: this.state.roomFilters_size } });
+	                    break;
+	                default:
+	                    console.log("Error in filter room size");
+	            }
+	        }
+	        console.log(andQuery);
+	        var query = {
+	            GET: ["rooms_name", "rooms_fullname", "rooms_seats", "rooms_type", "rooms_furniture"],
+	            WHERE: andQuery,
+	            AS: 'TABLE'
+	        };
+	        axios_1.default.post('http://localhost:4321/query', query).then(function (res) {
+	            console.log(res.data);
+	            var newResult = res.data.result;
+	            var oldResult = _this.state.result;
+	            oldResult.filter(function (n) {
+	                return newResult.indexOf(n);
+	            });
+	            _this.setState({ result: oldResult });
+	            var head = query.GET;
+	            _this.generateTable(head);
+	        }).catch(function (err) {
+	            console.log(err);
+	        });
 	    };
 	    QueryComponent.prototype.updateRoomFilters = function (event, type) {
 	        if (type == 1) {
@@ -319,7 +392,9 @@
 	        var style1 = {
 	            backgroundColor: 'rgb(240,250,255)',
 	            float: 'left',
-	            width: '50%'
+	            borderStyle: 'solid',
+	            borderWidth: '1px',
+	            width: '100%'
 	        };
 	        var style11 = {
 	            backgroundColor: 'rgb(240,250,255)',
@@ -339,16 +414,23 @@
 	        var style2 = {
 	            backgroundColor: 'rgb(240,255,250)',
 	            float: 'left',
-	            width: '50%'
+	            borderStyle: 'solid',
+	            borderWidth: '1px',
+	            width: '100%'
 	        };
 	        var style21 = {
 	            backgroundColor: 'rgb(240,255,250)',
 	            float: 'left',
 	            width: '33%'
 	        };
+	        var style215 = {
+	            backgroundColor: 'rgb(240,255,250)',
+	            float: 'left',
+	            width: '50%'
+	        };
 	        var experiment = ['some', 'fake', 'options', 'to', 'test'];
 	        var makeSelectItem = function (x) { return React.createElement("option", {value: x}, x); };
-	        return (React.createElement("div", null, React.createElement("div", {id: 'title'}, React.createElement("h3", null, "UBC Course Catalog"), React.createElement("h4", null, "Search: ", this.state.query)), React.createElement("div", {id: 'searchbar'}, React.createElement("div", {style: style1}, React.createElement("h4", null, "Course Xplorer"), React.createElement("div", null, React.createElement("p", null, "Search the course catalog by course title or instructor:"), React.createElement("input", {onChange: function (e) { return _this.updateCourseSearch(e); }}), React.createElement("button", {name: "SearchCourses", onClick: function (e) { return _this.handleCourseSearch(e, _this.state.courseSearch); }}, "Search")), React.createElement("div", null, React.createElement("h4", null, "Filters"), React.createElement("div", null, React.createElement("div", {style: style11}, React.createElement("p", null, "Size:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateCourseFilters(e, 2); }}, React.createElement("option", {value: ""}, " - "), React.createElement("option", {value: "GT"}, "Greater Than"), React.createElement("option", {value: "LT"}, "Less Than"), React.createElement("option", {value: "EQ"}, "Equal To")), React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 1); }}))), React.createElement("div", {style: style11}, React.createElement("p", null, "Dept:", React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 3); }}))), React.createElement("div", {style: style11}, React.createElement("p", null, "Number:", React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 4); }}))))), React.createElement("div", {style: style110}, React.createElement("button", {name: "ApplyCourses", onClick: function (e) { return _this.applyCourseFilters(e); }}, "Apply")), React.createElement("div", null, React.createElement("h5", null, "Filters:"), React.createElement("p", null, "Size:  ", this.state.courseFilters_size_mod, " ", this.state.courseFilters_size), React.createElement("p", null, "Dept: ", this.state.courseFilters_dept), React.createElement("p", null, "Number: ", this.state.courseFilters_num), React.createElement("div", null, React.createElement("div", {style: style110}, React.createElement("p", null, React.createElement("input", {type: "checkbox", name: "sortAvg", value: "avg", onChange: function (e) { return _this.updateCourseSorting(e); }}), "average")), React.createElement("div", {style: style110}, React.createElement("p", null, React.createElement("input", {type: "checkbox", name: "sortFail", value: "fail", onChange: function (e) { return _this.updateCourseSorting(e); }}), "most failing")), React.createElement("div", {style: style111}, React.createElement("p", null, "Sort by:", React.createElement("input", {type: "checkbox", name: "sortPass", value: "pass", onChange: function (e) { return _this.updateCourseSorting(e); }}), "most passing")))), React.createElement("div", {id: 'result'}, React.createElement("h4", null, "Results"), this.renderCoursesTable(this.state.result))), React.createElement("div", {style: style2}, React.createElement("h4", null, "Room Xplorer"), React.createElement("div", null, React.createElement("p", null, "Search the rooms of UBC by building or room number:"), React.createElement("input", {onChange: function (e) { return _this.updateRoomSearch(e); }}), React.createElement("button", {name: "SearchRooms", onClick: function (e) { return _this.handleRoomSearch(e, _this.state.roomSearch); }}, "Search")), React.createElement("div", null, React.createElement("h4", null, "Filters"), React.createElement("div", null, React.createElement("div", {style: style2}, React.createElement("p", null, " List Rooms in Building:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateBuilding(e); }}, React.createElement("option", {value: "1"}, "pseudo building 1"), React.createElement("option", {value: "2"}, "pseudo building 2"), React.createElement("option", {value: "3"}, "pseudo building 3")))), React.createElement("div", {style: style2}, React.createElement("p", null, React.createElement("input", {type: "checkbox", name: "nearBuilding", value: "near", onChange: function (e) { return _this.toggleNearby(e); }}), "in", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateNearbyRooms(e); }}, experiment.map(makeSelectItem)), "meters"))), React.createElement("div", null, React.createElement("div", {style: style21}, React.createElement("p", null, "Size:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 1); }}, React.createElement("option", {value: ""}, " - "), React.createElement("option", {value: "GT"}, "Greater Than"), React.createElement("option", {value: "LT"}, "Less Than"), React.createElement("option", {value: "EQ"}, "Equal To")), React.createElement("input", {onChange: function (e) { return _this.updateRoomFilters(e, 2); }}))), React.createElement("div", {style: style21}, React.createElement("p", null, "Type:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 3); }}, React.createElement("option", {value: "Small Group"}, "Small Group"), React.createElement("option", {value: "Tiered Large Group"}, "Tiered Large Group"), React.createElement("option", {value: "Open Design General Purpose"}, "Open Design General Purpose"), React.createElement("option", {value: "Case Style"}, "Case Style")))), React.createElement("div", {style: style21}, React.createElement("p", null, "Furniture:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 4); }}, React.createElement("option", {value: "Classroom-Movable Tables & Chairs"}, "Movable Tables & Chairs"), React.createElement("option", {value: "Classroom-Fixed Tables/Movable Chairs"}, "Fixed Tables/Movable Chairs"), React.createElement("option", {value: "Classroom-Movable Tablets"}, "Movable Tablets"), React.createElement("option", {value: "Classroom-Fixed Tablets"}, "Fixed Tablets"))))), React.createElement("button", {name: "ApplyRooms", onClick: function (e) { return _this.applyRoomFilters(e, _this.state.roomFilters); }}, "Apply")), React.createElement("div", null, React.createElement("h5", null, "Filters:"), React.createElement("p", null, "Size: ", this.state.roomFilters_size_mod, " ", this.state.roomFilters_size), React.createElement("p", null, "Furniture: ", this.state.roomFilters_furniture), React.createElement("p", null, "Type: ", this.state.roomFilters_type))))));
+	        return (React.createElement("div", null, React.createElement("div", {id: 'title'}, React.createElement("h3", null, "UBC Course Catalog"), React.createElement("h4", null, "Search: ", this.state.query)), React.createElement("div", {id: 'searchbar'}, React.createElement("div", {style: style1}, React.createElement("h4", null, "Course Xplorer"), React.createElement("div", null, React.createElement("p", null, "Search the course catalog by course title or instructor:"), React.createElement("input", {onChange: function (e) { return _this.updateCourseSearch(e); }}), React.createElement("button", {name: "SearchCourses", onClick: function (e) { return _this.handleCourseSearch(e, _this.state.courseSearch); }}, "Search")), React.createElement("div", null, React.createElement("h4", null, "Filters"), React.createElement("div", null, React.createElement("div", {style: style11}, React.createElement("p", null, "Size:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateCourseFilters(e, 2); }}, React.createElement("option", {value: ""}, " - "), React.createElement("option", {value: "GT"}, "Greater Than"), React.createElement("option", {value: "LT"}, "Less Than"), React.createElement("option", {value: "EQ"}, "Equal To")), React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 1); }}))), React.createElement("div", {style: style11}, React.createElement("p", null, "Dept:", React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 3); }}))), React.createElement("div", {style: style11}, React.createElement("p", null, "Number:", React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 4); }}))))), React.createElement("div", {style: style110}, React.createElement("button", {name: "ApplyCourses", onClick: function (e) { return _this.applyCourseFilters(e); }}, "Apply")), React.createElement("div", null, React.createElement("h5", null, "Filters:"), React.createElement("p", null, "Size:  ", this.state.courseFilters_size_mod, " ", this.state.courseFilters_size), React.createElement("p", null, "Dept: ", this.state.courseFilters_dept), React.createElement("p", null, "Number: ", this.state.courseFilters_num), React.createElement("div", null, React.createElement("div", {style: style110}, React.createElement("p", null, React.createElement("input", {type: "checkbox", name: "sortAvg", value: "avg", onChange: function (e) { return _this.updateCourseSorting(e); }}), "average")), React.createElement("div", {style: style110}, React.createElement("p", null, React.createElement("input", {type: "checkbox", name: "sortFail", value: "fail", onChange: function (e) { return _this.updateCourseSorting(e); }}), "most failing")), React.createElement("div", {style: style111}, React.createElement("p", null, "Sort by:", React.createElement("input", {type: "checkbox", name: "sortPass", value: "pass", onChange: function (e) { return _this.updateCourseSorting(e); }}), "most passing")))), React.createElement("div", {id: 'result'}, React.createElement("h4", null, "Results"), this.renderCoursesTable(this.state.result))), React.createElement("div", {style: style2}, React.createElement("h4", null, "Room Xplorer"), React.createElement("div", null, React.createElement("p", null, "Search the rooms of UBC by building or room number:"), React.createElement("input", {onChange: function (e) { return _this.updateRoomSearch(e); }}), React.createElement("button", {name: "SearchRooms", onClick: function (e) { return _this.handleRoomSearch(e, _this.state.roomSearch); }}, "Search")), React.createElement("div", null, React.createElement("h4", null, "Filters"), React.createElement("div", null, React.createElement("div", {style: style215}, React.createElement("p", null, " List Rooms in Building:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateBuilding(e); }}, React.createElement("option", {value: "1"}, "pseudo building 1"), React.createElement("option", {value: "2"}, "pseudo building 2"), React.createElement("option", {value: "3"}, "pseudo building 3")))), React.createElement("div", {style: style215}, React.createElement("p", null, React.createElement("input", {type: "checkbox", name: "nearBuilding", value: "near", onChange: function (e) { return _this.toggleNearby(e); }}), "in", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateNearbyRooms(e); }}, experiment.map(makeSelectItem)), "meters"))), React.createElement("div", null, React.createElement("div", {style: style21}, React.createElement("p", null, "Size:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 1); }}, React.createElement("option", {value: ""}, " - "), React.createElement("option", {value: "GT"}, "Greater Than"), React.createElement("option", {value: "LT"}, "Less Than"), React.createElement("option", {value: "EQ"}, "Equal To")), React.createElement("input", {onChange: function (e) { return _this.updateRoomFilters(e, 2); }}))), React.createElement("div", {style: style21}, React.createElement("p", null, "Type:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 3); }}, React.createElement("option", {value: "Small Group"}, "Small Group"), React.createElement("option", {value: "Tiered Large Group"}, "Tiered Large Group"), React.createElement("option", {value: "Open Design General Purpose"}, "Open Design General Purpose"), React.createElement("option", {value: "Case Style"}, "Case Style")))), React.createElement("div", {style: style21}, React.createElement("p", null, "Furniture:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 4); }}, React.createElement("option", {value: "Classroom-Movable Tables & Chairs"}, "Movable Tables & Chairs"), React.createElement("option", {value: "Classroom-Fixed Tables/Movable Chairs"}, "Fixed Tables/Movable Chairs"), React.createElement("option", {value: "Classroom-Movable Tablets"}, "Movable Tablets"), React.createElement("option", {value: "Classroom-Fixed Tablets"}, "Fixed Tablets"))))), React.createElement("button", {name: "ApplyRooms", onClick: function (e) { return _this.applyRoomFilters(e, _this.state.roomFilters); }}, "Apply")), React.createElement("div", null, React.createElement("h5", null, "Filters:"), React.createElement("p", null, "Size: ", this.state.roomFilters_size_mod, " ", this.state.roomFilters_size), React.createElement("p", null, "Furniture: ", this.state.roomFilters_furniture), React.createElement("p", null, "Type: ", this.state.roomFilters_type))))));
 	    };
 	    return QueryComponent;
 	}(React.Component));
