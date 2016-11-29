@@ -33,7 +33,8 @@ export default class ScheduleController {
             return true;
         }
         for (let s in this.schedule) {
-            if (this.schedule[s].Room == room && this.schedule[s].time == time) {
+            console.log('Z - in roomisFree() loop, room: ' + this.schedule[s].Room.name + ', time: ' + this.schedule[s].time.time);
+            if (this.schedule[s].Room.name == room.name && this.schedule[s].time.days == time.days && this.schedule[s].time.time == time.time) {
                 return false;
             }
         }
@@ -41,22 +42,28 @@ export default class ScheduleController {
     }
 
     private findTime(section: Section, possibleRooms: Room[], time: Time): Scheduled {
+        let that = this;
         console.log('Z - in findTime()...');
         var timeslot = new Scheduled();
         let flag: boolean = false;
 
         for (let r in possibleRooms) {
+            console.log('Z - in findTime(), is room free? ' + this.roomIsFree(possibleRooms[r], time));
             if (this.roomIsFree(possibleRooms[r], time)) {
 
                 timeslot.time = time;
                 timeslot.Room = possibleRooms[r];
                 timeslot.Section = section;
-
                 return timeslot;
             }
         }
 
-        return this.findTime(section, this.rooms, time.getNext());
+        console.log('Z - in findTime(), did not find timeslot');
+
+        let newTime = time.getNext();
+        console.log('Z - reached end of possible rooms at current time, new time: ' + newTime.time + ' ' + newTime.days)
+
+        return that.findTime(section, possibleRooms, newTime);
     }
 
     private getRooms(size: number, rooms: Room[]): Room[] {
@@ -94,6 +101,8 @@ export default class ScheduleController {
             console.log('Z - in makeSchedule(), number of possible rooms: ' + possibleRooms.length);
 
             var timeslot = this.findTime(sections[i], possibleRooms, time);
+
+            console.log('Z - in makeSchedule(), number of timeslots: ' + this.schedule.length);
 
             this.schedule.push(timeslot);
         }
