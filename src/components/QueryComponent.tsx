@@ -2,6 +2,8 @@ import * as React from "react";
 import axios from 'axios';
 import {type} from "os";
 import Section from "../model/Section";
+import ScheduleController from "../controller/ScheduleController";
+import TableComponent from "../components/TableComponent";
 
 export interface IQueryProps {
     defaultQuery: string;
@@ -398,6 +400,15 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         )
     }
 
+
+
+    private handleScheduler(event: any, rooms: any, sections: any) {
+        let controller = new ScheduleController();
+        let schedule = controller.makeSchedule(rooms, sections);
+
+        this.state.schedule = schedule;
+    }
+
     componentDidMount() {
 
     }
@@ -536,6 +547,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                         </div>
                         <div id='result'>
                             <h4>Results</h4>
+                            <TableComponent defaultHeader="courses" data={this.state.courseResult}/>
                             { this.renderCoursesTable(this.state.courseResult) }
                         </div>
                     </div>
@@ -620,6 +632,14 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                             <p>Type: { this.state.roomFilters_type }</p>
                         </div>
                     </div>
+                </div>
+                <div id="scheduler">
+                    <h4>Scheduler</h4>
+                    <p>Click to schedule the selected courses into the selected rooms</p>
+                    <button name="makeSchedule" onClick={ e => this.handleScheduler(e, this.state.roomResult, this.state.courseResult) }>
+                        Create!
+                    </button>
+                    <TableComponent defaultHeader='schedule' data={this.state.schedule}/>
                 </div>
             </div>
         );
