@@ -254,10 +254,10 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         console.log('L - start handling room search with ' + input);
 
         var query : IQueryRequest = {
-            GET:["rooms_fullname","rooms_number", "rooms_name"],
+            GET:["rooms_fullname","rooms_number", "rooms_name", "rooms_seats"],
             WHERE:{
                 "OR":[
-                        {"IS": {rooms_fullname: input}},
+                        {"IS": {rooms_name: input}},
                         {"IS":{rooms_number:input}}
                     ]},
             AS:'TABLE'};
@@ -278,7 +278,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
     }
 
     private updateRoomSearch(event:any):void {
-        this.setState({roomSearch: event.target.value});
+        this.setState({roomSearch: "*" + event.target.value + "*"});
     }
 
     private applyRoomFilters(event:any, input:any):void {

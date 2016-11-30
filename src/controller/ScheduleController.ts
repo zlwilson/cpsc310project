@@ -11,8 +11,8 @@ import {error} from "util";
 import parse5 = require('parse5');
 import forEach = require("core-js/fn/array/for-each");
 import Room from "../model/Room";
-import Scheduled from "../model/Scheduled";
 import Time from "../model/Time";
+import Scheduled from "../model/Scheduled";
 
 export default class ScheduleController {
     private allSections:Section[] = [];
@@ -26,32 +26,42 @@ export default class ScheduleController {
 
     private schedule: Scheduled[] = [];
 
-    private roomIsFree(room: Room, time: Time): boolean {
-        // console.log('Z - in roomIsFree(), room: ' + room.name + ', time: ' + time.time + ' ' + time.days);
+    private allTimes: Time[];
 
-        if (this.schedule.length == 0) {
-            return true;
-        }
-        for (let s in this.schedule) {
-            // console.log('Z - in roomisFree() loop, room: ' + this.schedule[s].Room.name + ', time: ' + this.schedule[s].time.time);
-            if (this.schedule[s].Room.name == room.name && this.schedule[s].time.days == time.days && this.schedule[s].time.time == time.time) {
+    private scheduleIsFree(array: any, room: any, time: Time): boolean {
+        for(var i=0;i<array.length;i++) {
+            if (array[i].Room.rooms_name === room && array[i].time === time) {
                 return false;
             }
         }
         return true;
     }
 
+    private roomIsFree(room: any, time: Time): boolean {
+        let that = this;
+        // console.log('Z - in roomIsFree(), room: ' + room.name + ', time: ' + time.time + ' ' + time.days);
+
+        if (this.schedule.length == 0) {
+            return true;
+        } else {
+            return this.scheduleIsFree(that.schedule, room.rooms_name, time);
+        }
+    }
+
     private findTime(section: Section, possibleRooms: Room[], time: Time): Scheduled {
         let that = this;
-        // console.log('Z - in findTime()...');
+        // console.log(section);   // section has courses_intructor, _size and _title
         var timeslot = new Scheduled();
 
-        for (let r in possibleRooms) {
+        for (let r of possibleRooms) {
             // console.log('Z - in findTime(), is room free? ' + this.roomIsFree(possibleRooms[r], time));
-            if (this.roomIsFree(possibleRooms[r], time)) {
+            if (this.roomIsFree(r, time)) {
+
+                console.log('Found a room:');
+                console.log()
 
                 timeslot.time = time;
-                timeslot.Room = possibleRooms[r];
+                timeslot.Room = r;
                 timeslot.Section = section;
                 return timeslot;
             }
@@ -69,7 +79,6 @@ export default class ScheduleController {
             if (rooms[r].rooms_seats >= size) {
                 if (rooms[r].rooms_seats < 3*size) {
                     array.push(rooms[r]);
-                    console.log('Adding to rooms[] ' + rooms[r].rooms_seats);
                 }
             }
         }
@@ -78,8 +87,8 @@ export default class ScheduleController {
         array.sort(function (obj1, obj2) {
             return obj1.Seats - obj2.Seats;
         });
-        console.log('Z - Section size ' + size);
-        console.log('       getRooms() array: ' + array.length);
+        // console.log('Z - Section size ' + size);
+        // console.log('       getRooms() array: ' + array.length);
         return array;
     }
 
@@ -97,7 +106,7 @@ export default class ScheduleController {
                 }
             }
 
-            console.log('Possible rooms = ' + possibleRooms.length);
+            // console.log('Possible rooms = ' + possibleRooms.length);
 
             var timeslot = this.findTime(sections[i], possibleRooms, time);
 

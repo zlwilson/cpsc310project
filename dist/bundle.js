@@ -269,10 +269,10 @@
 	        var _this = this;
 	        console.log('L - start handling room search with ' + input);
 	        var query = {
-	            GET: ["rooms_fullname", "rooms_number", "rooms_name"],
+	            GET: ["rooms_fullname", "rooms_number", "rooms_name", "rooms_seats"],
 	            WHERE: {
 	                "OR": [
-	                    { "IS": { rooms_fullname: input } },
+	                    { "IS": { rooms_name: input } },
 	                    { "IS": { rooms_number: input } }
 	                ] },
 	            AS: 'TABLE' };
@@ -289,7 +289,7 @@
 	        });
 	    };
 	    QueryComponent.prototype.updateRoomSearch = function (event) {
-	        this.setState({ roomSearch: event.target.value });
+	        this.setState({ roomSearch: "*" + event.target.value + "*" });
 	    };
 	    QueryComponent.prototype.applyRoomFilters = function (event, input) {
 	        var _this = this;
@@ -2138,8 +2138,8 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Scheduled_1 = __webpack_require__(31);
-	var Time_1 = __webpack_require__(32);
+	var Time_1 = __webpack_require__(31);
+	var Scheduled_1 = __webpack_require__(32);
 	var ScheduleController = (function () {
 	    function ScheduleController() {
 	        this.allSections = [];
@@ -2148,24 +2148,33 @@
 	        this.clock = 8;
 	        this.schedule = [];
 	    }
-	    ScheduleController.prototype.roomIsFree = function (room, time) {
-	        if (this.schedule.length == 0) {
-	            return true;
-	        }
-	        for (var s in this.schedule) {
-	            if (this.schedule[s].Room.name == room.name && this.schedule[s].time.days == time.days && this.schedule[s].time.time == time.time) {
+	    ScheduleController.prototype.scheduleIsFree = function (array, room, time) {
+	        for (var i = 0; i < array.length; i++) {
+	            if (array[i].Room.rooms_name === room && array[i].time === time) {
 	                return false;
 	            }
 	        }
 	        return true;
 	    };
+	    ScheduleController.prototype.roomIsFree = function (room, time) {
+	        var that = this;
+	        if (this.schedule.length == 0) {
+	            return true;
+	        }
+	        else {
+	            return this.scheduleIsFree(that.schedule, room.rooms_name, time);
+	        }
+	    };
 	    ScheduleController.prototype.findTime = function (section, possibleRooms, time) {
 	        var that = this;
 	        var timeslot = new Scheduled_1.default();
-	        for (var r in possibleRooms) {
-	            if (this.roomIsFree(possibleRooms[r], time)) {
+	        for (var _i = 0, possibleRooms_1 = possibleRooms; _i < possibleRooms_1.length; _i++) {
+	            var r = possibleRooms_1[_i];
+	            if (this.roomIsFree(r, time)) {
+	                console.log('Found a room:');
+	                console.log();
 	                timeslot.time = time;
-	                timeslot.Room = possibleRooms[r];
+	                timeslot.Room = r;
 	                timeslot.Section = section;
 	                return timeslot;
 	            }
@@ -2179,15 +2188,12 @@
 	            if (rooms[r].rooms_seats >= size) {
 	                if (rooms[r].rooms_seats < 3 * size) {
 	                    array.push(rooms[r]);
-	                    console.log('Adding to rooms[] ' + rooms[r].rooms_seats);
 	                }
 	            }
 	        }
 	        array.sort(function (obj1, obj2) {
 	            return obj1.Seats - obj2.Seats;
 	        });
-	        console.log('Z - Section size ' + size);
-	        console.log('       getRooms() array: ' + array.length);
 	        return array;
 	    };
 	    ScheduleController.prototype.makeSchedule = function (rooms, sections) {
@@ -2203,7 +2209,6 @@
 	                    throw 'No room big enough';
 	                }
 	            }
-	            console.log('Possible rooms = ' + possibleRooms.length);
 	            var timeslot = this.findTime(sections[i], possibleRooms, time);
 	            this.schedule.push(timeslot);
 	        }
@@ -2235,20 +2240,6 @@
 
 /***/ },
 /* 31 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var Scheduled = (function () {
-	    function Scheduled() {
-	    }
-	    return Scheduled;
-	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Scheduled;
-
-
-/***/ },
-/* 32 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2288,6 +2279,20 @@
 	}());
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = Time;
+
+
+/***/ },
+/* 32 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var Scheduled = (function () {
+	    function Scheduled() {
+	    }
+	    return Scheduled;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Scheduled;
 
 
 /***/ }
