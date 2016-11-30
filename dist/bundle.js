@@ -2175,12 +2175,12 @@
 	                return timeslot;
 	            }
 	            else {
+	                console.log(that.schedule.length);
 	                for (var _a = 0, _b = that.schedule; _a < _b.length; _a++) {
 	                    var slot = _b[_a];
 	                    var s = void 0;
 	                    s = slot;
-	                    console.log('Z - slot ' + slot.Room + ' ' + slot.time.time + slot.time.days);
-	                    if (s.Room.rooms_name !== r.rooms_name && slot.time.time != time.time && slot.time.days != time.days) {
+	                    if (s.Room.rooms_name != r.rooms_name && slot.time.time != time.time && slot.time.days != time.days) {
 	                        console.log('F - Found room');
 	                        var timeslot = new Scheduled_1.default();
 	                        timeslot.time = time;
@@ -2189,9 +2189,6 @@
 	                        return timeslot;
 	                    }
 	                    else {
-	                        console.log('Z - occupied room');
-	                        console.log(s.Room.rooms_name);
-	                        console.log(r.rooms_name);
 	                    }
 	                }
 	            }
