@@ -56,7 +56,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         let that = this;
 
         var query : IQueryRequest = {
-            GET:["courses_title", "courses_instructor"],
+            GET:["courses_title", "courses_instructor", "courses_size"],
             WHERE:{
                 "AND": [
                     {"OR":[
@@ -357,14 +357,10 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         axios.post('http://localhost:4321/query', query).then(res => {
             console.log(res.data);
             var newResult = res.data.result;
-            var oldResult = this.state.roomResult;
-            oldResult.filter(function (n:any) {
-                return newResult.indexOf(n);
-            })
 
-            this.setState({roomResult: oldResult});
+            this.setState({roomResult: newResult});
             var head:string[] = query.GET as string[];
-            this.generateTable(head);
+            // this.generateTable(head);
         }).catch( err=>{
                 console.log(err);
             }
@@ -414,7 +410,16 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
     private handleScheduler(event: any, rooms: any, sections: any) {
         let controller = new ScheduleController();
+
+        // console.log('Z - rooms and sections');
+        // console.log(rooms);
+        // console.log(sections);
+
         let schedule = controller.makeSchedule(rooms, sections);
+        let quality = controller.checkQuality(schedule);
+
+        console.log(schedule);
+        console.log('Quality = ' + quality);
 
         this.state.schedule = schedule;
         this.render();
@@ -438,7 +443,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             return null;
         } else {
             return (
-                <table>
+                <table key="scheduleTable">
                     <thead>
                     <tr>
                         <th>Title</th>
@@ -608,6 +613,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                         </div>
                         <div>
                             <h4>Filters</h4>
+                            {/*
                             <div>
                                 <div style={style215}>
                                     <p> List Rooms in Building:
@@ -631,6 +637,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                                     </p>
                                 </div>
                             </div>
+                            */}
 
                             <div>
                                 <div style={style21}>

@@ -45,7 +45,6 @@ export default class ScheduleController {
         let that = this;
         // console.log('Z - in findTime()...');
         var timeslot = new Scheduled();
-        let flag: boolean = false;
 
         for (let r in possibleRooms) {
             // console.log('Z - in findTime(), is room free? ' + this.roomIsFree(possibleRooms[r], time));
@@ -63,17 +62,14 @@ export default class ScheduleController {
     }
 
     // get all rooms large enough for a section, but not too large (3*size)
-    private getRooms(size: number, rooms: Room[]): Room[] {
-        // console.log('Z - in getRooms(), size = ' + size);
-
-        // console.log('Z - in getRooms(), rooms = ' + rooms.length);
+    private getRooms(size: number, rooms: any): Room[] {
         let array: Room[] = [];
 
         for (let r in rooms) {
-            // rooms[r].printRoom();
-            if (rooms[r].Seats >= size) {
-                if (rooms[r].Seats < 3*size) {
+            if (rooms[r].rooms_seats >= size) {
+                if (rooms[r].rooms_seats < 3*size) {
                     array.push(rooms[r]);
+                    console.log('Adding to rooms[] ' + rooms[r].rooms_seats);
                 }
             }
         }
@@ -82,23 +78,28 @@ export default class ScheduleController {
         array.sort(function (obj1, obj2) {
             return obj1.Seats - obj2.Seats;
         });
-
-        // console.log('Z - getRooms() array: ' + array.length);
+        console.log('Z - Section size ' + size);
+        console.log('       getRooms() array: ' + array.length);
         return array;
     }
 
-    public makeSchedule(rooms: Room[], sections: Section[]): Scheduled[] {
-        // console.log('Z - in makeSchedule()...');
+    public makeSchedule(rooms: any, sections: any): Scheduled[] {
         for (let i in sections) {
             let time = new Time('MWF', 8);
 
-            let possibleRooms = this.getRooms(sections[i].Size, rooms);
-            // let possibleRooms = rooms;
-            // console.log('Z - in makeSchedule(), number of possible rooms: ' + possibleRooms.length);
+            let possibleRooms = this.getRooms(sections[i].courses_size, rooms);
+            if (possibleRooms.length == 0) {
+                if (this.isBigEnough(rooms, sections[i].courses_size)) {
+                    possibleRooms = rooms;
+                } else {
+                    console.log('No room big enough');
+                    throw 'No room big enough';
+                }
+            }
+
+            console.log('Possible rooms = ' + possibleRooms.length);
 
             var timeslot = this.findTime(sections[i], possibleRooms, time);
-
-            // console.log('Z - in makeSchedule(), number of timeslots: ' + this.schedule.length);
 
             this.schedule.push(timeslot);
         }
@@ -114,6 +115,15 @@ export default class ScheduleController {
         }
         let quality = (counter/(schedule.length-1));
         return quality;
+    }
+
+    private isBigEnough(rooms: any, size: number): boolean {
+        for (let r in rooms) {
+            if (rooms[r].rooms_seats >= size) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

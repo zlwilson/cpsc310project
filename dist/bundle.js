@@ -118,7 +118,7 @@
 	        console.log('L - start handling course search with ' + input);
 	        var that = this;
 	        var query = {
-	            GET: ["courses_title", "courses_instructor"],
+	            GET: ["courses_title", "courses_instructor", "courses_size"],
 	            WHERE: {
 	                "AND": [
 	                    { "OR": [
@@ -356,13 +356,8 @@
 	        axios_1.default.post('http://localhost:4321/query', query).then(function (res) {
 	            console.log(res.data);
 	            var newResult = res.data.result;
-	            var oldResult = _this.state.roomResult;
-	            oldResult.filter(function (n) {
-	                return newResult.indexOf(n);
-	            });
-	            _this.setState({ roomResult: oldResult });
+	            _this.setState({ roomResult: newResult });
 	            var head = query.GET;
-	            _this.generateTable(head);
 	        }).catch(function (err) {
 	            console.log(err);
 	        });
@@ -392,6 +387,9 @@
 	    QueryComponent.prototype.handleScheduler = function (event, rooms, sections) {
 	        var controller = new ScheduleController_1.default();
 	        var schedule = controller.makeSchedule(rooms, sections);
+	        var quality = controller.checkQuality(schedule);
+	        console.log(schedule);
+	        console.log('Quality = ' + quality);
 	        this.state.schedule = schedule;
 	        this.render();
 	    };
@@ -405,7 +403,7 @@
 	            return null;
 	        }
 	        else {
-	            return (React.createElement("table", null, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", null, "Title"), React.createElement("th", null, "Section"), React.createElement("th", null, "Room"), React.createElement("th", null, "Time"))), React.createElement("tbody", null, this.renderScheduleTableRow(this.state.courseResult))));
+	            return (React.createElement("table", {key: "scheduleTable"}, React.createElement("thead", null, React.createElement("tr", null, React.createElement("th", null, "Title"), React.createElement("th", null, "Section"), React.createElement("th", null, "Room"), React.createElement("th", null, "Time"))), React.createElement("tbody", null, this.renderScheduleTableRow(this.state.courseResult))));
 	        }
 	    };
 	    QueryComponent.prototype.componentDidMount = function () {
@@ -453,7 +451,7 @@
 	        };
 	        var experiment = ['some', 'fake', 'options', 'to', 'test'];
 	        var makeSelectItem = function (x) { return React.createElement("option", {value: x}, x); };
-	        return (React.createElement("div", null, React.createElement("div", {id: 'title'}, React.createElement("h3", null, "UBC Course Catalog"), React.createElement("h4", null, "Search: ", this.state.query)), React.createElement("div", {id: 'searchbar'}, React.createElement("div", {style: style1}, React.createElement("h4", null, "Course Xplorer"), React.createElement("div", null, React.createElement("p", null, "Search the course catalog by course title or instructor:"), React.createElement("input", {onChange: function (e) { return _this.updateCourseSearch(e); }}), React.createElement("button", {name: "SearchCourses", onClick: function (e) { return _this.handleCourseSearch(e, _this.state.courseSearch); }}, "Search")), React.createElement("div", null, React.createElement("h4", null, "Filters"), React.createElement("div", null, React.createElement("div", {style: style11}, React.createElement("p", null, "Size:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateCourseFilters(e, 2); }}, React.createElement("option", {value: ""}, " - "), React.createElement("option", {value: "GT"}, "Greater Than"), React.createElement("option", {value: "LT"}, "Less Than"), React.createElement("option", {value: "EQ"}, "Equal To")), React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 1); }}))), React.createElement("div", {style: style11}, React.createElement("p", null, "Dept:", React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 3); }}))), React.createElement("div", {style: style11}, React.createElement("p", null, "Number:", React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 4); }}))))), React.createElement("div", {style: style110}, React.createElement("button", {name: "ApplyCourses", onClick: function (e) { return _this.applyCourseFilters(e); }}, "Apply")), React.createElement("div", null, React.createElement("h5", null, "Filters:"), React.createElement("p", null, "Size:  ", this.state.courseFilters_size_mod, " ", this.state.courseFilters_size), React.createElement("p", null, "Dept: ", this.state.courseFilters_dept), React.createElement("p", null, "Number: ", this.state.courseFilters_num), React.createElement("div", null, React.createElement("div", {style: style110}, React.createElement("p", null, React.createElement("input", {type: "checkbox", name: "sortAvg", value: "avg", onChange: function (e) { return _this.updateCourseSorting(e); }}), "average")), React.createElement("div", {style: style110}, React.createElement("p", null, React.createElement("input", {type: "checkbox", name: "sortFail", value: "fail", onChange: function (e) { return _this.updateCourseSorting(e); }}), "most failing")), React.createElement("div", {style: style111}, React.createElement("p", null, "Sort by:", React.createElement("input", {type: "checkbox", name: "sortPass", value: "pass", onChange: function (e) { return _this.updateCourseSorting(e); }}), "most passing")))), React.createElement("div", {id: 'result'}, React.createElement("h4", null, "Results"), this.renderCoursesTable())), React.createElement("div", {style: style2}, React.createElement("h4", null, "Room Xplorer"), React.createElement("div", null, React.createElement("p", null, "Search the rooms of UBC by building or room number:"), React.createElement("input", {onChange: function (e) { return _this.updateRoomSearch(e); }}), React.createElement("button", {name: "SearchRooms", onClick: function (e) { return _this.handleRoomSearch(e, _this.state.roomSearch); }}, "Search")), React.createElement("div", null, React.createElement("h4", null, "Filters"), React.createElement("div", null, React.createElement("div", {style: style215}, React.createElement("p", null, " List Rooms in Building:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateBuilding(e); }}, React.createElement("option", {value: "1"}, "pseudo building 1"), React.createElement("option", {value: "2"}, "pseudo building 2"), React.createElement("option", {value: "3"}, "pseudo building 3")))), React.createElement("div", {style: style215}, React.createElement("p", null, React.createElement("input", {type: "checkbox", name: "nearBuilding", value: "near", onChange: function (e) { return _this.toggleNearby(e); }}), "in", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateNearbyRooms(e); }}, experiment.map(makeSelectItem)), "meters"))), React.createElement("div", null, React.createElement("div", {style: style21}, React.createElement("p", null, "Size:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 1); }}, React.createElement("option", {value: ""}, " - "), React.createElement("option", {value: "GT"}, "Greater Than"), React.createElement("option", {value: "LT"}, "Less Than"), React.createElement("option", {value: "EQ"}, "Equal To")), React.createElement("input", {onChange: function (e) { return _this.updateRoomFilters(e, 2); }}))), React.createElement("div", {style: style21}, React.createElement("p", null, "Type:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 3); }}, React.createElement("option", {value: "Small Group"}, "Small Group"), React.createElement("option", {value: "Tiered Large Group"}, "Tiered Large Group"), React.createElement("option", {value: "Open Design General Purpose"}, "Open Design General Purpose"), React.createElement("option", {value: "Case Style"}, "Case Style")))), React.createElement("div", {style: style21}, React.createElement("p", null, "Furniture:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 4); }}, React.createElement("option", {value: "Classroom-Movable Tables & Chairs"}, "Movable Tables & Chairs"), React.createElement("option", {value: "Classroom-Fixed Tables/Movable Chairs"}, "Fixed Tables/Movable Chairs"), React.createElement("option", {value: "Classroom-Movable Tablets"}, "Movable Tablets"), React.createElement("option", {value: "Classroom-Fixed Tablets"}, "Fixed Tablets"))))), React.createElement("button", {name: "ApplyRooms", onClick: function (e) { return _this.applyRoomFilters(e, _this.state.roomFilters); }}, "Apply")), React.createElement("div", null, React.createElement("h5", null, "Filters:"), React.createElement("p", null, "Size: ", this.state.roomFilters_size_mod, " ", this.state.roomFilters_size), React.createElement("p", null, "Furniture: ", this.state.roomFilters_furniture), React.createElement("p", null, "Type: ", this.state.roomFilters_type)))), React.createElement("div", {id: "scheduler", style: style1}, React.createElement("h4", null, "Scheduler"), React.createElement("p", null, "Click to schedule the selected courses into the selected rooms"), React.createElement("button", {name: "makeSchedule", onClick: function (e) { return _this.handleScheduler(e, _this.state.roomResult, _this.state.courseResult); }}, "Create!"), this.renderScheduleTable())));
+	        return (React.createElement("div", null, React.createElement("div", {id: 'title'}, React.createElement("h3", null, "UBC Course Catalog"), React.createElement("h4", null, "Search: ", this.state.query)), React.createElement("div", {id: 'searchbar'}, React.createElement("div", {style: style1}, React.createElement("h4", null, "Course Xplorer"), React.createElement("div", null, React.createElement("p", null, "Search the course catalog by course title or instructor:"), React.createElement("input", {onChange: function (e) { return _this.updateCourseSearch(e); }}), React.createElement("button", {name: "SearchCourses", onClick: function (e) { return _this.handleCourseSearch(e, _this.state.courseSearch); }}, "Search")), React.createElement("div", null, React.createElement("h4", null, "Filters"), React.createElement("div", null, React.createElement("div", {style: style11}, React.createElement("p", null, "Size:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateCourseFilters(e, 2); }}, React.createElement("option", {value: ""}, " - "), React.createElement("option", {value: "GT"}, "Greater Than"), React.createElement("option", {value: "LT"}, "Less Than"), React.createElement("option", {value: "EQ"}, "Equal To")), React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 1); }}))), React.createElement("div", {style: style11}, React.createElement("p", null, "Dept:", React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 3); }}))), React.createElement("div", {style: style11}, React.createElement("p", null, "Number:", React.createElement("input", {onChange: function (e) { return _this.updateCourseFilters(e, 4); }}))))), React.createElement("div", {style: style110}, React.createElement("button", {name: "ApplyCourses", onClick: function (e) { return _this.applyCourseFilters(e); }}, "Apply")), React.createElement("div", null, React.createElement("h5", null, "Filters:"), React.createElement("p", null, "Size:  ", this.state.courseFilters_size_mod, " ", this.state.courseFilters_size), React.createElement("p", null, "Dept: ", this.state.courseFilters_dept), React.createElement("p", null, "Number: ", this.state.courseFilters_num), React.createElement("div", null, React.createElement("div", {style: style110}, React.createElement("p", null, React.createElement("input", {type: "checkbox", name: "sortAvg", value: "avg", onChange: function (e) { return _this.updateCourseSorting(e); }}), "average")), React.createElement("div", {style: style110}, React.createElement("p", null, React.createElement("input", {type: "checkbox", name: "sortFail", value: "fail", onChange: function (e) { return _this.updateCourseSorting(e); }}), "most failing")), React.createElement("div", {style: style111}, React.createElement("p", null, "Sort by:", React.createElement("input", {type: "checkbox", name: "sortPass", value: "pass", onChange: function (e) { return _this.updateCourseSorting(e); }}), "most passing")))), React.createElement("div", {id: 'result'}, React.createElement("h4", null, "Results"), this.renderCoursesTable())), React.createElement("div", {style: style2}, React.createElement("h4", null, "Room Xplorer"), React.createElement("div", null, React.createElement("p", null, "Search the rooms of UBC by building or room number:"), React.createElement("input", {onChange: function (e) { return _this.updateRoomSearch(e); }}), React.createElement("button", {name: "SearchRooms", onClick: function (e) { return _this.handleRoomSearch(e, _this.state.roomSearch); }}, "Search")), React.createElement("div", null, React.createElement("h4", null, "Filters"), React.createElement("div", null, React.createElement("div", {style: style21}, React.createElement("p", null, "Size:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 1); }}, React.createElement("option", {value: ""}, " - "), React.createElement("option", {value: "GT"}, "Greater Than"), React.createElement("option", {value: "LT"}, "Less Than"), React.createElement("option", {value: "EQ"}, "Equal To")), React.createElement("input", {onChange: function (e) { return _this.updateRoomFilters(e, 2); }}))), React.createElement("div", {style: style21}, React.createElement("p", null, "Type:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 3); }}, React.createElement("option", {value: "Small Group"}, "Small Group"), React.createElement("option", {value: "Tiered Large Group"}, "Tiered Large Group"), React.createElement("option", {value: "Open Design General Purpose"}, "Open Design General Purpose"), React.createElement("option", {value: "Case Style"}, "Case Style")))), React.createElement("div", {style: style21}, React.createElement("p", null, "Furniture:", React.createElement("select", {value: this.state.name, onChange: function (e) { return _this.updateRoomFilters(e, 4); }}, React.createElement("option", {value: "Classroom-Movable Tables & Chairs"}, "Movable Tables & Chairs"), React.createElement("option", {value: "Classroom-Fixed Tables/Movable Chairs"}, "Fixed Tables/Movable Chairs"), React.createElement("option", {value: "Classroom-Movable Tablets"}, "Movable Tablets"), React.createElement("option", {value: "Classroom-Fixed Tablets"}, "Fixed Tablets"))))), React.createElement("button", {name: "ApplyRooms", onClick: function (e) { return _this.applyRoomFilters(e, _this.state.roomFilters); }}, "Apply")), React.createElement("div", null, React.createElement("h5", null, "Filters:"), React.createElement("p", null, "Size: ", this.state.roomFilters_size_mod, " ", this.state.roomFilters_size), React.createElement("p", null, "Furniture: ", this.state.roomFilters_furniture), React.createElement("p", null, "Type: ", this.state.roomFilters_type)))), React.createElement("div", {id: "scheduler", style: style1}, React.createElement("h4", null, "Scheduler"), React.createElement("p", null, "Click to schedule the selected courses into the selected rooms"), React.createElement("button", {name: "makeSchedule", onClick: function (e) { return _this.handleScheduler(e, _this.state.roomResult, _this.state.courseResult); }}, "Create!"), this.renderScheduleTable())));
 	    };
 	    return QueryComponent;
 	}(React.Component));
@@ -2164,7 +2162,6 @@
 	    ScheduleController.prototype.findTime = function (section, possibleRooms, time) {
 	        var that = this;
 	        var timeslot = new Scheduled_1.default();
-	        var flag = false;
 	        for (var r in possibleRooms) {
 	            if (this.roomIsFree(possibleRooms[r], time)) {
 	                timeslot.time = time;
@@ -2179,21 +2176,34 @@
 	    ScheduleController.prototype.getRooms = function (size, rooms) {
 	        var array = [];
 	        for (var r in rooms) {
-	            if (rooms[r].Seats >= size) {
-	                if (rooms[r].Seats < 3 * size) {
+	            if (rooms[r].rooms_seats >= size) {
+	                if (rooms[r].rooms_seats < 3 * size) {
 	                    array.push(rooms[r]);
+	                    console.log('Adding to rooms[] ' + rooms[r].rooms_seats);
 	                }
 	            }
 	        }
 	        array.sort(function (obj1, obj2) {
 	            return obj1.Seats - obj2.Seats;
 	        });
+	        console.log('Z - Section size ' + size);
+	        console.log('       getRooms() array: ' + array.length);
 	        return array;
 	    };
 	    ScheduleController.prototype.makeSchedule = function (rooms, sections) {
 	        for (var i in sections) {
 	            var time = new Time_1.default('MWF', 8);
-	            var possibleRooms = this.getRooms(sections[i].Size, rooms);
+	            var possibleRooms = this.getRooms(sections[i].courses_size, rooms);
+	            if (possibleRooms.length == 0) {
+	                if (this.isBigEnough(rooms, sections[i].courses_size)) {
+	                    possibleRooms = rooms;
+	                }
+	                else {
+	                    console.log('No room big enough');
+	                    throw 'No room big enough';
+	                }
+	            }
+	            console.log('Possible rooms = ' + possibleRooms.length);
 	            var timeslot = this.findTime(sections[i], possibleRooms, time);
 	            this.schedule.push(timeslot);
 	        }
@@ -2208,6 +2218,14 @@
 	        }
 	        var quality = (counter / (schedule.length - 1));
 	        return quality;
+	    };
+	    ScheduleController.prototype.isBigEnough = function (rooms, size) {
+	        for (var r in rooms) {
+	            if (rooms[r].rooms_seats >= size) {
+	                return true;
+	            }
+	        }
+	        return false;
 	    };
 	    return ScheduleController;
 	}());
