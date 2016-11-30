@@ -59,6 +59,28 @@ export default class ScheduleController {
 
             } else {
                 // schedule not empty, so check each entry
+
+                // let j = 0;
+                // while (j < that.schedule.length) {
+                //     let s: any;
+                //     s = that.schedule[j];
+                //     console.log('Z - slot ' + s.Room + ' ' + s.time.time + s.time.days);
+                //     if (s.Room.rooms_name !== r.rooms_name && s.time.time != time.time && s.time.days != time.days) {
+                //         console.log('F - Found room')
+                //         let timeslot = new Scheduled();
+                //         timeslot.time = time;
+                //         timeslot.Room = r;
+                //         timeslot.Section = section;
+                //         return timeslot;
+                //     } else {
+                //         // do nothing
+                //         console.log('Z - occupied room');
+                //         console.log(s.Room.rooms_name);
+                //         console.log(r.rooms_name);
+                //         j++;
+                //     }
+                // }
+
                 for(let slot of that.schedule) {
                     let s: any;
                     s = slot;
@@ -66,21 +88,45 @@ export default class ScheduleController {
                     // console.log(s.Room);
                     // console.log(r);
 
-                    if (s.Room.rooms_name === r.rooms_name && slot.time.time == time.time && slot.time.days == time.days) {
-                        // do nothing
-                        console.log('Z - occupied room');
-                        console.log(s.Room.rooms_name);
-                        console.log(r.rooms_name);
-                        break;
-                    } else {
+                    if (s.Room.rooms_name !== r.rooms_name && slot.time.time != time.time && slot.time.days != time.days) {
                         console.log('F - Found room')
                         let timeslot = new Scheduled();
                         timeslot.time = time;
                         timeslot.Room = r;
                         timeslot.Section = section;
                         return timeslot;
+                    } else {
+                        // do nothing
+                        console.log('Z - occupied room');
+                        console.log(s.Room.rooms_name);
+                        console.log(r.rooms_name);
+                        
                     }
                 }
+
+
+                // for(let slot of that.schedule) {
+                //     let s: any;
+                //     s = slot;
+                //     console.log('Z - slot ' + slot.Room + ' ' + slot.time.time + slot.time.days);
+                //     // console.log(s.Room);
+                //     // console.log(r);
+                //
+                //     if (s.Room.rooms_name === r.rooms_name && slot.time.time == time.time && slot.time.days == time.days) {
+                //         // do nothing
+                //         console.log('Z - occupied room');
+                //         console.log(s.Room.rooms_name);
+                //         console.log(r.rooms_name);
+                //         break;
+                //     } else {
+                //         console.log('F - Found room')
+                //         let timeslot = new Scheduled();
+                //         timeslot.time = time;
+                //         timeslot.Room = r;
+                //         timeslot.Section = section;
+                //         return timeslot;
+                //     }
+                // }
             }
         }
 
