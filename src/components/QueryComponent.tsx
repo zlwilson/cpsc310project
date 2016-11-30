@@ -604,7 +604,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                     <div style={style2}>
                         <h4>Room Xplorer</h4>
                         <div>
-                            <p>Search the rooms of UBC by building or room number:</p>
+                            <p>Search the rooms of UBC by building (full name or abbreviation) or room number:</p>
                             <input onChange={ e => this.updateRoomSearch(e)  }/>
                             <button name="SearchRooms"
                                     onClick={ e => this.handleRoomSearch(e, this.state.roomSearch)  }>
