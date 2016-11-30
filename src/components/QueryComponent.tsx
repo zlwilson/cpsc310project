@@ -513,7 +513,6 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             <div>
                 <div id='title'>
                     <h3>UBC Course Catalog</h3>
-                    <h4>Search: { this.state.query }</h4>
                 </div>
                 <div id='searchbar'>
                     <div style={style1}>

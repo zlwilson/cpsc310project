@@ -15,22 +15,13 @@ import Time from "../model/Time";
 import Scheduled from "../model/Scheduled";
 
 export default class ScheduleController {
-    private allSections:Section[] = [];
-
-    // This is all possible rooms
-    private rooms:Room[] = [];
-    // This is all rooms still available at this time slot
-    private currentRooms: Room[] = [];
-
-    private clock: Number = 8;
 
     private schedule: Scheduled[] = [];
 
-    private allTimes: Time[];
-
     private scheduleIsFree(array: any, room: any, time: Time): boolean {
         for(var i=0;i<array.length;i++) {
-            if (array[i].Room.rooms_name === room && array[i].time === time) {
+            console.log(array[i].Room);
+            if (array[i].Room.rooms_name == room.rooms_name && array[i].time.time === time.time && array[i].time.days === time.days) {
                 return false;
             }
         }
@@ -44,26 +35,52 @@ export default class ScheduleController {
         if (this.schedule.length == 0) {
             return true;
         } else {
-            return this.scheduleIsFree(that.schedule, room.rooms_name, time);
+            return this.scheduleIsFree(that.schedule, room, time);
         }
     }
 
-    private findTime(section: Section, possibleRooms: Room[], time: Time): Scheduled {
+    private findTime(section: Section, possibleRooms: any, time: Time): Scheduled {
         let that = this;
         // console.log(section);   // section has courses_intructor, _size and _title
-        var timeslot = new Scheduled();
 
         for (let r of possibleRooms) {
             // console.log('Z - in findTime(), is room free? ' + this.roomIsFree(possibleRooms[r], time));
-            if (this.roomIsFree(r, time)) {
 
-                console.log('Found a room:');
-                console.log()
+            if (that.schedule.length == 0) {
 
+                console.log('Schedule empty, added 1st timeslot');
+
+                let timeslot = new Scheduled();
                 timeslot.time = time;
                 timeslot.Room = r;
                 timeslot.Section = section;
                 return timeslot;
+
+
+            } else {
+                // schedule not empty, so check each entry
+                for(let slot of that.schedule) {
+                    let s: any;
+                    s = slot;
+                    console.log('Z - slot ' + slot.Room + ' ' + slot.time.time + slot.time.days);
+                    // console.log(s.Room);
+                    // console.log(r);
+
+                    if (s.Room.rooms_name === r.rooms_name && slot.time.time == time.time && slot.time.days == time.days) {
+                        // do nothing
+                        console.log('Z - occupied room');
+                        console.log(s.Room.rooms_name);
+                        console.log(r.rooms_name);
+                        break;
+                    } else {
+                        console.log('F - Found room')
+                        let timeslot = new Scheduled();
+                        timeslot.time = time;
+                        timeslot.Room = r;
+                        timeslot.Section = section;
+                        return timeslot;
+                    }
+                }
             }
         }
 
@@ -106,11 +123,11 @@ export default class ScheduleController {
                 }
             }
 
-            // console.log('Possible rooms = ' + possibleRooms.length);
-
             var timeslot = this.findTime(sections[i], possibleRooms, time);
 
             this.schedule.push(timeslot);
+            console.log('Z - this.schedule.length is');
+            console.log(this.schedule.length);
         }
         return this.schedule;
     }
