@@ -11,7 +11,7 @@ class Main extends React.Component<any, any> {
         super(props);
     }
 
-    public render() {
+    render() {
         return (
             <div>
                     <p></p>

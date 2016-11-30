@@ -32,8 +32,11 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
         //Room
         this.state = {roomResult:""};
+        this.state = {roomSearch:""};
+        this.state = {roomFilters_size: 0};
         this.state = {roomFilters_size_mod: ""};
-        this.state = {roomFilters_building: " "};
+        this.state = {roomFilters_building: ""};
+        this.state = {roomFilters_type: ""};
         this.state = {nearBuilding: false};
 
         //Schedule
@@ -50,6 +53,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
     private handleCourseSearch(event:any, input:any):void {
         // TODO: this is the course search button action, so it should send an AJAX request to courses dataset
         console.log('L - start handling course search with ' + input);
+        let that = this;
 
         var query : IQueryRequest = {
             GET:["courses_title", "courses_instructor"],
@@ -71,6 +75,8 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             this.setState({courseResult: res.data.result});
             console.log('Z - whats the states result?');
             console.log(this.state.courseResult);
+        }).then(function () {
+            that.render();
         }).catch( err=>{
             console.log(err);
             }
@@ -380,7 +386,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
     private renderCourseTableRow(array: Section[]): JSX.Element {
         for (let i in array) {
             return (
-                <tr>
+                <tr key= { array[i].id }>
                     <th> { array[i].Title } </th>
                     <th> { array[i].Professor } </th>
                 </tr>
@@ -388,9 +394,9 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         }
     }
 
-    private renderCoursesTable(result: any): JSX.Element {
+    private renderCoursesTable(): JSX.Element {
         return (
-            <table>
+            <table id="coursesTable">
                 <thead>
                 <tr>
                     <th>Title</th>
@@ -411,12 +417,13 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         let schedule = controller.makeSchedule(rooms, sections);
 
         this.state.schedule = schedule;
+        this.render();
     }
 
     private renderScheduleTableRow(array: Scheduled[]): JSX.Element {
         for (let i in array) {
             return (
-                <tr>
+                <tr key= { array[i].Room.name + array[i].time.time } >
                     <th> { array[i].Section.Title } </th>
                     <th> { array[i].Section.Section } </th>
                     <th> { array[i].Room.name } </th>
@@ -586,7 +593,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                         </div>
                         <div id='result'>
                             <h4>Results</h4>
-                            { this.renderCoursesTable(this.state.courseResult) }
+                            { this.renderCoursesTable() }
                         </div>
                     </div>
                     <div style={style2}>

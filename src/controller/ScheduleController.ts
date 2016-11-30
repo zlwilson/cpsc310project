@@ -58,16 +58,12 @@ export default class ScheduleController {
             }
         }
 
-        // console.log('Z - in findTime(), did not find timeslot');
-
         let newTime = time.getNext();
-        // console.log('Z - reached end of possible rooms at current time, new time: ' + newTime.time + ' ' + newTime.days)
-
         return that.findTime(section, possibleRooms, newTime);
     }
 
+    // get all rooms large enough for a section, but not too large (3*size)
     private getRooms(size: number, rooms: Room[]): Room[] {
-        // get all rooms large enough for a section, but not too large (2*size)
         // console.log('Z - in getRooms(), size = ' + size);
 
         // console.log('Z - in getRooms(), rooms = ' + rooms.length);
@@ -76,7 +72,7 @@ export default class ScheduleController {
         for (let r in rooms) {
             // rooms[r].printRoom();
             if (rooms[r].Seats >= size) {
-                if (rooms[r].Seats < 2*size) {
+                if (rooms[r].Seats < 3*size) {
                     array.push(rooms[r]);
                 }
             }
@@ -94,10 +90,10 @@ export default class ScheduleController {
     public makeSchedule(rooms: Room[], sections: Section[]): Scheduled[] {
         // console.log('Z - in makeSchedule()...');
         for (let i in sections) {
-            let scheduledRoom = new Scheduled();
             let time = new Time('MWF', 8);
 
             let possibleRooms = this.getRooms(sections[i].Size, rooms);
+            // let possibleRooms = rooms;
             // console.log('Z - in makeSchedule(), number of possible rooms: ' + possibleRooms.length);
 
             var timeslot = this.findTime(sections[i], possibleRooms, time);
