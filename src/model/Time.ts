@@ -34,7 +34,11 @@ export default class Time {
     public getNext(): Time {
         // get the next available time slot
         if (this.days == 'T/Th') {
-            return new Time('T/Th', this.time + 1.5);
+            if (this.time > 22) {
+                return new Time('MWF', 8);
+            } else {
+                return new Time('T/Th', this.time + 1.5);
+            }
         } else if (this.time > 16) {
             return new Time('T/Th', 8);
         } else {

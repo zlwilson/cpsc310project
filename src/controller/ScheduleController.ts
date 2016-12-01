@@ -39,7 +39,7 @@ export default class ScheduleController {
         }
     }
 
-    private findTime(section: Section, possibleRooms: any, time: Time): Scheduled {
+    private findTime(section: any, possibleRooms: any, time: Time): Scheduled {
         let that = this;
         // console.log(section);   // section has courses_intructor, _size and _title
 
@@ -76,8 +76,12 @@ export default class ScheduleController {
                             // room occupied
                             flag = true;
                             break;
+                        } else if (s.Section.courses_instructor == section.courses_instructor) {
+                            flag = true;
+                            break;
                         } else {
-                            flag = false
+                            // room not occupied
+                            flag = false;
                         }
                     } else {
                         // room not occupied
@@ -94,7 +98,7 @@ export default class ScheduleController {
                     that.schedule.push(timeslot);
                     return timeslot;
                 } else {
-                    break;
+
                 }
             }
         }
