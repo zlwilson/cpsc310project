@@ -39,12 +39,15 @@ export default class ScheduleController {
         }
     }
 
-    private findTime(section: Section, possibleRooms: any, time: Time): Scheduled {
+    private findTime(section: any, possibleRooms: any, time: Time): Scheduled {
         let that = this;
         // console.log(section);   // section has courses_intructor, _size and _title
 
         for (let r of possibleRooms) {
-            // console.log('Z - in findTime(), is room free? ' + this.roomIsFree(possibleRooms[r], time));
+            console.log('Z - is room free? time, room');
+            console.log(time);
+            console.log(r);
+            let flag = false;
 
             if (that.schedule.length == 0) {
 
@@ -54,38 +57,56 @@ export default class ScheduleController {
                 timeslot.time = time;
                 timeslot.Room = r;
                 timeslot.Section = section;
+                that.schedule.push(timeslot);
                 return timeslot;
-
 
             } else {
                 // schedule not empty, so check each entry
-                // console.log(that.schedule.length);
                 for(let slot of that.schedule) {
                     let s: any;
                     s = slot;
-                    // console.log('Z - slot ' + slot.Room + ' ' + slot.time.time + slot.time.days);
-                    // console.log(s.Room);
-                    // console.log(r);
+                    console.log('Schedule not empty, slot ' + s.time.time + ' ' + s.time.days + ' ' + s.Room.rooms_name);
+                    console.log('Compare to        , slot ' + time.time + ' ' + time.days + ' ' + r.rooms_name);
+                    console.log('Same time? ' + (slot.time.time === time.time && slot.time.days === time.days));
+                    console.log('Same building? ' + (s.Room.rooms_shortname === r.rooms_shortname));
+                    console.log('Same room? ' + (s.Room.rooms_shortname === r.rooms_shortname));
 
-                    if (s.Room.rooms_name != r.rooms_name && slot.time.time != time.time && slot.time.days != time.days) {
-                        // room not occupied
-                        // console.log('F - Found room')
-                        let timeslot = new Scheduled();
-                        timeslot.time = time;
-                        timeslot.Room = r;
-                        timeslot.Section = section;
-                        return timeslot;
+                    if (slot.time.time === time.time && slot.time.days === time.days) {
+                        if (s.Room.rooms_shortname === r.rooms_shortname && s.Room.rooms_shortname === r.rooms_shortname) {
+                            // room occupied
+                            flag = true;
+                            break;
+                        } else if (s.Section.courses_instructor == section.courses_instructor) {
+                            flag = true;
+                            break;
+                        } else {
+                            // room not occupied
+                            flag = false;
+                        }
                     } else {
-                        // do nothing, room occupied
-                        // console.log('Z - occupied room');
-                        // console.log(s.Room.rooms_name);
-                        // console.log(r.rooms_name);
+                        // room not occupied
+                        flag = false;
                     }
+                }
+                if (!flag) {
+                    console.log('Found room:')
+                    console.log()
+                    let timeslot = new Scheduled();
+                    timeslot.time = time;
+                    timeslot.Room = r;
+                    timeslot.Section = section;
+                    that.schedule.push(timeslot);
+                    return timeslot;
+                } else {
+
                 }
             }
         }
-
         let newTime = time.getNext();
+
+        console.log('No rooms, next slot:');
+        console.log(newTime);
+
         return that.findTime(section, possibleRooms, newTime);
     }
 
@@ -111,12 +132,13 @@ export default class ScheduleController {
     }
 
     public makeSchedule(rooms: any, sections: any): Scheduled[] {
+        let that = this;
         for (let i in sections) {
             let time = new Time('MWF', 8);
 
-            let possibleRooms = this.getRooms(sections[i].courses_size, rooms);
+            let possibleRooms = that.getRooms(sections[i].courses_size, rooms);
             if (possibleRooms.length == 0) {
-                if (this.isBigEnough(rooms, sections[i].courses_size)) {
+                if (that.isBigEnough(rooms, sections[i].courses_size)) {
                     possibleRooms = rooms;
                 } else {
                     console.log('No room big enough');
@@ -124,13 +146,13 @@ export default class ScheduleController {
                 }
             }
 
-            var timeslot = this.findTime(sections[i], possibleRooms, time);
+            var timeslot = that.findTime(sections[i], possibleRooms, time);
 
-            this.schedule.push(timeslot);
-            console.log('Z - this.schedule.length is');
-            console.log(this.schedule.length);
+            // console.log('Z - this.schedule.length is');
+            // console.log(that.schedule.length);
         }
-        return this.schedule;
+        console.log(that.schedule);
+        return that.schedule;
     }
 
     public checkQuality(schedule: Scheduled[]): number {

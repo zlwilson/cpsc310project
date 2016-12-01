@@ -54,7 +54,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             roomFilterEmpty: true,
 
             //Schedule
-            schedule:""
+            schedule:[]
         };
 
     }
@@ -70,6 +70,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         // TODO: this is the course search button action, so it should send an AJAX request to courses dataset
         console.log('L - start handling course search with ' + input);
         console.log(this.state.sortAvg);
+
         let that = this;
 
         this.setState({courseSearch: input});
@@ -125,16 +126,16 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             }
 
         var queryJSON = JSON.stringify(query);
-        console.log('L - handle course search query string: ' + queryJSON);
+        // console.log('L - handle course search query string: ' + queryJSON);
 
         axios.post('http://localhost:4321/query', query).then(res => {
-            console.log('Z - got some data!');
-            console.log(res.data.result);
+            // console.log('Z - got some data!');
+            // console.log(res.data.result);
 
             this.setState({courseSearchResult: res.data.result});
 
-            console.log('Z - whats the states result?');
-            console.log(this.state.courseResult);
+            // console.log('Z - whats the states result?');
+            // console.log(this.state.courseResult);
 
             this.mergeCourseResult();
 
@@ -156,7 +157,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
     private updateCourseFilters(event:any, type:number):void {
         if (type == 1) {
             if (event.target.value === ""){
-                console.log("L - suppose to be empty value here" + event.target.value);
+                // console.log("L - suppose to be empty value here" + event.target.value);
                 this.setState({courseFilters_size: -1});
             } else {
                 this.setState({courseFilters_size: event.target.value});
@@ -177,7 +178,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         ]};
 
         this.setState({courseFilterEmpty:false});
-        console.log(this.state.courseFilters_size + this.state.courseFilters_num + this.state.courseFilters_dept);
+        // console.log(this.state.courseFilters_size + this.state.courseFilters_num + this.state.courseFilters_dept);
 
         if (typeof this.state.courseFilters_size_mod === "" || typeof this.state.courseFilters_size === "undefined" || this.state.courseFilters_size === -1){
 
@@ -353,7 +354,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
     private handleRoomSearch(event:any, input:any):void {
         // TODO: this is the room search button action, so it should send an AJAX request to rooms dataset
-        console.log('L - start handling room search with ' + input);
+        // console.log('L - start handling room search with ' + input);
 
         if(input === "**" || input === ""){
             this.setState({roomSearchEmpty: true});
@@ -373,14 +374,14 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             AS:'TABLE'};
 
         var queryJSON = JSON.stringify(query);
-        console.log('L - handle room search query string: ' + queryJSON);
+        // console.log('L - handle room search query string: ' + queryJSON);
 
         axios.post('http://localhost:4321/query', query).then(res => {
-            console.log('Z - got some data!');
-            console.log(res.data);
+            // console.log('Z - got some data!');
+            // console.log(res.data);
             this.setState({roomSearchResult: res.data.result});
-            console.log('Z - whats the states result?');
-            console.log(this.state.roomSearchResult);
+            // console.log('Z - whats the states result?');
+            // console.log(this.state.roomSearchResult);
             this.mergeRoomResult();
         }).catch( err=>{
                 console.log(err);
@@ -404,7 +405,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         ]};
 
         this.setState({roomFilterEmpty: false});
-        console.log(this.state.roomFilters_size + this.state.roomFilters_furniture + this.state.roomFilters_type);
+        // console.log(this.state.roomFilters_size + this.state.roomFilters_furniture + this.state.roomFilters_type);
 
         if (typeof this.state.roomFilters_size_mod === "" || typeof this.state.roomFilters_size === "undefined" || this.state.roomFilters_size === -1){
 
@@ -476,7 +477,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         };
 
         axios.post('http://localhost:4321/query', query).then(res => {
-            console.log(res.data);
+            // console.log(res.data);
 
             this.setState({roomFilterResult: res.data.result});
             this.mergeRoomResult();
@@ -492,7 +493,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             this.setState({roomFilters_size_mod: event.target.value});
         } else if (type == 2) {
             if (event.target.value === ""){
-                console.log("L - suppose to be empty value here" + event.target.value);
+                // console.log("L - suppose to be empty value here" + event.target.value);
                 this.setState({roomFilters_size: -1});
             } else {
                 this.setState({roomFilters_size: event.target.value});
@@ -510,23 +511,23 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         var searchResult = this.state.courseSearchResult;
         var filterResult = this.state.courseFilterResult;
         var result:any = [];
-        console.log(searchResult);
-        console.log(filterResult);
+        // console.log(searchResult);
+        // console.log(filterResult);
 
         if(this.state.courseFilterEmpty === true){
             if (this.state.courseSearchEmpty === true){
-                console.log("both empty");
+                // console.log("both empty");
                 this.setState({courseResult: []});
             } else {
-                console.log("empty filter");
+                // console.log("empty filter");
                 this.setState({courseResult: searchResult});
             }
         } else {
             if (this.state.courseSearchEmpty === true){
-                console.log("empty search");
+                // console.log("empty search");
                 this.setState({courseResult: filterResult});
             } else {
-                console.log("None empty");
+                // console.log("None empty");
 
                 for (var f in filterResult){
                     for (var s in searchResult){
@@ -541,7 +542,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             }
         }
 
-        console.log(this.state.courseResult);
+        // console.log(this.state.courseResult);
 
     }
 
@@ -551,23 +552,23 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         var filterResult = this.state.roomFilterResult;
         var result:any = [];
 
-        console.log(searchResult);
-        console.log(filterResult);
+        // console.log(searchResult);
+        // console.log(filterResult);
 
         if(this.state.roomFilterEmpty === true){
             if (this.state.roomSearchEmpty === true){
-                console.log("both empty");
+                // console.log("both empty");
                 this.setState({roomResult: []});
             } else {
-                console.log("empty filter");
+                // console.log("empty filter");
                 this.setState({roomResult: searchResult});
             }
         } else {
             if (this.state.roomSearchEmpty === true){
-                console.log("empty search");
+                // console.log("empty search");
                 this.setState({roomResult: filterResult});
             } else {
-                console.log("None empty");
+                // console.log("None empty");
 
                 for (var f in filterResult){
                     for (var s in searchResult){
@@ -588,7 +589,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
     private renderCourseTableRow(): JSX.Element {
 
         var array:any = this.state.courseResult;
-        console.log(array);
+        // console.log(array);
         // var something = this.state.courseFilters_dept;
         // var some = this.state.courseFilters_num;
         // return (
@@ -639,7 +640,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
     private renderRoomsTableRow(): JSX.Element {
 
         var array:any = this.state.roomResult;
-        console.log(array);
+        // console.log(array);
 
         for (var i = 1; i < array.length + 1; i++){
             array[i-1]["key"] = i;
@@ -694,18 +695,26 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         console.log('Quality = ' + quality);
 
         this.state.schedule = schedule;
-        this.render();
+        // this.render();
     }
 
     private renderScheduleTableRow(): JSX.Element {
-        var array : any = this.state.courseResult;
+        var array : any = this.state.schedule;
+        // console.log('Z - rendering schedule rows');
+
+        for (var i = 0; i < array.length; i++){
+            array[i]["key"] = i+1;
+            // console.log(array[i].Section.courses_title);
+            // console.log(array[i].Room.rooms_name);
+            // console.log(array[i].time);
+        }
 
         var rows = array.map(function (n:any) {
             return (
-                <tr key= { n.Room.name + n.time.time } >
-                    <th> { n.Section.Title } </th>
-                    <th> { n.Section.Section } </th>
-                    <th> { n.Room.name } </th>
+                <tr key= { n.key } >
+                    <th> { n.Section.courses_title } </th>
+                    <th> { n.Section.courses_section } </th>
+                    <th> { n.Room.rooms_name } </th>
                     <th> { n.time } </th>
                 </tr>
             )
@@ -715,25 +724,21 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
     }
 
     private renderScheduleTable(): JSX.Element {
-        if (this.state.schedule == "") {
-            return null;
-        } else {
-            return (
-                <table key="scheduleTable">
-                    <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Section</th>
-                        <th>Room</th>
-                        <th>Time</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    { this.renderScheduleTableRow() }
-                    </tbody>
-                </table>
-            );
-        }
+        return (
+            <table id="scheduleTable">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Section</th>
+                    <th>Room</th>
+                    <th>Time</th>
+                </tr>
+                </thead>
+                <tbody>
+                { this.renderScheduleTableRow() }
+                </tbody>
+            </table>
+        )
     }
 
     componentDidUpdate( prevProp: any, prevState: any) {
