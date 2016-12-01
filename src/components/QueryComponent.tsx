@@ -257,7 +257,8 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             GET:["rooms_fullname","rooms_number", "rooms_name", "rooms_seats"],
             WHERE:{
                 "OR":[
-                        {"IS": {rooms_name: input}},
+                        {"IS": {rooms_fullname: input}},
+                        {"IS": {rooms_shortname:input}},
                         {"IS":{rooms_number:input}}
                     ]},
             AS:'TABLE'};
