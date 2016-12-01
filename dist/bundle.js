@@ -139,7 +139,7 @@
 	                "AND": [
 	                    { "OR": [
 	                            { "IS": { courses_title: input } },
-	                            { "IS": { courses_instructor: input } }
+	                            { "IS": { courses_instructor: input } },
 	                        ] },
 	                    { "EQ": { courses_year: 2014 } }] },
 	            AS: 'TABLE' };
@@ -481,7 +481,8 @@
 	        var quality = controller.checkQuality(schedule);
 	        console.log(schedule);
 	        console.log('Quality = ' + quality);
-	        this.state.schedule = schedule;
+	        this.setState({ schedule: schedule });
+	        this.render();
 	    };
 	    QueryComponent.prototype.renderScheduleTableRow = function () {
 	        var array = this.state.schedule;
@@ -489,7 +490,7 @@
 	            array[i]["key"] = i + 1;
 	        }
 	        var rows = array.map(function (n) {
-	            return (React.createElement("tr", {key: n.key}, React.createElement("th", null, " ", n.Section.courses_title, " "), React.createElement("th", null, " ", n.Section.courses_section, " "), React.createElement("th", null, " ", n.Room.rooms_name, " "), React.createElement("th", null, " ", n.time, " ")));
+	            return (React.createElement("tr", {key: n.key}, React.createElement("th", null, " ", n.Section.courses_title, " "), React.createElement("th", null, " ", n.Section.courses_id, " "), React.createElement("th", null, " ", n.Room.rooms_name, " "), React.createElement("th", null, " ", n.time.time + n.time.days, " ")));
 	        });
 	        return rows;
 	    };
@@ -2256,12 +2257,8 @@
 	        var that = this;
 	        for (var _i = 0, possibleRooms_1 = possibleRooms; _i < possibleRooms_1.length; _i++) {
 	            var r = possibleRooms_1[_i];
-	            console.log('Z - is room free? time, room');
-	            console.log(time);
-	            console.log(r);
 	            var flag = false;
 	            if (that.schedule.length == 0) {
-	                console.log('Schedule empty, added 1st timeslot');
 	                var timeslot = new Scheduled_1.default();
 	                timeslot.time = time;
 	                timeslot.Room = r;
@@ -2274,11 +2271,6 @@
 	                    var slot = _b[_a];
 	                    var s = void 0;
 	                    s = slot;
-	                    console.log('Schedule not empty, slot ' + s.time.time + ' ' + s.time.days + ' ' + s.Room.rooms_name);
-	                    console.log('Compare to        , slot ' + time.time + ' ' + time.days + ' ' + r.rooms_name);
-	                    console.log('Same time? ' + (slot.time.time === time.time && slot.time.days === time.days));
-	                    console.log('Same building? ' + (s.Room.rooms_shortname === r.rooms_shortname));
-	                    console.log('Same room? ' + (s.Room.rooms_shortname === r.rooms_shortname));
 	                    if (slot.time.time === time.time && slot.time.days === time.days) {
 	                        if (s.Room.rooms_shortname === r.rooms_shortname && s.Room.rooms_shortname === r.rooms_shortname) {
 	                            flag = true;
@@ -2297,8 +2289,6 @@
 	                    }
 	                }
 	                if (!flag) {
-	                    console.log('Found room:');
-	                    console.log();
 	                    var timeslot = new Scheduled_1.default();
 	                    timeslot.time = time;
 	                    timeslot.Room = r;
@@ -2311,8 +2301,6 @@
 	            }
 	        }
 	        var newTime = time.getNext();
-	        console.log('No rooms, next slot:');
-	        console.log(newTime);
 	        return that.findTime(section, possibleRooms, newTime);
 	    };
 	    ScheduleController.prototype.getRooms = function (size, rooms) {
@@ -2331,6 +2319,11 @@
 	    };
 	    ScheduleController.prototype.makeSchedule = function (rooms, sections) {
 	        var that = this;
+	        for (var j in sections) {
+	            if (sections[j].courses_instructor == '') {
+	                sections.splice(j, 1);
+	            }
+	        }
 	        for (var i in sections) {
 	            var time = new Time_1.default('MWF', 8);
 	            var possibleRooms = that.getRooms(sections[i].courses_size, rooms);
@@ -2345,7 +2338,6 @@
 	            }
 	            var timeslot = that.findTime(sections[i], possibleRooms, time);
 	        }
-	        console.log(that.schedule);
 	        return that.schedule;
 	    };
 	    ScheduleController.prototype.checkQuality = function (schedule) {

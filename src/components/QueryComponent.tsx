@@ -81,7 +81,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                 "AND": [
                     {"OR":[
                         {"IS": {courses_title: input}},
-                        {"IS":{courses_instructor:input}}
+                        {"IS":{courses_instructor:input}},
                         ]},
                 {"EQ": {courses_year: 2014}}]},
             AS:'TABLE'};
@@ -590,8 +590,9 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         console.log(schedule);
         console.log('Quality = ' + quality);
 
-        this.state.schedule = schedule;
-        // this.render();
+        this.setState({ schedule: schedule });
+        // this.state.schedule = schedule;
+        this.render();
     }
 
     private renderScheduleTableRow(): JSX.Element {
@@ -609,9 +610,9 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             return (
                 <tr key= { n.key } >
                     <th> { n.Section.courses_title } </th>
-                    <th> { n.Section.courses_section } </th>
+                    <th> { n.Section.courses_id } </th>
                     <th> { n.Room.rooms_name } </th>
-                    <th> { n.time } </th>
+                    <th> { n.time.time + n.time.days } </th>
                 </tr>
             )
         });
