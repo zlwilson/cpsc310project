@@ -502,9 +502,11 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         var rows = array.map(function (n:any) {
             return (
                 <tr key={n.key}>
-                    <th> {n.key} </th>
                     <th> { n.courses_title} </th>
                     <th> { n.courses_instructor } </th>
+                    <th> { n.courses_id } </th>
+                    <th> { n.courses_dept } </th>
+                    <th> { n.courses_size } </th>
                 </tr>
             )
         });
@@ -517,9 +519,11 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             <table id="coursesTable">
                 <thead>
                 <tr>
-                    <th>No.</th>
                     <th>Title</th>
                     <th>Instructor</th>
+                    <th>Course Number</th>
+                    <th>Department</th>
+                    <th>Section Size</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -541,9 +545,11 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         var rows = array.map(function (n:any) {
             return (
                 <tr key={n.key}>
-                    <th> {n.key} </th>
                     <th> { n.rooms_fullname} </th>
                     <th> { n.rooms_number } </th>
+                    <th> { n.rooms_seats } </th>
+                    <th> { n.rooms_type } </th>
+                    <th> { n.rooms_furniture } </th>
                 </tr>
             )
         });
@@ -556,9 +562,11 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             <table id="roomsTable">
                 <thead>
                 <tr>
-                    <th>No.</th>
                     <th>Building Name</th>
                     <th>Room Number</th>
+                    <th>Room Size</th>
+                    <th>Room Type</th>
+                    <th>Room Furniture</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -586,17 +594,21 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         this.render();
     }
 
-    private renderScheduleTableRow(array: Scheduled[]): JSX.Element {
-        for (let i in array) {
+    private renderScheduleTableRow(): JSX.Element {
+        var array : any = this.state.courseResult;
+
+        var rows = array.map(function (n) {
             return (
-                <tr key= { array[i].Room.name + array[i].time.time } >
-                    <th> { array[i].Section.Title } </th>
-                    <th> { array[i].Section.Section } </th>
-                    <th> { array[i].Room.name } </th>
-                    <th> { array[i].time } </th>
+                <tr key= { n.Room.name + n.time.time } >
+                    <th> { n.Section.Title } </th>
+                    <th> { n.Section.Section } </th>
+                    <th> { n.Room.name } </th>
+                    <th> { n.time } </th>
                 </tr>
             )
-        }
+        });
+
+        return rows;
     }
 
     private renderScheduleTable(): JSX.Element {
@@ -614,7 +626,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                     </tr>
                     </thead>
                     <tbody>
-                    { this.renderScheduleTableRow(this.state.courseResult) }
+                    { this.renderScheduleTableRow() }
                     </tbody>
                 </table>
             );
@@ -858,6 +870,10 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                         Create!
                     </button>
                     { this.renderScheduleTable() }
+                </div>
+                <div id='scheduleResult'>
+                    <h4>Results</h4>
+                    {this.renderScheduleTable()}
                 </div>
             </div>
         );
