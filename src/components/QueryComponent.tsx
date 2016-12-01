@@ -24,14 +24,18 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         super(props);
         //this.state = {query: this.props.defaultQuery};
         this.state = {courseFilters_size_mod: ""};
-        this.state = {courseResult:""};
+        this.state = {courseSearchResult:[]};
+        this.state = {courseFilterResult:[]};
+        this.state = {courseResult:[]};
         this.state = {courseSearch:""};
         this.state = {courseFilters_size: 0};
         this.state = {courseFilters_dept: ""};
         this.state = {courseFilters_num: ""};
 
         //Room
-        this.state = {roomResult:""};
+        this.state = {roomSearchResult:[]};
+        this.state = {roomFilterResult:[]};
+        this.state = {roomResult: []};
         this.state = {roomSearch:""};
         this.state = {roomFilters_size: 0};
         this.state = {roomFilters_size_mod: ""};
@@ -55,6 +59,12 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         console.log('L - start handling course search with ' + input);
         let that = this;
 
+        if(input === ""){
+            this.setState({courseSearchResult:[]});
+            this.mergeCourseResult();
+            return;
+        }
+
         var query : IQueryRequest = {
             GET:["courses_title", "courses_instructor", "courses_size"],
             WHERE:{
@@ -72,11 +82,14 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         axios.post('http://localhost:4321/query', query).then(res => {
             console.log('Z - got some data!');
             console.log(res.data.result);
-            this.setState({courseResult: res.data.result});
+
+            this.setState({courseSearchResult: res.data.result});
+
             console.log('Z - whats the states result?');
             console.log(this.state.courseResult);
-        }).then(function () {
-            that.render();
+
+            this.mergeCourseResult();
+
         }).catch( err=>{
             console.log(err);
             }
@@ -113,7 +126,10 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             if (typeof this.state.courseFilters_dept === "undefined" || this.state.courseFilters_dept === ""){
 
                 if (typeof this.state.courseFilters_num === "undefined" || this.state.courseFilters_num === ""){
-                    //Case 1: all left empty -> get all courses
+                    //Case 1: all left empty -> nothing shown
+                    this.setState({courseFilterResult:[]});
+                    this.mergeCourseResult();
+                    return;
 
                 } else {
                     //Case 2: only course number indicated
@@ -175,55 +191,16 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
         axios.post('http://localhost:4321/query', query).then(res => {
             console.log(res.data);
-            var newResult = res.data.result;
-            var oldResult = this.state.courseResult;
-            oldResult.filter(function (n:any) {
-                return newResult.indexOf(n);
-            })
 
-            this.setState({courseResult: oldResult});
-            var head:string[] = query.GET as string[];
-            this.generateTable(head);
+            this.setState({courseFilterResult: res.data.result});
+            this.mergeCourseResult();
         }).catch( err=>{
                 console.log(err);
             }
         );
+
     }
 
-    private generateTable(head:string[]) {
-        var table = document.getElementById("myTable");
-        var thead = document.createElement("thead");
-        var tbody = document.createElement("tbody");
-
-        table.appendChild(thead);
-        table.appendChild(tbody);
-
-        var cols = head.map(function (colData) {
-            return <th key={colData}> {colData}</th>
-        });
-        //thead.appendChild(cols);
-
-        var data = this.state.result.map(function (item: any) {
-            var cells = head.map(function (colData) {
-                return <td>{item[colData]}</td>;
-            });
-
-            return <tr key={item}>{cells}</tr>;
-        });
-        tbody.appendChild(data);
-
-
-        // this.state.result.forEach(function (items: any) {
-        //     var row = document.createElement("tr");
-        //     for (var i in items){
-        //         var cell = document.createElement("dt");
-        //         cell.textContent = items[i];
-        //         row.appendChild(cell);
-        //     }
-        //
-        //     tbody.appendChild(row);
-        // });
-    }
 
     private updateCourseSorting(event:any){
 
@@ -253,6 +230,12 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         // TODO: this is the room search button action, so it should send an AJAX request to rooms dataset
         console.log('L - start handling room search with ' + input);
 
+        if(input === ""){
+            this.setState({roomSearchResult:[]});
+            this.mergeRoomResult();
+            return;
+        }
+
         var query : IQueryRequest = {
             GET:["rooms_fullname","rooms_number", "rooms_name", "rooms_seats"],
             WHERE:{
@@ -269,9 +252,10 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         axios.post('http://localhost:4321/query', query).then(res => {
             console.log('Z - got some data!');
             console.log(res.data);
-            this.setState({result: res.data});
+            this.setState({roomSearchResult: res.data});
             console.log('Z - whats the states result?');
             console.log(this.state.result.result);
+            this.mergeRoomResult();
         }).catch( err=>{
                 console.log(err);
             }
@@ -285,6 +269,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
     private applyRoomFilters(event:any, input:any):void {
         // TODO: this is the room filter apply button action, so it should send an AJAX request to rooms dataset
         var andQuery: any = {"AND":[
+            //Why are we doing that?
             {"LT":{rooms_lat:100}}
         ]};
 
@@ -295,7 +280,10 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             if (typeof this.state.roomFilters_type === "undefined" || this.state.roomFilters_type === ""){
 
                 if (typeof this.state.roomFilters_furniture === "undefined" || this.state.roomFilters_furniture === ""){
-                    //Case 1: all left empty -> get all courses
+                    //Case 1: all left empty -> nothing shown
+                    this.setState({roomSearchResult:[]});
+                    this.mergeRoomResult();
+                    return;
 
                 } else {
                     //Case 2: only room furniture indicated
@@ -357,11 +345,10 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
         axios.post('http://localhost:4321/query', query).then(res => {
             console.log(res.data);
-            var newResult = res.data.result;
 
-            this.setState({roomResult: newResult});
-            var head:string[] = query.GET as string[];
-            // this.generateTable(head);
+            this.setState({roomFilterResult: res.data.result});
+            this.mergeRoomResult();
+
         }).catch( err=>{
                 console.log(err);
             }
@@ -379,6 +366,99 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             this.setState({roomFilters_type: event.target.value});
         }
     }
+
+
+    //combine search and filter result, generate table, and render
+    private mergeCourseResult(){
+        var searchResult = this.state.courseSearchResult;
+        var filterResult = this.state.courseFilterResult;
+        var result:any = [];
+
+        if(filterResult === 0){
+            if (searchResult.length === 0){
+                this.setState({courseResult: []});
+            } else {
+                this.setState({courseResult: searchResult});
+            }
+        } else {
+            if (searchResult.length === 0){
+                this.setState({courseResult: filterResult});
+            } else {
+
+                result = searchResult.filter(function (n:any) {
+                    return filterResult.indexOf(n);
+                });
+
+                this.setState({courseResult: result});
+            }
+        }
+
+        //generate table and render here
+        //this.generateTable();
+
+    }
+
+    private mergeRoomResult() {
+
+        var searchResult = this.state.roomSearchResult;
+        var filterResult = this.state.roomFilterResult;
+        var result:any = [];
+
+        if (filterResult === 0) {
+            if (searchResult.length === 0) {
+                this.setState({roomResult: []});
+            } else {
+                this.setState({roomResult: searchResult});
+            }
+        } else {
+            if (searchResult.length === 0) {
+                this.setState({roomResult: filterResult});
+            } else {
+
+                result = searchResult.filter(function (n: any) {
+                    return filterResult.indexOf(n);
+                });
+
+                this.setState({roomResult: result});
+            }
+        }
+    }
+
+    private generateTable(head:string[]) {
+        var table = document.getElementById("myTable");
+        var thead = document.createElement("thead");
+        var tbody = document.createElement("tbody");
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
+
+        var cols = head.map(function (colData) {
+            return <th key={colData}> {colData}</th>
+        });
+        //thead.appendChild(cols);
+
+        var data = this.state.result.map(function (item: any) {
+            var cells = head.map(function (colData) {
+                return <td>{item[colData]}</td>;
+            });
+
+            return <tr key={item}>{cells}</tr>;
+        });
+        tbody.appendChild(data);
+
+
+        // this.state.result.forEach(function (items: any) {
+        //     var row = document.createElement("tr");
+        //     for (var i in items){
+        //         var cell = document.createElement("dt");
+        //         cell.textContent = items[i];
+        //         row.appendChild(cell);
+        //     }
+        //
+        //     tbody.appendChild(row);
+        // });
+    }
+
 
     private renderCourseTableRow(array: Section[]): JSX.Element {
         for (let i in array) {
@@ -598,7 +678,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                         </div>
                         <div id='result'>
                             <h4>Results</h4>
-                            { this.renderCoursesTable() }
+                            {this.renderCoursesTable()}
                         </div>
                     </div>
                     <div style={style2}>
@@ -654,6 +734,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                                 <div style={style21}>
                                     <p>Type:
                                         <select value={this.state.name} onChange={ e => this.updateRoomFilters(e, 3) }>
+                                            <option value=""> - choose type - </option>
                                             <option value="Small Group">Small Group</option>
                                             <option value="Tiered Large Group">Tiered Large Group</option>
                                             <option value="Open Design General Purpose">Open Design General Purpose</option>
@@ -664,6 +745,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                                 <div style={style21}>
                                     <p>Furniture:
                                         <select value={this.state.name} onChange={ e => this.updateRoomFilters(e, 4) }>
+                                            <option value=""> - choose furniture - </option>
                                             <option value="Classroom-Movable Tables & Chairs">Movable Tables & Chairs</option>
                                             <option value="Classroom-Fixed Tables/Movable Chairs">Fixed Tables/Movable Chairs</option>
                                             <option value="Classroom-Movable Tablets">Movable Tablets</option>

@@ -1122,7 +1122,7 @@ export default class QueryController {
         {
             for (var j = i + 1; j< dupArray.length; ++j)
             {
-                if (dupArray[i].id === dupArray[j].id)
+                if (dupArray[i] === dupArray[j])
                 {
                     dupArray.splice(j--, 1);
                 }
