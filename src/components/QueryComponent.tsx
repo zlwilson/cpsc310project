@@ -694,7 +694,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         console.log(schedule);
         console.log('Quality = ' + quality);
 
-        this.state.schedule = schedule;
+        this.setState({schedule: schedule});
         // this.render();
     }
 
@@ -715,7 +715,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                     <th> { n.Section.courses_title } </th>
                     <th> { n.Section.courses_section } </th>
                     <th> { n.Room.rooms_name } </th>
-                    <th> { n.time } </th>
+                    <th> { n.time.days + n.time.time } </th>
                 </tr>
             )
         });
