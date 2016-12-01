@@ -31,20 +31,24 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             courseFilterResult:[],
             courseResult:[],
             courseSearch:"",
-            courseFilters_size: 0,
+            courseFilters_size: -1,
             courseFilters_dept: "",
             courseFilters_num: "",
+            courseSearchEmpty: true,
+            courseFilterEmpty: true,
 
             //Room
             roomSearchResult:[],
             roomFilterResult:[],
             roomResult: [],
             roomSearch:"",
-            roomFilters_size: 0,
+            roomFilters_size: -1,
             roomFilters_size_mod: "",
             roomFilters_building: "",
             roomFilters_type: "",
             nearBuilding: false,
+            roomSearchEmpty: true,
+            roomFilterEmpty: true,
 
             //Schedule
             schedule:""
@@ -64,14 +68,15 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         console.log('L - start handling course search with ' + input);
         let that = this;
 
-        if(input === ""){
+        if(input === "**" || input === ""){
+            this.setState({courseSearchEmpty: true});
             this.setState({courseSearchResult:[]});
             this.mergeCourseResult();
             return;
         }
-
+        this.setState({courseSearchEmpty: false});
         var query : IQueryRequest = {
-            GET:["courses_title", "courses_instructor", "courses_size"],
+            GET:["courses_title", "courses_instructor", "courses_size", "courses_dept", "courses_id", "courses_avg", "courses_fail", "courses_pass"],
             WHERE:{
                 "AND": [
                     {"OR":[
@@ -103,12 +108,21 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
     private updateCourseSearch(event:any):void {
         //Add * for searching if ever appear in dataset
+        this.setState({courseSearchEmpty: false});
+        if(event.target.value === ""){
+            this.setState({courseSearchEmpty: true});
+        }
         this.setState({courseSearch: "*" + event.target.value + "*"});
     }
 
     private updateCourseFilters(event:any, type:number):void {
         if (type == 1) {
-            this.setState({courseFilters_size: event.target.value});
+            if (event.target.value === ""){
+                console.log("L - suppose to be empty value here" + event.target.value);
+                this.setState({courseFilters_size: -1});
+            } else {
+                this.setState({courseFilters_size: event.target.value});
+            }
         } else if (type == 2) {
             this.setState({courseFilters_size_mod: event.target.value});
         } else if (type == 3) {
@@ -124,15 +138,18 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             {"EQ":{courses_year:2014}}
         ]};
 
+        this.setState({courseFilterEmpty:false});
         console.log(this.state.courseFilters_size + this.state.courseFilters_num + this.state.courseFilters_dept);
 
-        if (typeof this.state.courseFilters_size_mod === "" || typeof this.state.courseFilters_size === "undefined" || this.state.courseFilters_dept === ""){
+        if (typeof this.state.courseFilters_size_mod === "" || typeof this.state.courseFilters_size === "undefined" || this.state.courseFilters_size === -1){
 
             if (typeof this.state.courseFilters_dept === "undefined" || this.state.courseFilters_dept === ""){
 
                 if (typeof this.state.courseFilters_num === "undefined" || this.state.courseFilters_num === ""){
                     //Case 1: all left empty -> nothing shown
+                    this.setState({courseFilterEmpty:true});
                     this.setState({courseFilterResult:[]});
+                    console.log(this.state.courseSearchResult);
                     this.mergeCourseResult();
                     return;
 
@@ -189,7 +206,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
         console.log(andQuery);
         var query : IQueryRequest = {
-            GET:["courses_dept", "courses_id", "courses_pass", "courses_fail"],
+            GET:["courses_title", "courses_instructor", "courses_size", "courses_dept", "courses_id", "courses_avg", "courses_fail", "courses_pass"],
             WHERE: andQuery,
             AS:'TABLE'
         };
@@ -235,14 +252,15 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         // TODO: this is the room search button action, so it should send an AJAX request to rooms dataset
         console.log('L - start handling room search with ' + input);
 
-        if(input === ""){
+        if(input === "**" || input === ""){
+            this.setState({roomSearchEmpty: true});
             this.setState({roomSearchResult:[]});
             this.mergeRoomResult();
             return;
         }
-
+        this.setState({roomSearchEmpty: false});
         var query : IQueryRequest = {
-            GET:["rooms_fullname","rooms_number", "rooms_name", "rooms_seats"],
+            GET:["rooms_fullname", "rooms_shortname","rooms_number", "rooms_name", "rooms_seats", "rooms_type", "rooms_furniture"],
             WHERE:{
                 "OR":[
                         {"IS": {rooms_fullname: input}},
@@ -257,9 +275,9 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         axios.post('http://localhost:4321/query', query).then(res => {
             console.log('Z - got some data!');
             console.log(res.data);
-            this.setState({roomSearchResult: res.data});
+            this.setState({roomSearchResult: res.data.result});
             console.log('Z - whats the states result?');
-            console.log(this.state.result.result);
+            console.log(this.state.roomSearchResult);
             this.mergeRoomResult();
         }).catch( err=>{
                 console.log(err);
@@ -268,6 +286,10 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
     }
 
     private updateRoomSearch(event:any):void {
+        this.setState({roomSearchEmpty: false});
+        if(event.target.value === ""){
+            this.setState({roomSearchEmpty: true});
+        }
         this.setState({roomSearch: "*" + event.target.value + "*"});
     }
 
@@ -278,14 +300,16 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             {"LT":{rooms_lat:100}}
         ]};
 
+        this.setState({roomFilterEmpty: false});
         console.log(this.state.roomFilters_size + this.state.roomFilters_furniture + this.state.roomFilters_type);
 
-        if (typeof this.state.roomFilters_size_mod === "" || typeof this.state.roomFilters_size === "undefined" || this.state.roomFilters_size === ""){
+        if (typeof this.state.roomFilters_size_mod === "" || typeof this.state.roomFilters_size === "undefined" || this.state.roomFilters_size === -1){
 
             if (typeof this.state.roomFilters_type === "undefined" || this.state.roomFilters_type === ""){
 
                 if (typeof this.state.roomFilters_furniture === "undefined" || this.state.roomFilters_furniture === ""){
                     //Case 1: all left empty -> nothing shown
+                    this.setState({roomFilterEmpty: true});
                     this.setState({roomFilterResult:[]});
                     this.mergeRoomResult();
                     return;
@@ -343,7 +367,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
         console.log(andQuery);
         var query : IQueryRequest = {
-            GET:["rooms_name", "rooms_fullname", "rooms_seats", "rooms_type", "rooms_furniture"],
+            GET:["rooms_fullname", "rooms_shortname","rooms_number", "rooms_name", "rooms_seats", "rooms_type", "rooms_furniture"],
             WHERE: andQuery,
             AS:'TABLE'
         };
@@ -364,7 +388,12 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         if (type == 1) {
             this.setState({roomFilters_size_mod: event.target.value});
         } else if (type == 2) {
-            this.setState({roomFilters_size: event.target.value});
+            if (event.target.value === ""){
+                console.log("L - suppose to be empty value here" + event.target.value);
+                this.setState({roomFilters_size: -1});
+            } else {
+                this.setState({roomFilters_size: event.target.value});
+            }
         } else if (type == 4) {
             this.setState({roomFilters_furniture: event.target.value});
         } else {
@@ -378,28 +407,38 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         var searchResult = this.state.courseSearchResult;
         var filterResult = this.state.courseFilterResult;
         var result:any = [];
+        console.log(searchResult);
+        console.log(filterResult);
 
-        if(filterResult.length === 0){
-            if (searchResult.length === 0){
+        if(this.state.courseFilterEmpty === true){
+            if (this.state.courseSearchEmpty === true){
+                console.log("both empty");
                 this.setState({courseResult: []});
             } else {
+                console.log("empty filter");
                 this.setState({courseResult: searchResult});
             }
         } else {
-            if (searchResult.length === 0){
+            if (this.state.courseSearchEmpty === true){
+                console.log("empty search");
                 this.setState({courseResult: filterResult});
             } else {
+                console.log("None empty");
 
-                result = searchResult.filter(function (n:any) {
-                    return filterResult.indexOf(n);
-                });
+                for (var f in filterResult){
+                    for (var s in searchResult){
+                        if (filterResult[f].courses_title + filterResult[f].courses_instructor + filterResult[f].courses_size
+                            === searchResult[s].courses_title + searchResult[s].courses_instructor + searchResult[s].courses_size){
+                            result.push(filterResult[f]);
+                        }
+                    }
+                }
 
                 this.setState({courseResult: result});
             }
         }
 
-        //generate table and render here
-        //this.generateTable();
+        console.log(this.state.courseResult);
 
     }
 
@@ -409,66 +448,44 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         var filterResult = this.state.roomFilterResult;
         var result:any = [];
 
-        if (filterResult.length === 0) {
-            if (searchResult.length === 0) {
+        console.log(searchResult);
+        console.log(filterResult);
+
+        if(this.state.roomFilterEmpty === true){
+            if (this.state.roomSearchEmpty === true){
+                console.log("both empty");
                 this.setState({roomResult: []});
             } else {
+                console.log("empty filter");
                 this.setState({roomResult: searchResult});
             }
         } else {
-            if (searchResult.length === 0) {
+            if (this.state.roomSearchEmpty === true){
+                console.log("empty search");
                 this.setState({roomResult: filterResult});
             } else {
+                console.log("None empty");
 
-                result = searchResult.filter(function (n: any) {
-                    return filterResult.indexOf(n);
-                });
+                for (var f in filterResult){
+                    for (var s in searchResult){
+                        if (filterResult[f].rooms_name
+                            === searchResult[s].rooms_name){
+                            result.push(filterResult[f]);
+                        }
+                    }
+                }
 
                 this.setState({roomResult: result});
             }
         }
-    }
 
-    private generateTable(head:string[]) {
-        var table = document.getElementById("myTable");
-        var thead = document.createElement("thead");
-        var tbody = document.createElement("tbody");
-
-        table.appendChild(thead);
-        table.appendChild(tbody);
-
-        var cols = head.map(function (colData) {
-            return <th key={colData}> {colData}</th>
-        });
-        //thead.appendChild(cols);
-
-        var data = this.state.result.map(function (item: any) {
-            var cells = head.map(function (colData) {
-                return <td>{item[colData]}</td>;
-            });
-
-            return <tr key={item}>{cells}</tr>;
-        });
-        tbody.appendChild(data);
-
-
-        // this.state.result.forEach(function (items: any) {
-        //     var row = document.createElement("tr");
-        //     for (var i in items){
-        //         var cell = document.createElement("dt");
-        //         cell.textContent = items[i];
-        //         row.appendChild(cell);
-        //     }
-        //
-        //     tbody.appendChild(row);
-        // });
     }
 
 
     private renderCourseTableRow(): JSX.Element {
 
-        console.log(this.state.courseSearchResult);
-        var array:any = this.state.courseSearchResult;
+        var array:any = this.state.courseResult;
+        console.log(array);
         // var something = this.state.courseFilters_dept;
         // var some = this.state.courseFilters_num;
         // return (
@@ -477,12 +494,12 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         //         <th> {some} </th>
         //     </tr>
         // )
+
         for (var i = 1; i < array.length + 1; i++){
-                array[i-1]["key"] = i;
+            array[i-1]["key"] = i;
         }
 
         var rows = array.map(function (n:any) {
-            console.log(n);
             return (
                 <tr key={n.key}>
                     <th> {n.key} </th>
@@ -512,6 +529,44 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         )
     }
 
+    private renderRoomsTableRow(): JSX.Element {
+
+        var array:any = this.state.roomResult;
+        console.log(array);
+
+        for (var i = 1; i < array.length + 1; i++){
+            array[i-1]["key"] = i;
+        }
+
+        var rows = array.map(function (n:any) {
+            return (
+                <tr key={n.key}>
+                    <th> {n.key} </th>
+                    <th> { n.rooms_fullname} </th>
+                    <th> { n.rooms_number } </th>
+                </tr>
+            )
+        });
+
+        return rows;
+    }
+
+    private renderRoomsTable(): JSX.Element {
+        return (
+            <table id="roomsTable">
+                <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Building Name</th>
+                    <th>Room Number</th>
+                </tr>
+                </thead>
+                <tbody>
+                { this.renderRoomsTableRow() }
+                </tbody>
+            </table>
+        )
+    }
 
 
     private handleScheduler(event: any, rooms: any, sections: any) {
@@ -701,7 +756,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
                             </div>
                         </div>
-                        <div id='result'>
+                        <div id='courseResult'>
                             <h4>Results</h4>
                             {this.renderCoursesTable()}
                         </div>
@@ -789,6 +844,10 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                             <p>Size: { this.state.roomFilters_size_mod } { this.state.roomFilters_size }</p>
                             <p>Furniture: { this.state.roomFilters_furniture }</p>
                             <p>Type: { this.state.roomFilters_type }</p>
+                        </div>
+                        <div id='roomResult'>
+                            <h4>Results</h4>
+                            {this.renderRoomsTable()}
                         </div>
                     </div>
                 </div>
