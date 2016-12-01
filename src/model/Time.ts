@@ -15,7 +15,7 @@ export default class Time {
     }
 
     public validTime(): boolean {
-        if (this.days != 'MTF' || this.days != 'T/Th') {
+        if (this.days != 'MWF' || this.days != 'T/Th') {
             return false;
         } else if (this.time % .5 != 0) {
             return false;
@@ -33,14 +33,12 @@ export default class Time {
      */
     public getNext(): Time {
         // get the next available time slot
-        if (this.days == 'MWF') {
-            if (this.time < 16) {
-                return new Time('MWF', this.time+1);
-            } else {
-                return new Time('T/Th', 8);
-            }
-        } else {
+        if (this.days == 'T/Th') {
             return new Time('T/Th', this.time + 1.5);
+        } else if (this.time > 16) {
+            return new Time('T/Th', 8);
+        } else {
+            return new Time('MWF', this.time+1);
         }
     }
 }
