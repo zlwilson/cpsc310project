@@ -6,6 +6,7 @@ import ScheduleController from "../controller/ScheduleController";
 import TableComponent from "../components/TableComponent";
 import Scheduled from "../model/Scheduled";
 
+
 export interface IQueryProps {
     defaultQuery: string;
 }
@@ -23,28 +24,32 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
     constructor(props:any) {
         super(props);
         //this.state = {query: this.props.defaultQuery};
-        this.state = {courseFilters_size_mod: ""};
-        this.state = {courseSearchResult:[]};
-        this.state = {courseFilterResult:[]};
-        this.state = {courseResult:[]};
-        this.state = {courseSearch:""};
-        this.state = {courseFilters_size: 0};
-        this.state = {courseFilters_dept: ""};
-        this.state = {courseFilters_num: ""};
+        this.state = {
+            //courses
+            courseFilters_size_mod: "",
+            courseSearchResult:[],
+            courseFilterResult:[],
+            courseResult:[],
+            courseSearch:"",
+            courseFilters_size: 0,
+            courseFilters_dept: "",
+            courseFilters_num: "",
 
-        //Room
-        this.state = {roomSearchResult:[]};
-        this.state = {roomFilterResult:[]};
-        this.state = {roomResult: []};
-        this.state = {roomSearch:""};
-        this.state = {roomFilters_size: 0};
-        this.state = {roomFilters_size_mod: ""};
-        this.state = {roomFilters_building: ""};
-        this.state = {roomFilters_type: ""};
-        this.state = {nearBuilding: false};
+            //Room
+            roomSearchResult:[],
+            roomFilterResult:[],
+            roomResult: [],
+            roomSearch:"",
+            roomFilters_size: 0,
+            roomFilters_size_mod: "",
+            roomFilters_building: "",
+            roomFilters_type: "",
+            nearBuilding: false,
 
-        //Schedule
-        this.state = {schedule:""};
+            //Schedule
+            schedule:""
+        };
+
     }
 
     private handleQueryResponse() {
@@ -281,7 +286,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
                 if (typeof this.state.roomFilters_furniture === "undefined" || this.state.roomFilters_furniture === ""){
                     //Case 1: all left empty -> nothing shown
-                    this.setState({roomSearchResult:[]});
+                    this.setState({roomFilterResult:[]});
                     this.mergeRoomResult();
                     return;
 
@@ -374,7 +379,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         var filterResult = this.state.courseFilterResult;
         var result:any = [];
 
-        if(filterResult === 0){
+        if(filterResult.length === 0){
             if (searchResult.length === 0){
                 this.setState({courseResult: []});
             } else {
@@ -404,7 +409,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         var filterResult = this.state.roomFilterResult;
         var result:any = [];
 
-        if (filterResult === 0) {
+        if (filterResult.length === 0) {
             if (searchResult.length === 0) {
                 this.setState({roomResult: []});
             } else {
@@ -460,15 +465,34 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
     }
 
 
-    private renderCourseTableRow(array: Section[]): JSX.Element {
-        for (let i in array) {
+    private renderCourseTableRow(): JSX.Element {
+
+        console.log(this.state.courseSearchResult);
+        var array:any = this.state.courseSearchResult;
+        // var something = this.state.courseFilters_dept;
+        // var some = this.state.courseFilters_num;
+        // return (
+        //     <tr key= { 1 }>
+        //         <th> {something} </th>
+        //         <th> {some} </th>
+        //     </tr>
+        // )
+        for (var i = 1; i < array.length + 1; i++){
+                array[i-1]["key"] = i;
+        }
+
+        var rows = array.map(function (n:any) {
+            console.log(n);
             return (
-                <tr key= { array[i].id }>
-                    <th> { array[i].Title } </th>
-                    <th> { array[i].Professor } </th>
+                <tr key={n.key}>
+                    <th> {n.key} </th>
+                    <th> { n.courses_title} </th>
+                    <th> { n.courses_instructor } </th>
                 </tr>
             )
-        }
+        });
+
+        return rows;
     }
 
     private renderCoursesTable(): JSX.Element {
@@ -476,12 +500,13 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             <table id="coursesTable">
                 <thead>
                 <tr>
+                    <th>No.</th>
                     <th>Title</th>
                     <th>Instructor</th>
                 </tr>
                 </thead>
                 <tbody>
-                { this.renderCourseTableRow(this.state.courseResult) }
+                { this.renderCourseTableRow() }
                 </tbody>
             </table>
         )
