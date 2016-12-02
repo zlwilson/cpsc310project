@@ -982,10 +982,6 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                     </button>
                     { this.renderScheduleTable() }
                 </div>
-                <div id='scheduleResult'>
-                    <h4>Results</h4>
-                    {this.renderScheduleTable()}
-                </div>
             </div>
         );
     }
