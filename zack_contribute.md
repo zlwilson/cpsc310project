@@ -39,3 +39,14 @@ https://github.com/CS310-2016Fall/cpsc310project_team78/commit/7c4ee8768eb8d3f2f
 
 Wrote code to create room objects:
 https://github.com/CS310-2016Fall/cpsc310project_team78/commit/a14a76cd2ca80c49586b98d3d7253327bd181cad
+
+
+D4 ===========
+UI work:
+https://github.com/CS310-2016Fall/cpsc310project_team78/commit/b8cd1fd51d197177c8122c50c854a73b511b39c4
+
+Scheduling:
+https://github.com/CS310-2016Fall/cpsc310project_team78/commit/87b96c991a9ffce791214eeb64619d25dd0315ff
+
+Room searching:
+https://github.com/CS310-2016Fall/cpsc310project_team78/commit/0e2178e1b01aa6fca6bedcb37817e30eb97428d8

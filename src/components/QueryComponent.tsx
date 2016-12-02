@@ -36,6 +36,9 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             courseFilters_num: "",
             courseSearchEmpty: true,
             courseFilterEmpty: true,
+            sortAvg: true,
+            sortFail: false,
+            sortPass: false,
 
             //Room
             roomSearchResult:[],
@@ -63,11 +66,14 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
     //Search using IS query, assume only one field searching is valid.
     //@Param: event -> click
     //        input -> field to search
-    private handleCourseSearch(event:any, input:any):void {
+    private handleCourseSearch(input:any):void {
         // TODO: this is the course search button action, so it should send an AJAX request to courses dataset
-        // console.log('L - start handling course search with ' + input);
+        console.log('L - start handling course search with ' + input);
+        console.log(this.state.sortAvg);
+
         let that = this;
 
+        this.setState({courseSearch: input});
         if(input === "**" || input === ""){
             this.setState({courseSearchEmpty: true});
             this.setState({courseSearchResult:[]});
@@ -75,6 +81,8 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             return;
         }
         this.setState({courseSearchEmpty: false});
+
+
         var query : IQueryRequest = {
             GET:["courses_title", "courses_instructor", "courses_size", "courses_dept", "courses_id", "courses_avg", "courses_fail", "courses_pass"],
             WHERE:{
@@ -84,7 +92,38 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                         {"IS":{courses_instructor:input}},
                         ]},
                 {"EQ": {courses_year: 2014}}]},
+
             AS:'TABLE'};
+
+            if (this.state.sortAvg === false){
+                if(this.state.sortFail === false){
+                    if (this.state.sortPass === false){
+
+                    } else {
+                        query.ORDER =  { "dir": "DOWN", "keys": ["courses_pass"]};
+                    }
+                } else {
+                    if (this.state.sortPass === false){
+                        query.ORDER = { "dir": "DOWN", "keys": ["courses_fail"]};
+                    } else {
+                        query.ORDER =  { "dir": "DOWN", "keys": ["courses_fail", "courses_pass"]};
+                    }
+                }
+            }else {
+                if(this.state.sortFail === false){
+                    if (this.state.sortPass === false){
+                        query.ORDER =  { "dir": "DOWN", "keys": ["courses_avg"]};
+                    } else {
+                        query.ORDER =  { "dir": "DOWN", "keys": ["courses_pass", "courses_avg"]};
+                    }
+                } else {
+                    if (this.state.sortPass === false){
+                        query.ORDER = { "dir": "DOWN", "keys": ["courses_fail", "courses_avg"]};
+                    } else {
+                        query.ORDER =  { "dir": "DOWN", "keys": ["courses_fail", "courses_pass", "courses_avg"]};
+                    }
+                }
+            }
 
         var queryJSON = JSON.stringify(query);
         // console.log('L - handle course search query string: ' + queryJSON);
@@ -132,7 +171,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         }
     }
 
-    private applyCourseFilters(event:any):void {
+    private applyCourseFilters():void {
         // TODO: this is the course filter apply button action, so it should send an AJAX request to courses dataset
         var andQuery: any = {"AND":[
             {"EQ":{courses_year:2014}}
@@ -210,6 +249,36 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             WHERE: andQuery,
             AS:'TABLE'
         };
+        console.log(this.state.sortAvg);
+        if (this.state.sortAvg === false){
+            if(this.state.sortFail === false){
+                if (this.state.sortPass === false){
+
+                } else {
+                    query.ORDER =  { "dir": "DOWN", "keys": ["courses_pass"]};
+                }
+            } else {
+                if (this.state.sortPass === false){
+                    query.ORDER = { "dir": "DOWN", "keys": ["courses_fail"]};
+                } else {
+                    query.ORDER =  { "dir": "DOWN", "keys": ["courses_fail", "courses_pass"]};
+                }
+            }
+        }else {
+            if(this.state.sortFail === false){
+                if (this.state.sortPass === false){
+                    query.ORDER =  { "dir": "DOWN", "keys": ["courses_avg"]};
+                } else {
+                    query.ORDER =  { "dir": "DOWN", "keys": ["courses_pass", "courses_avg"]};
+                }
+            } else {
+                if (this.state.sortPass === false){
+                    query.ORDER = { "dir": "DOWN", "keys": ["courses_fail", "courses_avg"]};
+                } else {
+                    query.ORDER =  { "dir": "DOWN", "keys": ["courses_fail", "courses_pass", "courses_avg"]};
+                }
+            }
+        }
 
         axios.post('http://localhost:4321/query', query).then(res => {
             console.log(res.data);
@@ -224,8 +293,43 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
     }
 
 
-    private updateCourseSorting(event:any){
+    private updateCourseSorting(event:any):void{
 
+        console.log(this.state.sortAvg);
+        switch (event.target.value){
+            case 'avg':
+                if (this.state.sortAvg == false){
+                    this.setState({sortAvg: true});
+                } else {
+                    this.setState({sortAvg: false});
+                }
+
+                break;
+            case 'fail':
+                if (this.state.sortFail == false){
+                    this.setState({sortFail:true});
+                } else {
+                    this.setState({sortFail:false});
+                }
+
+                break;
+            case "pass":
+                if (this.state.sortPass == false){
+                    this.setState({sortPass:true});
+                } else {
+                    this.setState({sortPass:false});
+                }
+
+                break;
+            default:
+                console.log(event.target.value);
+        }
+
+    }
+
+    private updateCourseTable():void{
+        this.handleCourseSearch(this.state.courseSearch);
+        this.applyCourseFilters();
     }
 
     private updateBuilding(event:any):void{
@@ -606,13 +710,13 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
             // console.log(array[i].time);
         }
 
-        var rows = array.map(function (n: any) {
+        var rows = array.map(function (n:any) {
             return (
                 <tr key= { n.key } >
                     <th> { n.Section.courses_title } </th>
                     <th> { n.Section.courses_id } </th>
                     <th> { n.Room.rooms_name } </th>
-                    <th> { n.time.time + n.time.days } </th>
+                    <th> { n.time.days + n.time.time } </th>
                 </tr>
             )
         });
@@ -638,8 +742,11 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         )
     }
 
-    componentDidMount() {
-
+    componentDidUpdate( prevProp: any, prevState: any) {
+        if (prevState.sortAvg !== this.state.sortAvg || prevState.sortPass !== this.state.sortPass || prevState.sortFail !== this.state.sortFail){
+            this.updateCourseTable();
+        }
+        console.log("component did update");
     }
 
     render() {
@@ -699,7 +806,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                             <p>Search the course catalog by course title or instructor:</p>
                             <input onChange={ e => this.updateCourseSearch(e) }/>
                             <button name="SearchCourses"
-                                    onClick={ e => this.handleCourseSearch(e, this.state.courseSearch) }>
+                                    onClick={ e => this.handleCourseSearch(this.state.courseSearch) }>
                                 Search
                             </button>
                         </div>
@@ -732,7 +839,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                         </div>
                         <div style={style110}>
                             <button name="ApplyCourses"
-                                    onClick={ e => this.applyCourseFilters(e) }>
+                                    onClick={ e => this.applyCourseFilters() }>
                                 Apply
                             </button>
                         </div>
@@ -745,7 +852,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
                                 <div style={style110}>
                                     <p>
-                                        <input type="checkbox" name="sortAvg" value="avg"
+                                        <input type="checkbox" name="sortAvg" value="avg" checked={ this.state.sortAvg}
                                                onChange={ e => this.updateCourseSorting(e)}>
                                         </input>
                                         average
@@ -754,22 +861,22 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
 
                                 <div style={style110}>
                                     <p>
-                                        <input type="checkbox" name="sortFail" value="fail"
+                                        <input type="checkbox" name="sortFail" value="fail" checked={ this.state.sortFail}
                                                onChange={ e => this.updateCourseSorting(e)}>
                                         </input>
                                         most failing
                                     </p>
                                 </div>
-
                                 <div style={style111}>
                                     <p>
                                         Sort by:
-                                        <input type="checkbox" name="sortPass" value="pass"
+                                        <input type="checkbox" name="sortPass" value="pass" checked={ this.state.sortPass}
                                                onChange={ e => this.updateCourseSorting(e)}>
                                         </input>
                                         most passing
                                     </p>
                                 </div>
+
 
                             </div>
                         </div>
