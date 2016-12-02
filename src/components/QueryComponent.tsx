@@ -587,7 +587,7 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
         let schedule = controller.makeSchedule(rooms, sections);
         let quality = controller.checkQuality(schedule);
 
-        console.log(schedule);
+        // console.log(schedule);
         console.log('Quality = ' + quality);
 
         this.setState({ schedule: schedule });
@@ -875,10 +875,6 @@ export class QueryComponent extends React.Component<IQueryProps, any> {
                         Create!
                     </button>
                     { this.renderScheduleTable() }
-                </div>
-                <div id='scheduleResult'>
-                    <h4>Results</h4>
-                    {this.renderScheduleTable()}
                 </div>
             </div>
         );
